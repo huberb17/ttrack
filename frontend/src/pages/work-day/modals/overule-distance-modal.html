@@ -1,0 +1,43 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>
+      Wegstrecke festlegen
+    </ion-title>
+    <ion-buttons start>
+      <button ion-button (click)="dismiss()">
+        <ion-icon name="md-close"></ion-icon>
+      </button>
+    </ion-buttons>
+  </ion-toolbar> 
+</ion-header>
+
+<ion-content>
+  <ion-list>
+    <ion-item>
+        <h2>{{customer.title}} {{customer.lastName}} {{customer.firstName}}</h2>
+        <p align="center">
+              {{customer.routeToCustomer.start.street}} {{customer.routeToCustomer.start.streetNumber}},
+              {{customer.routeToCustomer.start.zipCode}} {{customer.routeToCustomer.start.city}}
+        </p>
+        <p align="center">
+              <ion-icon name="arrow-down"></ion-icon>
+        </p>
+        <p align="center">
+              {{customer.routeToCustomer.end.street}} {{customer.routeToCustomer.end.streetNumber}},
+              {{customer.routeToCustomer.end.zipCode}} {{customer.routeToCustomer.end.city}}
+        </p>
+    </ion-item>
+    <ion-item>
+        <ion-label fixed>Wegstrecke:</ion-label>
+        <ion-input type="text" [(ngModel)]="tempDistance"></ion-input>
+        <button ion-button item-right (click)="getDistance()">
+          von Google Maps
+        </button>
+    </ion-item>
+    <ion-item>
+      <button ion-button icon-left block (click)="saveDistance()">
+        Speichern
+      </button>
+    </ion-item>
+  </ion-list>
+</ion-content>
