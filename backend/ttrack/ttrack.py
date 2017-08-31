@@ -11,17 +11,16 @@ Actions are one of:
 
 import backend.ttrack.utils.custom_logger as cl
 from backend.ttrack.utils.config_reader import ConfigReader
-from backend.ttrack.utils.errors import ConfigReaderError
-from cloud.gdrive_connector import GdriveConnector
-from export.excel_writer import ExcelWriter
-from persistence.data_store import DataStore
+from backend.ttrack.utils.errors import ConfigReaderError, GdriveConnectorError
+from backend.ttrack.cloud.gdrive_connector import GdriveConnector
+from backend.ttrack.export.excel_writer import ExcelWriter
+from backend.ttrack.persistence.data_store import DataStore
 
 def main():
     """The main function for the ttrack module."""
 
     logger = cl.initialize_logging()
     logger.info('**************** main function called ****************')
-    gd_conn = None
     ds = None
 
     try:
@@ -30,7 +29,7 @@ def main():
         ds = DataStore(config)
         excel_writer = ExcelWriter(config)
 
-        gd_conn.connect('frontend')
+        gd_conn.connect()
         file_id, action = gd_conn.get_next_action()
         while file_id is not None:
             # TODO persist the action
@@ -38,11 +37,9 @@ def main():
             file_id, action = gd_conn.get_next_action()
         # TODO: backup and create new excel file
         excel_writer.backup_and_create(ds)
-    except ConfigReaderError as ce:
-        logger.error(ce.message)
+    except (ConfigReaderError, GdriveConnectorError) as err:
+        logger.error(err.message)
     finally:
-        if gd_conn is not None:
-            gd_conn.disconnect()
         if ds is not None:
             ds.disconnect()
 

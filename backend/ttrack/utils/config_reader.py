@@ -24,4 +24,8 @@ class ConfigReader:
             logger.info('received IO exception: {0}'.format(io_err.strerror))
             msg = 'Unable to open configuration file {0}: {1}'.format(file_name, io_err.strerror)
             raise ConfigReaderError(msg)
+        except KeyError as key_err:
+            logger.info('key not found in configuration: {0}'.format(key_err.message))
+            msg = 'Missing key "{1}" in configuration file "{0}".'.format(file_name, key_err.message)
+            raise ConfigReaderError(msg)
 

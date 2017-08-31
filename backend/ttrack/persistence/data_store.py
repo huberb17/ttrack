@@ -18,3 +18,6 @@ class DataStore:
         except:
             # TODO: errorhandling
             pass
+
+    def disconnect(self):
+        pass
