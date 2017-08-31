@@ -30,6 +30,7 @@ def main():
         excel_writer = ExcelWriter(config)
 
         gd_conn.connect()
+        gd_conn.populate_drive() # remove this after tests are finished
         file_id, action = gd_conn.get_next_action()
         while file_id is not None:
             # TODO persist the action
@@ -39,6 +40,8 @@ def main():
         excel_writer.backup_and_create(ds)
     except (ConfigReaderError, GdriveConnectorError) as err:
         logger.error(err.message)
+    except Exception as e:
+        logger.error(e.message)
     finally:
         if ds is not None:
             ds.disconnect()

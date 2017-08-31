@@ -1,4 +1,5 @@
 import logging
+import os
 
 from googleapiclient.errors import HttpError
 from pydrive.auth import GoogleAuth, AuthenticationRejected, AuthError
@@ -38,8 +39,7 @@ class GdriveConnector:
             result_list = self._drive.ListFile({'q': query_string}).GetList()
             self._share_id = result_list[0]['id']
             logger.info('connection to Google Drive established')
-            self._file_list = self._drive.ListFile({'q': "'{0}' in parents".format(self._share_id),
-                                                    'orderBy': 'title'}).GetList()
+            self._update_file_list()
             title_list = map(lambda x: x['title'], self._file_list)
             logger.info('found files in share "{0}": {1}'.format(self._share, title_list))
         except IOError as io_err:
@@ -60,8 +60,8 @@ class GdriveConnector:
         try:
             file_id, action = self._get_next_action()
             return  file_id, action
-        except:
-            # TODO: log error
+        except Exception as e:
+            logger.error('Error on getting next action: {0}'.format(e.message))
             return None, None
 
     def delete_action(self, file_id):
@@ -71,22 +71,52 @@ class GdriveConnector:
         """
         try:
             # TODO: delete action in _share at _drive
-            return file_id
+            for f in self._file_list:
+                if f['id'] == file_id:
+                    self._file_list.remove(f)
+                    logger.info('removed file with id "{0} from list.'.format(file_id))
+                    f.Trash()
+                    logger.info('moved file with id "{0} to trash on Google Drive.'.format(file_id))
+                    return file_id
+            logger.info('file with id "{0} not found.'.format(file_id))
+            return None
         except:
-            # TODO: log error
+            logger.error('Failed to remove file with id "{0}.'.format(file_id))
             return None
 
     def _get_next_action(self):
         """Internal method that retrieves and decrypts the next action from Google Drive."""
-        # TODO: look up in _share at _drive an return oldest file
-        file_id = ''
-        encrypted_action = ''
-        # TODO: decrypt the action
-        action = ActionDecryptor.decrypt(encrypted_action)
+        if len(self._file_list) == 0:
+            logger.info('file list is empty')
+            self._update_file_list()
+            if len(self._file_list) == 0:
+                return None, None
+        next_file = self._file_list[0]
+        file_id = next_file['id']
+        logger.info('got file with id "{0} from list.'.format(file_id))
+        next_file.GetContentFile('tmpfile')
+        action = ActionDecryptor.decrypt('tmpfile')
         return file_id, action
 
+    def _update_file_list(self):
+        logger.info('retrieve file list from Google Drive')
+        self._file_list = self._drive.ListFile({'q': "'{0}' in parents and trashed=false".format(self._share_id),
+                                                'orderBy': 'title'}).GetList()
 
 
+    def populate_drive(self):
+        """Function to populate the drive first - will be removed."""
+        self._populate_helper('./resources/20170831-140610.json')
+        self._populate_helper('./resources/20170831-140630.json')
+        self._populate_helper('./resources/20170831-140730.json')
 
+    def _populate_helper(self, filename):
+        with open(filename, 'rb') as json_file:
+            data = json_file.read()
+            bin_name = os.path.basename(filename).split('.')[0] + '.bin'
+            ActionDecryptor.encrypt(data, bin_name)
+        tmpfile = self._drive.CreateFile({"parents": [{"kind": "drive#fileLink", "id": self._share_id}]})
+        tmpfile.SetContentFile(bin_name)
+        tmpfile.Upload()
 
 

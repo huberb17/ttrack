@@ -1,0 +1,8 @@
+{
+  "type": "customer",
+  "command": "create",
+  "data": {
+    "first_name": "Sepp",
+    "last_name": "Forcher"
+  }
+}

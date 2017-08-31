@@ -1,0 +1,9 @@
+{
+  "type": "customer",
+  "command": "update",
+  "data": {
+    "id": "123456",
+    "first_name": "Sepp",
+    "last_name": "Mair"
+  }
+}
