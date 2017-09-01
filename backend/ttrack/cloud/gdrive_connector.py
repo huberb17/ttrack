@@ -106,6 +106,7 @@ class GdriveConnector:
 
     def populate_drive(self):
         """Function to populate the drive first - will be removed."""
+        logger.info('populate share on Google Drive')
         self._populate_helper('./resources/20170831-140610.json')
         self._populate_helper('./resources/20170831-140630.json')
         self._populate_helper('./resources/20170831-140730.json')

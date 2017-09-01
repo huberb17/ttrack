@@ -11,7 +11,7 @@ Actions are one of:
 
 import backend.ttrack.utils.custom_logger as cl
 from backend.ttrack.utils.config_reader import ConfigReader
-from backend.ttrack.utils.errors import ConfigReaderError, GdriveConnectorError
+from backend.ttrack.utils.errors import ConfigReaderError, GdriveConnectorError, DataStoreError
 from backend.ttrack.cloud.gdrive_connector import GdriveConnector
 from backend.ttrack.export.excel_writer import ExcelWriter
 from backend.ttrack.persistence.data_store import DataStore
@@ -33,12 +33,12 @@ def main():
         gd_conn.populate_drive() # remove this after tests are finished
         file_id, action = gd_conn.get_next_action()
         while file_id is not None:
-            # TODO persist the action
+            ds.update(action)
             gd_conn.delete_action(file_id)
             file_id, action = gd_conn.get_next_action()
         # TODO: backup and create new excel file
         excel_writer.backup_and_create(ds)
-    except (ConfigReaderError, GdriveConnectorError) as err:
+    except (ConfigReaderError, GdriveConnectorError, DataStoreError) as err:
         logger.error(err.message)
     except Exception as e:
         logger.error(e.message)
