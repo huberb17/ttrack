@@ -19,6 +19,9 @@ class ConfigReader:
             self.dbname = config['dbName']
             self.share = config['shareName']
             self.oaut_settings = config['oauthSettingsFile']
+            self.export_milage = config['exportMilage']
+            self.export_income = config['exportIncome']
+            self.export_path = config['exportBackup']
             logger.info('successfully read config file')
         except IOError as io_err:
             logger.info('received IO exception: {0}'.format(io_err.strerror))

@@ -25,18 +25,17 @@ def main():
 
     try:
         config = ConfigReader('./resources/config.json')
-        gd_conn = GdriveConnector(config)
+        # gd_conn = GdriveConnector(config)
         ds = DataStore(config)
         excel_writer = ExcelWriter(config)
 
-        gd_conn.connect()
-        gd_conn.populate_drive() # remove this after tests are finished
-        file_id, action = gd_conn.get_next_action()
-        while file_id is not None:
-            ds.update(action)
-            gd_conn.delete_action(file_id)
-            file_id, action = gd_conn.get_next_action()
-        # TODO: backup and create new excel file
+        # gd_conn.connect()
+        # gd_conn.populate_drive() # remove this after tests are finished
+        # file_id, action = gd_conn.get_next_action()
+        # while file_id is not None:
+        #     ds.update(action)
+        #     gd_conn.delete_action(file_id)
+        #     file_id, action = gd_conn.get_next_action()
         excel_writer.backup_and_create(ds)
     except (ConfigReaderError, GdriveConnectorError, DataStoreError) as err:
         logger.error(err.message)

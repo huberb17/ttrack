@@ -2,7 +2,7 @@
   "dbName": "C:\\Users\\bernhard.huber\\PycharmProjects\\ttrack\\backend\\ttrack\\resources\\ttrack.db3",
   "oauthSettingsFile": "C:\\Users\\bernhard.huber\\PycharmProjects\\ttrack\\backend\\ttrack\\resources\\settings.yaml",
   "shareName": "frontend",
-  "exportMilage": "C:\\Users\\bernhard.huber\\PycharmProjects\\ttrack\\backend\\ttrack\\resources\\milage.xlsx",
-  "exportIncome": "C:\\Users\\bernhard.huber\\PycharmProjects\\ttrack\\backend\\ttrack\\resources\\income.xlsx",
+  "exportMilage": "C:\\Users\\bernhard.huber\\PycharmProjects\\ttrack\\backend\\ttrack\\resources\\Fahrtenbuch.xlsx",
+  "exportIncome": "C:\\Users\\bernhard.huber\\PycharmProjects\\ttrack\\backend\\ttrack\\resources\\EinAusgaben.xlsx",
   "exportBackup": "C:\\Users\\bernhard.huber\\PycharmProjects\\ttrack\\backend\\ttrack\\resources\\exportBackup"
 }
