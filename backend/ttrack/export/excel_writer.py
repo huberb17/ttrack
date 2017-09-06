@@ -8,6 +8,7 @@ import shutil
 import datetime
 
 from openpyxl import load_workbook
+from openpyxl.styles import Border, Side
 from openpyxl.worksheet import Worksheet
 
 from backend.ttrack.utils.errors import ExcelWriterError
@@ -58,7 +59,6 @@ class ExcelWriter:
     def _create_milage_export(self, data_store):
         try:
             wb = load_workbook(self._milage_filename)
-            #wb = self._initialize_milage_workbook(wb)
             wb = self._generate_milage_rows(wb, data_store)
             wb.save(self._milage_filename)
         except Exception as err:
@@ -67,52 +67,10 @@ class ExcelWriter:
     def _create_income_export(self, data_store):
         try:
             wb = load_workbook(self._income_filename)
-            wb = self._initialize_income_workbook(wb)
             wb = self._generate_income_rows(wb, data_store)
             wb.save(self._income_filename)
         except Exception as err:
             raise ExcelWriterError(err.message)
-
-    def _initialize_milage_workbook(self, wb):
-        template_ws = wb.get_sheet_by_name('Vorlage')
-        # check if for every month a sheet is avaiable
-        for month_num, month_name in [(1, u'Jänner'), (2, u'Februar'), (3, u'März'), (4, u'April'), (5, u'Mai'),
-                                    (6, u'Juni'), (7, u'Juli'), (8, u'August'), (9, u'September'),
-                                    (10, u'Oktober'), (11, u'November'), (12, u'Dezember')]:
-            # if sheet is not found, just copy the template and set the date
-            if not month_name in wb.sheetnames:
-                template_sheet = wb.copy_worksheet(template_ws)
-                self._create_milage_header(month_name, template_sheet)
-                template_sheet.title = month_name
-            else:
-                # copy all manually entered values and remove the rest
-                old_sheet = wb.get_sheet_by_name(month_name)
-                max_row = old_sheet.max_row
-                max_col = old_sheet.max_column
-
-                new_sheet = wb.copy_worksheet(template_ws)
-                self._create_milage_header(month_name, new_sheet)
-
-                old_start_row = self._find_start_marker(max_row, old_sheet)
-                new_start_row = self._find_start_marker(max_row, new_sheet)
-
-                next_row = new_start_row + 1
-                for row_num in range(old_start_row+1, max_row):
-                    cell_name = 'A{0}'.format(row_num)
-                    if old_sheet[cell_name].value == 'generated':
-                        # skip this row
-                        pass
-                    else:
-                        # copy this row
-                        for col_num in range(1, max_col+1):
-                            new_sheet.cell(row=next_row, column=col_num).value = old_sheet.cell(row=row_num,
-                                                                                                column=col_num).value
-                        next_row = next_row + 1
-                # rename the sheet
-                wb.remove(old_sheet)
-                new_sheet.title = month_name
-
-        return wb
 
     def _find_start_marker(self, max_row, sheet):
         start_row = 0
@@ -131,18 +89,13 @@ class ExcelWriter:
         sheet['E2'].value = month_name + ' ' + '2017'
 
     def _generate_milage_rows(self, wb, data_store):
-
         template_ws = wb.get_sheet_by_name('Vorlage')
         # check if for every month a sheet is avaiable
         for month_num, month_name in [(1, u'Jänner'), (2, u'Februar'), (3, u'März'), (4, u'April'), (5, u'Mai'),
                                       (6, u'Juni'), (7, u'Juli'), (8, u'August'), (9, u'September'),
                                       (10, u'Oktober'), (11, u'November'), (12, u'Dezember')]:
 
-            # TODO replace mock by real data
-            data = [('generated', datetime.datetime(2017, 1, 1), 123, 'Start1', 'Ziel1', 15.2, 'Comment1'),
-                    ('generated', datetime.datetime(2017, 1, 5), 223, 'Start2', 'Ziel2', 25.2, 'Comment2'),
-                    ('generated', datetime.datetime(2017, 1, 8), 823, 'Start3', 'Ziel3', 35.2, 'Comment3'),
-                    ]
+            data = data_store.get_milage_data(month_num, '2017')
 
             # if sheet is not found, just copy the template and set the date
             if not month_name in wb.sheetnames:
@@ -180,10 +133,24 @@ class ExcelWriter:
                 # copy this row
                 for col_num in range(1, max_col + 1):
                     new_sheet.cell(row=next_row, column=col_num).value = data[row_num][col_num-1]
+                    if col_num == 2:
+                        new_sheet.cell(row=next_row, column=col_num).number_format = 'dd.mm.yy'
+                    if col_num != 1:
+                        new_sheet.cell(row=next_row, column=col_num).border = Border(left=Side(border_style='thin',
+                                                                                           color='FF000000'),
+                                                                                 right=Side(border_style='thin',
+                                                                                            color='FF000000'),
+                                                                                 top=Side(border_style='thin',
+                                                                                          color='FF000000'),
+                                                                                 bottom=Side(border_style='thin',
+                                                                                             color='FF000000'))
                 next_row = next_row + 1
+            # correct the sum forumlar
+            new_sheet["E3"] = "=SUM(F{0}:F{1})".format(new_start_row + 1, new_sheet.max_row)
             # rename the sheet
             wb.remove(old_sheet)
             new_sheet.title = month_name
+            new_sheet.column_dimensions['A'].hidden = True
 
         return wb
 
@@ -193,6 +160,3 @@ class ExcelWriter:
         # look at B of start_row, if there is a date -> this is manually entered data
         # compare the date with the first date of the list and add it on the appropriate place
         return wb
-
-    def _initialize_income_workbook(self, wb):
-        pass

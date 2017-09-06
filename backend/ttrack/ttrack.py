@@ -12,7 +12,6 @@ Actions are one of:
 import backend.ttrack.utils.custom_logger as cl
 from backend.ttrack.utils.config_reader import ConfigReader
 from backend.ttrack.utils.errors import ConfigReaderError, GdriveConnectorError, DataStoreError
-from backend.ttrack.cloud.gdrive_connector import GdriveConnector
 from backend.ttrack.export.excel_writer import ExcelWriter
 from backend.ttrack.persistence.data_store import DataStore
 

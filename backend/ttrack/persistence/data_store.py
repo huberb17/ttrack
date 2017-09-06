@@ -2,6 +2,7 @@
 import sqlite3
 
 import logging
+import datetime
 
 from backend.ttrack.utils.errors import DataStoreError
 
@@ -136,3 +137,32 @@ class DataStore:
         elif type == 'income':
             sql_string = '''DELETE FROM incomes WHERE id = '{0}' '''.format(data['id'])
         return sql_string
+
+    def get_milage_data(self, month, year):
+        query_string = '''SELECT date, start_km, start_addr.street as start_street, end_addr.street as end_street,
+	                        route_km, comment, strftime('%m', date) as month, strftime('%Y', date) as year
+                            FROM driven_routes JOIN addresses as start_addr JOIN addresses as end_addr 
+                            WHERE start_addr.id = driven_routes.start_address_id and 
+                            end_addr.id = driven_routes.end_address_id and month = '{0:02d}' and 
+                            year = '{1}'  '''.format(month, year)
+
+        c = self._conn.cursor()
+        c.execute(query_string)
+        data = []
+        for row in c:
+            data_row = ('generated',)
+            index = 1
+            for field in row:
+                if index == 1:
+                    # convert date
+                    converted_field = datetime.datetime.strptime(field.strip(), "%Y-%m-%d")
+                    data_row = data_row + (converted_field,)
+                elif index > 6:
+                    # skip those fields
+                    pass
+                else:
+                    data_row = data_row + (field,)
+                index += 1
+            data.append(data_row)
+
+        return data
