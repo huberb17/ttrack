@@ -1,5 +1,6 @@
 import { NgModule, ErrorHandler } from '@angular/core';
 import { IonicApp, IonicModule, IonicErrorHandler } from 'ionic-angular';
+import { Storage } from '@ionic/storage'
 import { MyApp } from './app.component';
 import { CustomerListPage } from '../pages/customer-list/customer-list';
 import { SettingsPage } from '../pages/settings/settings';
@@ -12,6 +13,8 @@ import { OveruleDistanceModalPage } from "../pages/work-day/modals/overule-dista
 import { CreateOrChangeCustomerModalPage } from "../pages/customer-list/modals/create-change-customer-modal";
 import { CustomerService } from "./services/customer.service";
 import { DistanceService } from "./services/distance.service";
+import { CreateOrChangeAddressModalPage } from "../pages/customer-list/modals/create-change-address-modal";
+import { AddressService } from "./services/address.service";
 
 @NgModule({
   declarations: [
@@ -24,6 +27,7 @@ import { DistanceService } from "./services/distance.service";
     ChangeAddressModalPage,
     OveruleDistanceModalPage,
     CreateOrChangeCustomerModalPage,
+    CreateOrChangeAddressModalPage,
     TabsPage
   ],
   imports: [
@@ -40,8 +44,9 @@ import { DistanceService } from "./services/distance.service";
     ChangeAddressModalPage,
     OveruleDistanceModalPage,
     CreateOrChangeCustomerModalPage,
+    CreateOrChangeAddressModalPage,
     TabsPage
   ],
-  providers: [{provide: ErrorHandler, useClass: IonicErrorHandler}, CustomerService, DistanceService]
+  providers: [{provide: ErrorHandler, useClass: IonicErrorHandler}, AddressService, CustomerService, DistanceService]
 })
 export class AppModule {}

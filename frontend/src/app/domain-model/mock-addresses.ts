@@ -1,6 +1,7 @@
 import { TTrackAddress } from './domain-model';
  
 export const ADDR_ZIEGELFELD: TTrackAddress = {
+    id: "1",
     street: "Ziegelfeld",
     streetNumber: "35",
     doorNumber: "",
@@ -11,6 +12,7 @@ export const ADDR_ZIEGELFELD: TTrackAddress = {
 }
 
 export const ADDR_SCHLUMPFHAUSEN: TTrackAddress = {
+    id: "2",
     street: "Waldweg",
     streetNumber: "1",
     doorNumber: "08/15",
@@ -21,6 +23,7 @@ export const ADDR_SCHLUMPFHAUSEN: TTrackAddress = {
 }
 
 export const ADDR_WICKI: TTrackAddress = {
+    id: "3",
     street: "Fjord",
     streetNumber: "2",
     doorNumber: "3",
@@ -31,6 +34,7 @@ export const ADDR_WICKI: TTrackAddress = {
 }
 
 export const ADDR_EDLA: TTrackAddress = {
+    id: "4",
     street: "Edla",
     streetNumber: "9",
     doorNumber: "",

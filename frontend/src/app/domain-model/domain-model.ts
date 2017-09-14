@@ -47,6 +47,7 @@ export class TTrackTherapyItem {
 }
 
 export class TTrackAddress {
+    public id: string;
     public street: string;
     public streetNumber: string;
     public doorNumber: string;

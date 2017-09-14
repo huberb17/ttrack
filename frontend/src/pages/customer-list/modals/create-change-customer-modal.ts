@@ -2,7 +2,7 @@ import { Component } from '@angular/core';
 
 import { Platform, NavParams, ViewController } from 'ionic-angular';
 
-import { TTrackCustomer } from '../../../app/domain-model/domain-model'
+import { TTrackCustomer, TTrackAddress } from '../../../app/domain-model/domain-model'
 import { CustomerService } from "../../../app/services/customer.service";
 
 @Component({
@@ -18,7 +18,11 @@ export class CreateOrChangeCustomerModalPage {
         private custCtrl: CustomerService
     )
     { 
-        this.customer = new TTrackCustomer;
+        this.customer = Object.create(this.params.get('customer'));
+        if (this.customer.address == null) {
+            console.log('null address found');
+            this.customer.address = new TTrackAddress();
+        }
     }
 
     dismiss(): void {
@@ -26,7 +30,7 @@ export class CreateOrChangeCustomerModalPage {
     }
 
     saveCustomer(): void {
-        this.custCtrl.saveCustomer(this.customer);
-        this.viewCtrl.dismiss(this.customer);
+        let data = { 'customer': this.customer}
+        this.viewCtrl.dismiss(data);
     }
 }
