@@ -9,6 +9,7 @@ import { AddCustomerModalPage } from './modals/add-customer-modal';
 import { ChangeAddressModalPage } from './modals/change-address-modal';
 import { DistanceService } from "../../app/services/distance.service";
 import { OveruleDistanceModalPage } from "./modals/overule-distance-modal";
+import { GdriveService } from "../../app/services/gdrive.service";
 
 @Component({
   selector: 'page-work-day',
@@ -32,12 +33,15 @@ export class WorkDayPage implements OnInit {
               public toastCtrl: ToastController,
               private customerService: CustomerService,
               private addressService: AddressService,
-              private distanceService: DistanceService) {
+              private distanceService: DistanceService,
+              private gdriveService: GdriveService) {
     this.isCreated = false;
     this.isDayEmpty = true;
     this.isDaySaved = true;
     this.customersOfDay = new Array<CustomerAtWorkday>();
     this.addressList = new Array<TTrackAddress>();
+    console.log('would like to access gdrive...')
+    this.gdriveService.printFileList();
   }
 
   ngOnInit(): void {
@@ -47,6 +51,11 @@ export class WorkDayPage implements OnInit {
     this.startAddress = this.addressService.getHomeAddress();
     this.endAddress = this.addressService.getHomeAddress();
     this.lastRoute = new TTrackRoute();
+  }
+
+  saveFileOnDrive(): void {
+    this.gdriveService.printFileList();
+    this.gdriveService.uploadFile("saveFileOnDrive.json", "{ 'myData': 'test' }");
   }
 
   createWorkDay(): void {
@@ -223,5 +232,5 @@ export class WorkDayPage implements OnInit {
     })
     modal.present();
   }
-
+  
 }
