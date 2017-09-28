@@ -1,6 +1,5 @@
 import { NgModule, ErrorHandler } from '@angular/core';
 import { IonicApp, IonicModule, IonicErrorHandler } from 'ionic-angular';
-import { Storage } from '@ionic/storage'
 import { MyApp } from './app.component';
 import { CustomerListPage } from '../pages/customer-list/customer-list';
 import { SettingsPage } from '../pages/settings/settings';

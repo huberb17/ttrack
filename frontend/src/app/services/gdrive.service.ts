@@ -98,29 +98,29 @@ export class GdriveService {
                 'mimeType': contentType
               };
           
-              var multipartRequestBody =
-                  delimiter +
-                  'Content-Type: application/json\r\n\r\n' +
-                  JSON.stringify(metadata) +
-                  delimiter +
-                  'Content-Type: ' + contentType + '\r\n\r\n' +
-                  data +
-                  close_delim;
-          
-              var request = gapi.client.request({
-                  'path': '/upload/drive/v3/files',
-                  'method': 'POST',
-                  'params': {'uploadType': 'multipart'},
-                  'headers': {
-                    'Content-Type': 'multipart/related; boundary="' + boundary + '"'
-                  },
-                  'body': multipartRequestBody});
-              
-              var callback = function(file) {
-                  console.log(file)
-                };
-             
-              request.execute(callback);
+            var multipartRequestBody =
+                delimiter +
+                'Content-Type: ' + contentType + '\r\n\r\n' +
+                JSON.stringify(metadata) +
+                delimiter +
+                'Content-Type: ' + contentType + '\r\n\r\n' +
+                data +
+                close_delim;
+        
+            var request = gapi.client.request({
+                'path': '/upload/drive/v3/files',
+                'method': 'POST',
+                'params': {'uploadType': 'multipart'},
+                'headers': {
+                'Content-Type': 'multipart/related; boundary="' + boundary + '"'
+                },
+                'body': multipartRequestBody});
+            
+            var callback = function(file) {
+                console.log(file)
+            };
+            
+            request.execute(callback);
         } 
     }
 }

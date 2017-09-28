@@ -10,6 +10,7 @@ import { ChangeAddressModalPage } from './modals/change-address-modal';
 import { DistanceService } from "../../app/services/distance.service";
 import { OveruleDistanceModalPage } from "./modals/overule-distance-modal";
 import { GdriveService } from "../../app/services/gdrive.service";
+import CryptoJS from 'crypto-js'
 
 @Component({
   selector: 'page-work-day',
@@ -56,6 +57,26 @@ export class WorkDayPage implements OnInit {
   saveFileOnDrive(): void {
     this.gdriveService.printFileList();
     this.gdriveService.uploadFile("saveFileOnDrive.json", "{ 'myData': 'test' }");
+  }
+
+  encryptString(): void {
+    var key = CryptoJS.enc.Latin1.parse('1234567890123456');
+    console.log('key: ' + key);
+    var iv = CryptoJS.enc.Latin1.parse('1234567890123456');
+    console.log('iv: ' + iv);
+    var encrypted = CryptoJS.AES.encrypt('{ "name": "süpp", "city": "hier" }', key, {
+      iv: iv
+     });
+     console.log('iv ' + encrypted.iv.toString());
+
+    console.log(encrypted.ciphertext)
+    console.log('encrypted: ' + encrypted.toString())
+    console.log('file_content: ' + encrypted.iv.toString() + encrypted.toString());
+    
+    var recoveredPlaintext = CryptoJS.AES.decrypt(encrypted, key, {
+      iv: iv
+    });
+    console.log(recoveredPlaintext.toString(CryptoJS.enc.Utf8));   
   }
 
   createWorkDay(): void {
