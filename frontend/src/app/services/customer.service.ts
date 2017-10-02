@@ -17,11 +17,15 @@ export class CustomerService {
     }
 
     deleteCustomer(customer: TTrackCustomer): TTrackCustomer[] {
-        let index = this.customerList.indexOf(customer);
-        if  (index > -1) {
-            this.customerList.splice(index, 1);
-        }
-        this.storeCustomers();
+        var idx = 0;
+        for (var item of this.customerList) {
+            if (item.id == customer.id) {
+                console.log('delete customer');
+                console.log(this.customerList[idx]);
+                this.customerList.splice(idx, 1);
+                this.storeCustomers();
+            }
+        }      
         return this.customerList;
     }
 
@@ -36,6 +40,9 @@ export class CustomerService {
     }
 
     addCustomer(customer: TTrackCustomer) {
+        if (customer.id == undefined) {
+            customer.id = this.newGuid();
+        }
         this.customerList.push(customer);
         this.storeCustomers();
     }
@@ -53,6 +60,7 @@ export class CustomerService {
         var serCustList = [];
         for (var cust of this.customerList) {
             var serCust = {};
+            serCust['id'] = cust.id;
             serCust['title'] = cust.title;
             serCust['firstName'] = cust.firstName;
             serCust['lastName'] = cust.lastName;
@@ -76,6 +84,7 @@ export class CustomerService {
             if (data) {
                 for (var serCust of data) {
                     var cust = new TTrackCustomer();
+                    cust.id = serCust['id'];
                     cust.title = serCust['title'];
                     cust.firstName = serCust['firstName'];
                     cust.lastName = serCust['lastName'];

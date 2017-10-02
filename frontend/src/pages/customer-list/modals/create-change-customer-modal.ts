@@ -10,6 +10,8 @@ import { CustomerService } from "../../../app/services/customer.service";
 })
 export class CreateOrChangeCustomerModalPage {
     public customer: TTrackCustomer;
+    public isCreateNew;
+    public hasAddress;
 
     constructor(
         public platform: Platform,
@@ -18,10 +20,14 @@ export class CreateOrChangeCustomerModalPage {
         private custCtrl: CustomerService
     )
     { 
+        this.isCreateNew = false;
         this.customer = Object.create(this.params.get('customer'));
         if (this.customer.address == null) {
             console.log('null address found');
-            this.customer.address = new TTrackAddress();
+            this.hasAddress = false;
+        }
+        else {
+            this.hasAddress = true;
         }
     }
 
@@ -32,5 +38,15 @@ export class CreateOrChangeCustomerModalPage {
     saveCustomer(): void {
         let data = { 'customer': this.customer}
         this.viewCtrl.dismiss(data);
+    }
+
+    createAddress(): void {
+        this.customer.address = new TTrackAddress();
+        this.hasAddress = true;
+        this.isCreateNew = true;
+    }
+
+    chooseAddress(): void {
+
     }
 }

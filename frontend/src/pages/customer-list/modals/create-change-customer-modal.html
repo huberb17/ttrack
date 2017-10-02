@@ -10,7 +10,7 @@
     </ion-buttons>
   </ion-toolbar>  
 </ion-header>
-
+ 
 <ion-content>
   <ion-list>
     <ion-item>
@@ -26,23 +26,32 @@
         <ion-input type="text" [(ngModel)]="customer.lastName"></ion-input>
     </ion-item>
     <ion-item>
+      <ion-label>Adresse:</ion-label>
+      <button button ion-button item-right [disabled]="hasAddress ? true : null" (click)="createAddress()">Neu anlegen</button>
+      <button button ion-button item-right [disabled]="hasAddress ? true : null" (click)="chooseAddress()">Auswählen</button>
+    </ion-item>
+    <ion-item *ngIf="isCreateNew == true">
         <ion-label fixed>Straße</ion-label>
         <ion-input type="text" [(ngModel)]="customer.address.street"></ion-input>
     </ion-item>
-    <ion-item>
+    <ion-item *ngIf="isCreateNew == true">
         <ion-label fixed>Hausnummer</ion-label>
         <ion-input type="number" [(ngModel)]="customer.address.streetNumber"></ion-input>
     </ion-item>
-    <ion-item>
+    <ion-item *ngIf="isCreateNew == true">
+        <ion-label fixed>Tür</ion-label>
+        <ion-input type="number" [(ngModel)]="customer.address.doorNumber"></ion-input>
+    </ion-item>
+    <ion-item *ngIf="isCreateNew == true">
         <ion-label fixed>PLZ</ion-label>
         <ion-input type="number" [(ngModel)]="customer.address.zipCode"></ion-input>
     </ion-item>
-    <ion-item>
+    <ion-item *ngIf="isCreateNew == true">
         <ion-label fixed>Ort</ion-label>
         <ion-input type="text" [(ngModel)]="customer.address.city"></ion-input>
     </ion-item>
     <ion-item>
-      <button ion-button block (click)="saveCustomer()">Speichern</button>
+      <button ion-button block [disabled]="hasAddress ? null : true" (click)="saveCustomer()">Speichern</button>
     </ion-item>    
   </ion-list>
 </ion-content>

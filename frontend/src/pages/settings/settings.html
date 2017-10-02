@@ -19,5 +19,8 @@
     <ion-item>
       Default End-Adresse
     </ion-item>
+    <ion-item>
+      <button ion-button [disabled]="needsSync ? null : true" (click)="doSync()" block>Synchronisieren</button>
+    </ion-item>
   </ion-list>
 </ion-content>

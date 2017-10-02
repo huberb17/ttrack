@@ -3,14 +3,36 @@ import { Storage } from '@ionic/storage';
 import { TTrackAddress } from '../domain-model/domain-model';
 import { ADDR_ZIEGELFELD } from '../domain-model/mock-addresses';
 
+class AddressServiceState {
+    public needsUpload: boolean;
+    public constructor() {
+        this.needsUpload = false;
+    }
+    public initializeState() {
+        this.needsUpload = false;
+    }
+}
+
 @Injectable()
 export class AddressService {
     private addressList: TTrackAddress[];
     private storage: Storage;
+    private state: AddressServiceState;
+    private observers;
 
     public constructor() {
         this.storage = new Storage();
         this.refreshAddressList(); 
+        this.state = this.getStateFromStorage();
+        this.observers = [];
+    }
+
+    registerCallback(callback): void {
+        this.observers.push(callback);
+    }
+
+    getSyncState(): boolean {
+        return this.state.needsUpload;
     }
 
     getAddresses(): TTrackAddress[] {
@@ -22,11 +44,17 @@ export class AddressService {
     }
 
     deleteAddress(address: TTrackAddress): TTrackAddress[] {
-        let index = this.addressList.indexOf(address);
-        if  (index > -1) {
-            this.addressList.splice(index, 1);
+        var idx = 0;
+        for (var item of this.addressList) {
+            if (item.id == address.id) {
+                console.log('remove address');
+                console.log(this.addressList[idx]);
+                this.addressList.splice(idx, 1);
+                this.storeAddresses();
+                break;
+            }
+            idx++;
         }
-        this.storeAddresses();
         return this.addressList;
     }
 
@@ -44,6 +72,13 @@ export class AddressService {
             this.addressList[idx] = address;
             console.log('overwrite address');
             this.storeAddresses();   
+        }
+    }
+
+    markUploadCompleted(): void {
+        if (this.state.needsUpload) {
+            this.state.needsUpload = false;
+            this.storeStateToStorage();
         }
     }
 
@@ -67,6 +102,11 @@ export class AddressService {
         }, (error) => {
             console.log('address storage failed: ' + error);
         });
+
+        if (!this.state.needsUpload) {
+            this.state.needsUpload = true;
+            this.storeStateToStorage();
+        }
     }
 
     private refreshAddressList() {
@@ -92,6 +132,37 @@ export class AddressService {
         }, (error) => {
             console.log(error.err);
             this.addressList = addrList;
+        });
+    }
+
+    private getStateFromStorage(): AddressServiceState {
+        var state: AddressServiceState = new AddressServiceState;
+        state.initializeState();
+        this.storage.get('addressServiceState').then((data) => {
+            console.log('successful access to addressServiceState');
+            if (data) {
+                state.needsUpload = data['needsUpload'];
+                console.log('needs upload: ' + state.needsUpload);
+            }
+        }, (error) => {
+            console.log(error.err);
+        })
+        console.log('addressServiceState: ');
+        console.log(state);
+        return state;
+    }
+
+    private storeStateToStorage(): void {
+        if (this.state.needsUpload) {
+            console.log('notify all obervers');
+            for (var observer of this.observers) {
+                observer();
+            }
+        }
+        this.storage.set('addressServiceState', this.state).then((data) => {
+            console.log('addressServiceState storage successfull');
+        }, (error) => {
+            console.log('addressServiceState storage failed: ' + error.err);
         });
     }
 
