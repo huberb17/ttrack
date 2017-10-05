@@ -13,10 +13,10 @@
 <ion-content padding>
   <div>
   <ion-segment [(ngModel)]="customerData">
-    <ion-segment-button value="customers">
+    <ion-segment-button value="customers" (click)="clickTest()">
       Kundenliste
     </ion-segment-button>
-    <ion-segment-button value="addresses">
+    <ion-segment-button value="addresses" (click)="reloadAddressList()">
       Adressliste
     </ion-segment-button>
   </ion-segment>

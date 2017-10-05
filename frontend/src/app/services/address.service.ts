@@ -18,17 +18,29 @@ export class AddressService {
     private addressList: TTrackAddress[];
     private storage: Storage;
     private state: AddressServiceState;
-    private observers;
+    private stateObservers;
+    private addressObservers;
 
     public constructor() {
         this.storage = new Storage();
         this.refreshAddressList(); 
         this.state = this.getStateFromStorage();
-        this.observers = [];
+        this.stateObservers = [];
+        this.addressObservers = [];
+
     }
 
-    registerCallback(callback): void {
-        this.observers.push(callback);
+    registerStateCallback(callback): void {
+        this.stateObservers.push(callback);
+
+    }
+
+    registerAddressCallback(callback): void {
+        this.addressObservers.push(callback);
+    }
+
+    reloadAddresses(): void {
+        this.refreshAddressList();
     }
 
     getSyncState(): boolean {
@@ -37,6 +49,15 @@ export class AddressService {
 
     getAddresses(): TTrackAddress[] {
         return this.addressList;
+    }
+
+    getAddressById(id: string): TTrackAddress {
+        for (var address of this.addressList) {
+            if (address.id == id) {
+                return address;
+            }
+        }
+        return null;
     }
 
     getHomeAddress(): TTrackAddress {
@@ -66,13 +87,19 @@ export class AddressService {
         this.storeAddresses();
     }
 
-    updateAddress(address: TTrackAddress, idx: number) {
-        console.log('update address with idx ' + idx);
-        if (this.addressList.length > idx) {
-            this.addressList[idx] = address;
-            console.log('overwrite address');
-            this.storeAddresses();   
+    updateAddress(address: TTrackAddress, id: string) {
+        console.log('update address with id ' + id);
+        var idx = 0;
+        for  (var item of this.addressList) {
+            if (item.id == id) {
+                this.addressList[idx] = address;
+                console.log('overwrite address');
+                this.storeAddresses();
+                return;
+            }
+            idx++;
         }
+        console.log('address with id: ' + id + ' not found');
     }
 
     markUploadCompleted(): void {
@@ -110,10 +137,10 @@ export class AddressService {
     }
 
     private refreshAddressList() {
+        console.log('enter refreshAddressList')
         var addrList: TTrackAddress[] = [];
 
         this.storage.get('addresses').then((data) => {
-            console.log('address retrieval successful');
             if (data) {           
                 for (var serAddr of data) {
                     var addr = new TTrackAddress();
@@ -129,10 +156,12 @@ export class AddressService {
                 }
             }
             this.addressList = addrList;
+            this.notifyAddressChange();
         }, (error) => {
             console.log(error.err);
             this.addressList = addrList;
         });
+        console.log('leave refreshAddressList');
     }
 
     private getStateFromStorage(): AddressServiceState {
@@ -155,7 +184,8 @@ export class AddressService {
     private storeStateToStorage(): void {
         if (this.state.needsUpload) {
             console.log('notify all obervers');
-            for (var observer of this.observers) {
+            for (var observer of this.stateObservers) {
+        
                 observer();
             }
         }
@@ -171,5 +201,15 @@ export class AddressService {
             var r = Math.random()*16|0, v = c == 'x' ? r : (r&0x3|0x8);
             return v.toString(16);
         });
+    }
+
+    private notifyAddressChange(): void {
+        console.log('notify address change');
+        console.log(this.addressObservers);
+        console.log(this);
+        for (var observer of this.addressObservers) {
+            observer(this.addressList);
+            console.log('observer called: ' + observer.toString());
+        }
     }
 }

@@ -54,12 +54,7 @@ export class WorkDayPage implements OnInit {
     this.lastRoute = new TTrackRoute();
   }
 
-  saveFileOnDrive(): void {
-    this.gdriveService.printFileList();
-    this.gdriveService.uploadFile("saveFileOnDrive.json", "{ 'myData': 'test' }");
-  }
-
-  encryptString(): void {
+  /* encryptString(): void {
     var key = CryptoJS.enc.Latin1.parse('1234567890123456');
     console.log('key: ' + key);
     var iv = CryptoJS.enc.Latin1.parse('1234567890123456');
@@ -77,7 +72,7 @@ export class WorkDayPage implements OnInit {
       iv: iv
     });
     console.log(recoveredPlaintext.toString(CryptoJS.enc.Utf8));   
-  }
+  } */
 
   createWorkDay(): void {
     this.customersOfDay = [];

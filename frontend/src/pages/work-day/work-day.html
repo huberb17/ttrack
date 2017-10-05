@@ -7,12 +7,6 @@
 <ion-content padding>
 
   <ion-list>
-      <ion-item>
-          <button ion-button block (click)="encryptString()">Enryption Test</button>
-        </ion-item>
-       <ion-item>
-          <button ion-button block (click)="saveFileOnDrive()">File hochladen</button>
-        </ion-item>
     <ion-item>
       <ion-label>Datum</ion-label>
       <ion-datetime displayFormat="DD MM YYYY" [(ngModel)]="therapyDate" disabled={{isCreated}}></ion-datetime>

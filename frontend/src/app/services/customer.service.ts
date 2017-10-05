@@ -1,13 +1,14 @@
 import { Injectable } from '@angular/core';
 import { Storage } from '@ionic/storage';
 import { TTrackCustomer, TTrackAddress } from '../domain-model/domain-model';
+import { AddressService } from "../../app/services/address.service";
 
 @Injectable()
 export class CustomerService {
     private customerList: TTrackCustomer[];
     private storage: Storage;
 
-    public constructor() {
+    public constructor(private addrService: AddressService) {
         this.storage = new Storage();
         this.refreshCustomerList(); 
     }
@@ -77,12 +78,16 @@ export class CustomerService {
     }
 
     private refreshCustomerList() {
+        console.log('enter refresh customer list');
         var custList: TTrackCustomer[] = [];
-
+        var addrList: TTrackAddress[] = this.addrService.getAddresses();
         this.storage.get('customers').then((data) => {
-            console.log('customer retrieval successful: ' + data);
+            console.log('customer retrieval successful');
+            console.log(data);
             if (data) {
                 for (var serCust of data) {
+                    console.log('customer');
+                    console.log(serCust);
                     var cust = new TTrackCustomer();
                     cust.id = serCust['id'];
                     cust.title = serCust['title'];
@@ -91,6 +96,11 @@ export class CustomerService {
                     cust.isActive = serCust['active'];
                     cust.address = new TTrackAddress();
                     cust.address.id = serCust['address'];
+                    // for (var item of addrList) {
+                    //     if (item.id == cust.address.id) {
+                    //         cust.address = item;
+                    //     }
+                    // }
                     custList.push(cust);
                 }
             }
@@ -99,6 +109,7 @@ export class CustomerService {
             console.log(error.err);
             this.customerList = custList;
         });
+        console.log('leave refresh customer list');
     }
 
     private newGuid() {

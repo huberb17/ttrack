@@ -12,7 +12,6 @@ import { CreateOrChangeAddressModalPage } from "./modals/create-change-address-m
   templateUrl: 'customer-list.html'
 })
 export class CustomerListPage {
-  public customerData:string;
   public customers: TTrackCustomer[];
   public addresses: TTrackAddress[];
 
@@ -21,9 +20,19 @@ export class CustomerListPage {
               public modalCtrl: ModalController,
               private custService: CustomerService,
               private addrService: AddressService) {
-    this.customerData="customers";
+  
     this.customers = this.custService.getCustomers();
-    this.addresses = this.addrService.getAddresses();
+    this.observeAddressChange = this.observeAddressChange.bind(this);
+    this.addrService.registerAddressCallback(this.observeAddressChange);
+    this.addrService.reloadAddresses();
+  }
+
+  clickTest(): void {
+    console.log("Kundenliste was clicked");
+  }
+
+  reloadAddressList(): void {
+    console.log("unused dummy function");
   }
 
   removeCustomer(idx: number): void {
@@ -71,6 +80,8 @@ export class CustomerListPage {
       {
         this.custService.addCustomer(data['customer']);
         this.customers = this.custService.getCustomers();
+        console.log(this.custService.getCustomers());
+        console.log(this.addrService.getAddresses());
       }
     })
     modal.present();
@@ -82,13 +93,14 @@ export class CustomerListPage {
 
   changeAddress(idx: number): void {
     console.log('pressed address edit with idx '  + idx);
+    var id = this.addresses[idx].id;
     let modal = this.modalCtrl.create(CreateOrChangeAddressModalPage, 
                   { address: this.addresses[idx] });
     modal.onDidDismiss(data => {
       if (data)
       {
         console.log('edit address with idx '  + idx);
-        this.addrService.updateAddress(data['address'], idx);
+        this.addrService.updateAddress(data['address'], id);
         this.addresses = this.addrService.getAddresses();
       }
     })
@@ -128,5 +140,20 @@ export class CustomerListPage {
       ]
     });
     confirm.present();
+  }
+
+  private observeAddressChange(addressList: TTrackAddress[]): void {
+    this.addresses = addressList;
+    console.log('callback observeAddressChange called');
+    console.log(this.addresses);
+    for (var cust of this.customers) {
+      for (var addr of this.addresses) {
+        if (cust.address) {
+          if (cust.address.id == addr.id) {
+            cust.address = addr;
+          }
+        }
+      }
+    }
   }
 }

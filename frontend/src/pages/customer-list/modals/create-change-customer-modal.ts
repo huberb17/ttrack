@@ -1,9 +1,11 @@
 import { Component } from '@angular/core';
 
-import { Platform, NavParams, ViewController } from 'ionic-angular';
+import { Platform, NavParams, ViewController, ModalController } from 'ionic-angular';
 
 import { TTrackCustomer, TTrackAddress } from '../../../app/domain-model/domain-model'
 import { CustomerService } from "../../../app/services/customer.service";
+import { CreateOrChangeAddressModalPage } from "./create-change-address-modal";
+import { AddressService } from '../../../app/services/address.service';
 
 @Component({
   templateUrl: 'create-change-customer-modal.html'
@@ -17,7 +19,9 @@ export class CreateOrChangeCustomerModalPage {
         public platform: Platform,
         public params: NavParams,
         public viewCtrl: ViewController,
-        private custCtrl: CustomerService
+        public modalCtrl: ModalController,
+        private custCtrl: CustomerService,
+        private addrService: AddressService
     )
     { 
         this.isCreateNew = false;
@@ -41,9 +45,21 @@ export class CreateOrChangeCustomerModalPage {
     }
 
     createAddress(): void {
-        this.customer.address = new TTrackAddress();
-        this.hasAddress = true;
-        this.isCreateNew = true;
+        //this.customer.address = new TTrackAddress();
+        //this.isCreateNew = true;
+        let modal = this.modalCtrl.create(CreateOrChangeAddressModalPage, 
+            { address: new TTrackAddress() });
+            modal.onDidDismiss(data => {
+                if (data)
+                {
+                    this.customer.address = data['address'];
+                    this.addrService.addAddress(data['address']);
+                    this.hasAddress = true;
+                    console.log(this.customer);
+                    console.log(this.addrService.getAddresses());
+                }
+            })
+        modal.present();
     }
 
     chooseAddress(): void {
