@@ -10,6 +10,7 @@ import { TabsPage } from '../pages/tabs/tabs';
 import { HistoryListPage } from "../pages/history/history";
 import { OveruleDistanceModalPage } from "../pages/work-day/modals/overule-distance-modal";
 import { CreateOrChangeCustomerModalPage } from "../pages/customer-list/modals/create-change-customer-modal";
+import { ChooseAddressModalPage } from "../pages/customer-list/modals/choose-address-modal";
 import { CustomerService } from "./services/customer.service";
 import { DistanceService } from "./services/distance.service";
 import { CreateOrChangeAddressModalPage } from "../pages/customer-list/modals/create-change-address-modal";
@@ -23,6 +24,7 @@ import { GdriveService } from "./services/gdrive.service";
     SettingsPage,
     WorkDayPage,
     HistoryListPage,
+    ChooseAddressModalPage,
     AddCustomerModalPage,
     ChangeAddressModalPage,
     OveruleDistanceModalPage,
@@ -40,6 +42,7 @@ import { GdriveService } from "./services/gdrive.service";
     SettingsPage,
     HistoryListPage,
     WorkDayPage,
+    ChooseAddressModalPage,
     AddCustomerModalPage,
     ChangeAddressModalPage,
     OveruleDistanceModalPage,

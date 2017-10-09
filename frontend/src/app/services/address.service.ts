@@ -44,6 +44,7 @@ export class AddressService {
     }
 
     getSyncState(): boolean {
+        this.notifyStateObservers();
         return this.state.needsUpload;
     }
 
@@ -182,13 +183,7 @@ export class AddressService {
     }
 
     private storeStateToStorage(): void {
-        if (this.state.needsUpload) {
-            console.log('notify all obervers');
-            for (var observer of this.stateObservers) {
-        
-                observer();
-            }
-        }
+        this.notifyStateObservers();
         this.storage.set('addressServiceState', this.state).then((data) => {
             console.log('addressServiceState storage successfull');
         }, (error) => {
@@ -210,6 +205,15 @@ export class AddressService {
         for (var observer of this.addressObservers) {
             observer(this.addressList);
             console.log('observer called: ' + observer.toString());
+        }
+    }
+
+    private notifyStateObservers(): void {
+        if (this.state.needsUpload) {
+            console.log('notify all state obervers');
+            for (var observer of this.stateObservers) {
+                observer();
+            }
         }
     }
 }

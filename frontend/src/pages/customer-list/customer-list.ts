@@ -12,8 +12,11 @@ import { CreateOrChangeAddressModalPage } from "./modals/create-change-address-m
   templateUrl: 'customer-list.html'
 })
 export class CustomerListPage {
+  public customerData: string;
   public customers: TTrackCustomer[];
+  public visibleCustomers: TTrackCustomer[];
   public addresses: TTrackAddress[];
+  public showInactive: boolean;
 
   constructor(public navCtrl: NavController,
               public alertCtrl: AlertController,
@@ -21,18 +24,24 @@ export class CustomerListPage {
               private custService: CustomerService,
               private addrService: AddressService) {
   
-    this.customers = this.custService.getCustomers();
+    this.customerData = "customers";
+    this.showInactive = false;
+    this.customers = [];
+    this.visibleCustomers = [];
+    this.addresses = [];
     this.observeAddressChange = this.observeAddressChange.bind(this);
     this.addrService.registerAddressCallback(this.observeAddressChange);
     this.addrService.reloadAddresses();
+
+    this.observeCustomerChange = this.observeCustomerChange.bind(this);
+    this.custService.registerCustomerCallback(this.observeCustomerChange);
+    this.custService.reloadCustomers();
+
   }
 
-  clickTest(): void {
-    console.log("Kundenliste was clicked");
-  }
-
-  reloadAddressList(): void {
-    console.log("unused dummy function");
+  reloadCustomerList(): void {
+    console.log('show inactive ' +  this.showInactive);
+    this.custService.reloadCustomers();
   }
 
   removeCustomer(idx: number): void {
@@ -64,8 +73,8 @@ export class CustomerListPage {
     modal.onDidDismiss(data => {
       if (data)
       {
-        console.log('edit customer with idx '  + idx);
-        this.custService.updateCustomer(data['customer'], idx);
+        console.log(data);
+        this.custService.updateCustomer(data['customer'], data['customer'].id);
         this.customers = this.custService.getCustomers();
       }
     })
@@ -80,8 +89,6 @@ export class CustomerListPage {
       {
         this.custService.addCustomer(data['customer']);
         this.customers = this.custService.getCustomers();
-        console.log(this.custService.getCustomers());
-        console.log(this.addrService.getAddresses());
       }
     })
     modal.present();
@@ -153,6 +160,28 @@ export class CustomerListPage {
             cust.address = addr;
           }
         }
+      }
+    }
+  }
+
+  private observeCustomerChange(customerList: TTrackCustomer[]): void {
+    this.customers = customerList;
+    this.visibleCustomers = [];
+    console.log('callback observeCustomerChange called');
+    console.log(this.customers);
+    for (var cust of this.customers) {
+      for (var addr of this.addresses) {
+        if (cust.address) {
+          if (cust.address.id == addr.id) {
+            cust.address = addr;
+          }
+        }
+      }
+      if (this.showInactive) {
+        this.visibleCustomers.push(cust);
+      }
+      else {
+        if (cust.isActive) this.visibleCustomers.push(cust);
       }
     }
   }

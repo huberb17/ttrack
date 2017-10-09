@@ -27,8 +27,8 @@
     </ion-item>
     <ion-item>
       <ion-label>Adresse:</ion-label>
-      <button button ion-button item-right [disabled]="hasAddress ? true : null" (click)="createAddress()">Neu anlegen</button>
-      <button button ion-button item-right [disabled]="hasAddress ? true : null" (click)="chooseAddress()">Auswählen</button>
+      <button button ion-button item-right (click)="createAddress()">Neu anlegen</button>
+      <button button ion-button item-right (click)="chooseAddress()">Auswählen</button>
     </ion-item>
     <ion-item *ngIf="hasAddress == true">
         <p>
