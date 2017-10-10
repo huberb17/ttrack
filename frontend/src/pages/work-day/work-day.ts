@@ -10,7 +10,6 @@ import { ChangeAddressModalPage } from './modals/change-address-modal';
 import { DistanceService } from "../../app/services/distance.service";
 import { OveruleDistanceModalPage } from "./modals/overule-distance-modal";
 import { GdriveService } from "../../app/services/gdrive.service";
-import CryptoJS from 'crypto-js'
 
 @Component({
   selector: 'page-work-day',
@@ -40,39 +39,22 @@ export class WorkDayPage implements OnInit {
     this.isDayEmpty = true;
     this.isDaySaved = true;
     this.customersOfDay = new Array<CustomerAtWorkday>();
-    this.addressList = new Array<TTrackAddress>();
-    console.log('would like to access gdrive...')
-    this.gdriveService.printFileList();
+    
+    this.addressList = [];
+    this.customerList = [];
+    this.observeAddressChange = this.observeAddressChange.bind(this);
+    this.addressService.registerAddressCallback(this.observeAddressChange);
+    
+    this.observeCustomerChange = this.observeCustomerChange.bind(this);
+    this.customerService.registerCustomerCallback(this.observeCustomerChange);    
   }
 
   ngOnInit(): void {
     this.therapyDate = new Date().toISOString();
-    this.customerList = this.customerService.getCustomers();
-    this.addressList = this.addressService.getAddresses();
     this.startAddress = this.addressService.getHomeAddress();
     this.endAddress = this.addressService.getHomeAddress();
     this.lastRoute = new TTrackRoute();
   }
-
-  /* encryptString(): void {
-    var key = CryptoJS.enc.Latin1.parse('1234567890123456');
-    console.log('key: ' + key);
-    var iv = CryptoJS.enc.Latin1.parse('1234567890123456');
-    console.log('iv: ' + iv);
-    var encrypted = CryptoJS.AES.encrypt('{ "name": "süpp", "city": "hier" }', key, {
-      iv: iv
-     });
-     console.log('iv ' + encrypted.iv.toString());
-
-    console.log(encrypted.ciphertext)
-    console.log('encrypted: ' + encrypted.toString())
-    console.log('file_content: ' + encrypted.iv.toString() + encrypted.toString());
-    
-    var recoveredPlaintext = CryptoJS.AES.decrypt(encrypted, key, {
-      iv: iv
-    });
-    console.log(recoveredPlaintext.toString(CryptoJS.enc.Utf8));   
-  } */
 
   createWorkDay(): void {
     this.customersOfDay = [];
@@ -165,7 +147,10 @@ export class WorkDayPage implements OnInit {
             else {
               this.lastRoute.lengthInKm = 0;
             }
-          });
+          }).catch(error => {
+            console.log(error);
+          }
+        )
       }
     });
     modal.present();
@@ -247,6 +232,16 @@ export class WorkDayPage implements OnInit {
       }
     })
     modal.present();
+  }
+
+  private observeAddressChange(addressList: TTrackAddress[]): void {
+    this.addressList = addressList;
+    console.log('callback observeAddressChange called');
+  }
+
+  private observeCustomerChange(customerList: TTrackCustomer[]): void {
+    this.customerList = customerList;
+    console.log('callback observeCustomerChange called');
   }
   
 }

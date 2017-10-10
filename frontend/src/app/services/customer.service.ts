@@ -23,12 +23,14 @@ export class CustomerService {
     private state: CustomerServiceState;
     
     public constructor(private addrService: AddressService) {
+        this.customerList = [];
         this.storage = new Storage();
         this.refreshCustomerList(); 
         this.stateObservers = [];
         this.customerObservers = [];
         this.state = this.getStateFromStorage();
-        
+        this.observeAddressChange = this.observeAddressChange.bind(this);
+        this.addrService.registerAddressCallback(this.observeAddressChange);
     }
 
     registerStateCallback(callback): void {
@@ -58,8 +60,6 @@ export class CustomerService {
         var idx = 0;
         for (var item of this.customerList) {
             if (item.id == customer.id) {
-                console.log('delete customer');
-                console.log(this.customerList[idx]);
                 this.customerList.splice(idx, 1);
                 this.storeCustomers();
             }
@@ -86,15 +86,10 @@ export class CustomerService {
     }
 
     updateCustomer(customer: TTrackCustomer, id: string) {
-        console.log('update customer with id ' + id);
-        console.log('new customer');
-        console.log(customer);
         var idx = 0;
         for (var item of this.customerList) {
             if (item.id == id) {
                 this.customerList[idx] = customer;
-                console.log('new customer');
-                console.log(this.customerList[idx]);
                 this.storeCustomers();
                 return;
             }
@@ -122,8 +117,6 @@ export class CustomerService {
             serCustList.push(serCust);
         }
         this.storage.set('customers', serCustList).then((data) => {
-            console.log('customer storage successfull!');
-            console.log(data);
             this.refreshCustomerList();
         }, (error) => {
             console.log('customer storage failed: ' + error);
@@ -136,16 +129,12 @@ export class CustomerService {
     }
 
     private refreshCustomerList() {
-        console.log('enter refresh customer list');
         var custList: TTrackCustomer[] = [];
-        var addrList: TTrackAddress[] = this.addrService.getAddresses();
+        var addrList: TTrackAddress[] = [];
         this.storage.get('customers').then((data) => {
-            console.log('customer retrieval successful');
-            console.log(data);
             if (data) {
+                addrList = this.addrService.getAddresses();
                 for (var serCust of data) {
-                    console.log('customer');
-                    console.log(serCust);
                     var cust = new TTrackCustomer();
                     cust.id = serCust['id'];
                     cust.title = serCust['title'];
@@ -170,31 +159,25 @@ export class CustomerService {
         }, (error) => {
             console.log(error.err);
             this.customerList = custList;
-        });
-        console.log('leave refresh customer list');
+        });     
     }
 
     private getStateFromStorage(): CustomerServiceState {
         var state: CustomerServiceState = new CustomerServiceState;
         state.initializeState();
         this.storage.get('customerServiceState').then((data) => {
-            console.log('successful access to customerServiceState');
             if (data) {
-                state.needsUpload = data['needsUpload'];
-                console.log('needs upload: ' + state.needsUpload);
+                state.needsUpload = data['needsUpload'];              
             }
         }, (error) => {
             console.log(error.err);
         })
-        console.log('customerServiceState: ');
-        console.log(state);
         return state;
     }
 
     private storeStateToStorage(): void {
         this.notifyStateObservers();
         this.storage.set('customerServiceState', this.state).then((data) => {
-            console.log('customerServiceState storage successfull');
         }, (error) => {
             console.log('customerServiceState storage failed: ' + error.err);
         });
@@ -208,21 +191,28 @@ export class CustomerService {
     }
 
     private notifyCustomerChange(): void {
-        console.log('notify customer change');
-        console.log(this.customerObservers);
-        console.log(this);
         for (var observer of this.customerObservers) {
             observer(this.customerList);
-            console.log('observer called: ' + observer.toString());
         }
     }
 
     private notifyStateObservers(): void {
         if (this.state.needsUpload) {
-            console.log('notify all state obervers');
             for (var observer of this.stateObservers) {
                 observer();
             }
+        }
+    }
+
+    private observeAddressChange(addressList: TTrackAddress[]): void {
+        for (var cust of this.customerList) {
+          for (var addr of addressList) {
+            if (cust.address) {
+              if (cust.address.id == addr.id) {
+                cust.address = addr;
+              }
+            }
+          }
         }
     }
 }

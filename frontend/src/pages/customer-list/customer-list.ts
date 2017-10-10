@@ -36,7 +36,6 @@ export class CustomerListPage {
     this.observeCustomerChange = this.observeCustomerChange.bind(this);
     this.custService.registerCustomerCallback(this.observeCustomerChange);
     this.custService.reloadCustomers();
-
   }
 
   reloadCustomerList(): void {
@@ -152,16 +151,6 @@ export class CustomerListPage {
   private observeAddressChange(addressList: TTrackAddress[]): void {
     this.addresses = addressList;
     console.log('callback observeAddressChange called');
-    console.log(this.addresses);
-    for (var cust of this.customers) {
-      for (var addr of this.addresses) {
-        if (cust.address) {
-          if (cust.address.id == addr.id) {
-            cust.address = addr;
-          }
-        }
-      }
-    }
   }
 
   private observeCustomerChange(customerList: TTrackCustomer[]): void {
@@ -170,13 +159,6 @@ export class CustomerListPage {
     console.log('callback observeCustomerChange called');
     console.log(this.customers);
     for (var cust of this.customers) {
-      for (var addr of this.addresses) {
-        if (cust.address) {
-          if (cust.address.id == addr.id) {
-            cust.address = addr;
-          }
-        }
-      }
       if (this.showInactive) {
         this.visibleCustomers.push(cust);
       }

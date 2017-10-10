@@ -69,8 +69,6 @@ export class AddressService {
         var idx = 0;
         for (var item of this.addressList) {
             if (item.id == address.id) {
-                console.log('remove address');
-                console.log(this.addressList[idx]);
                 this.addressList.splice(idx, 1);
                 this.storeAddresses();
                 break;
@@ -89,18 +87,15 @@ export class AddressService {
     }
 
     updateAddress(address: TTrackAddress, id: string) {
-        console.log('update address with id ' + id);
         var idx = 0;
         for  (var item of this.addressList) {
             if (item.id == id) {
                 this.addressList[idx] = address;
-                console.log('overwrite address');
                 this.storeAddresses();
                 return;
             }
             idx++;
         }
-        console.log('address with id: ' + id + ' not found');
     }
 
     markUploadCompleted(): void {
@@ -125,7 +120,6 @@ export class AddressService {
             serAddrList.push(serAddr);
         }
         this.storage.set('addresses', serAddrList).then((data) => {
-            console.log('address storage successfull');
             this.refreshAddressList();
         }, (error) => {
             console.log('address storage failed: ' + error);
@@ -138,7 +132,6 @@ export class AddressService {
     }
 
     private refreshAddressList() {
-        console.log('enter refreshAddressList')
         var addrList: TTrackAddress[] = [];
 
         this.storage.get('addresses').then((data) => {
@@ -162,30 +155,24 @@ export class AddressService {
             console.log(error.err);
             this.addressList = addrList;
         });
-        console.log('leave refreshAddressList');
     }
 
     private getStateFromStorage(): AddressServiceState {
         var state: AddressServiceState = new AddressServiceState;
         state.initializeState();
         this.storage.get('addressServiceState').then((data) => {
-            console.log('successful access to addressServiceState');
             if (data) {
                 state.needsUpload = data['needsUpload'];
-                console.log('needs upload: ' + state.needsUpload);
             }
         }, (error) => {
             console.log(error.err);
         })
-        console.log('addressServiceState: ');
-        console.log(state);
         return state;
     }
 
     private storeStateToStorage(): void {
         this.notifyStateObservers();
         this.storage.set('addressServiceState', this.state).then((data) => {
-            console.log('addressServiceState storage successfull');
         }, (error) => {
             console.log('addressServiceState storage failed: ' + error.err);
         });
@@ -199,18 +186,13 @@ export class AddressService {
     }
 
     private notifyAddressChange(): void {
-        console.log('notify address change');
-        console.log(this.addressObservers);
-        console.log(this);
         for (var observer of this.addressObservers) {
             observer(this.addressList);
-            console.log('observer called: ' + observer.toString());
         }
     }
 
     private notifyStateObservers(): void {
         if (this.state.needsUpload) {
-            console.log('notify all state obervers');
             for (var observer of this.stateObservers) {
                 observer();
             }
