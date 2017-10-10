@@ -21,6 +21,7 @@ export class WorkDayPage implements OnInit {
   public isDayEmpty: boolean;
   public isDaySaved: boolean;
   public customersOfDay: CustomerAtWorkday[];
+  public milage: number;
   
   private customerList: TTrackCustomer[];
   private addressList: TTrackAddress[];
