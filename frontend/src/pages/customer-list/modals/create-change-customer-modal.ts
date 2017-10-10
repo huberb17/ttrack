@@ -29,7 +29,9 @@ export class CreateOrChangeCustomerModalPage {
         //this.customer = Object.create(this.params.get('customer'));
         var oldCust = this.params.get('customer');
         console.log(oldCust);
-        if (oldCust.address == null) {
+        console.log(oldCust.address);
+        if (oldCust.address === undefined) {
+            this.customer = oldCust;
             this.hasAddress = false;
         }
         else {
