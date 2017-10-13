@@ -10,6 +10,7 @@ import { ChangeAddressModalPage } from './modals/change-address-modal';
 import { DistanceService } from "../../app/services/distance.service";
 import { OveruleDistanceModalPage } from "./modals/overule-distance-modal";
 import { GdriveService } from "../../app/services/gdrive.service";
+import { WorkdayService, Workday } from "../../app/services/workday.service";
 
 @Component({
   selector: 'page-work-day',
@@ -35,6 +36,7 @@ export class WorkDayPage implements OnInit {
               private customerService: CustomerService,
               private addressService: AddressService,
               private distanceService: DistanceService,
+              private workdayService: WorkdayService,
               private gdriveService: GdriveService) {
     this.isCreated = false;
     this.isDayEmpty = true;
@@ -48,6 +50,10 @@ export class WorkDayPage implements OnInit {
     
     this.observeCustomerChange = this.observeCustomerChange.bind(this);
     this.customerService.registerCustomerCallback(this.observeCustomerChange);    
+
+    this.observeWorkdayChange = this.observeWorkdayChange.bind(this);
+    this.workdayService.registerWorkdayCallback(this.observeWorkdayChange);
+    this.workdayService.reloadWorkday();
   }
 
   ngOnInit(): void {
@@ -185,12 +191,33 @@ export class WorkDayPage implements OnInit {
   }
 
   saveWorkday(): void {
-    // todo: add logic to save data locally
+    var workday = new Workday();
+    workday.therapyDate = this.therapyDate;
+    workday.milage = this.milage;
+    workday.customersOfDay = this.customersOfDay;
+    workday.startAddress = this.startAddress;
+    workday.endAddress = this.endAddress;
+    this.workdayService.saveWorkday(workday);
+
+    let toast = this.toastCtrl.create({
+      message: 'Arbeitstag gespeichert.',
+      duration: 1000,
+      position: 'bottom'
+    })
+    toast.present();
+
     this.isDaySaved = true;
   }
 
   submitWorkday(): void {
-    // todo: add logic to submit data
+    var workday = new Workday();
+    workday.therapyDate = this.therapyDate;
+    workday.milage = this.milage;
+    workday.customersOfDay = this.customersOfDay;
+    workday.startAddress = this.startAddress;
+    workday.endAddress = this.endAddress;
+    this.workdayService.submitWorkday(workday);
+
     let toast = this.toastCtrl.create({
       message: 'Arbeitstag erfolgreich übernommen.',
       duration: 1000,
@@ -205,7 +232,9 @@ export class WorkDayPage implements OnInit {
   }
 
   deleteWorkday(): void {
-    // todo: add logic to delete saved data if necessary
+    var workday = new Workday();
+    this.workdayService.saveWorkday(workday);
+
     let toast = this.toastCtrl.create({
       message: 'Arbeitstag gelöscht.',
       duration: 1000,
@@ -235,6 +264,10 @@ export class WorkDayPage implements OnInit {
     modal.present();
   }
 
+  setToUnsaved() {
+    this.isDaySaved = false;
+  }
+
   private observeAddressChange(addressList: TTrackAddress[]): void {
     this.addressList = addressList;
     console.log('callback observeAddressChange called');
@@ -244,5 +277,42 @@ export class WorkDayPage implements OnInit {
     this.customerList = customerList;
     console.log('callback observeCustomerChange called');
   }
-  
+
+  private observeWorkdayChange(workday: Workday): void {
+    console.log(workday);
+    if (workday.therapyDate === undefined) {
+      this.therapyDate = new Date().toISOString();
+      this.isCreated = false;
+    }
+    else {
+      this.therapyDate = workday.therapyDate;
+      this.isCreated = true;
+    }
+    this.milage = workday.milage;
+    this.customersOfDay = workday.customersOfDay;
+    if (this.customersOfDay.length > 0 ) {
+      this.isDayEmpty = false;
+    }
+    else {
+      this.isDayEmpty = true;
+    }
+    if (workday.startAddress === undefined) {
+      this.startAddress = this.addressService.getHomeAddress();
+    }
+    else if (workday.startAddress.street === undefined) {
+      this.startAddress = this.addressService.getHomeAddress();
+    }
+    else {
+      this.startAddress = workday.startAddress;
+    }
+    if (workday.endAddress === undefined) {
+      this.endAddress = this.addressService.getHomeAddress();
+    }
+    else if (workday.endAddress.street === undefined) {
+      this.endAddress = this.addressService.getHomeAddress();
+    }
+    else {
+      this.endAddress = workday.endAddress;
+    }
+  }
 }

@@ -9,15 +9,14 @@
 <ion-content>
   <ion-list>
     <ion-list-header>Vergangene Arbeitstage</ion-list-header>
-    <ion-item>
-      <ion-icon name="ionic" item-left></ion-icon>
-      Kilometerpauschale
-    </ion-item>
-    <ion-item>
-      Default Start-Adresse
-    </ion-item>
-    <ion-item>
-      Default End-Adresse
-    </ion-item>
+    <ion-item *ngFor="let workday of workdayHistory; let i = index">
+        <h2>{{workday.therapyDate}}</h2>
+            <p>
+              {{workday.customersOfDay.length}}
+            </p>
+            <button ion-button item-right icon-only color="danger" clear (click)="removeCustomer(i)">
+              <ion-icon name="open"></ion-icon>  
+            </button>
+      </ion-item>
   </ion-list>
 </ion-content>

@@ -16,6 +16,7 @@ import { DistanceService } from "./services/distance.service";
 import { CreateOrChangeAddressModalPage } from "../pages/customer-list/modals/create-change-address-modal";
 import { AddressService } from "./services/address.service";
 import { GdriveService } from "./services/gdrive.service";
+import { WorkdayService } from "./services/workday.service";
 
 @NgModule({
   declarations: [
@@ -50,6 +51,6 @@ import { GdriveService } from "./services/gdrive.service";
     CreateOrChangeAddressModalPage,
     TabsPage
   ],
-  providers: [{provide: ErrorHandler, useClass: IonicErrorHandler}, AddressService, CustomerService, DistanceService, GdriveService]
+  providers: [{provide: ErrorHandler, useClass: IonicErrorHandler}, AddressService, CustomerService, DistanceService, GdriveService, WorkdayService]
 })
 export class AppModule {}

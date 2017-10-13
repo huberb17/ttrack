@@ -19,7 +19,7 @@
   <ion-list *ngIf="isCreated == true">
     <ion-item>
         <ion-label>Kilometerstand</ion-label>
-        <ion-input type="number" [(ngModel)]="milage"></ion-input>
+        <ion-input type="number" [(ngModel)]="milage" (input)="setToUnsaved()"></ion-input>
     </ion-item>
     <ion-item>
       <h2>Ausgangspunkt</h2>
