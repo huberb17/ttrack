@@ -8,15 +8,13 @@
 
 <ion-content>
   <ion-list>
-    <ion-list-header>Vergangene Arbeitstage</ion-list-header>
-    <ion-item *ngFor="let workday of workdayHistory; let i = index">
-        <h2>{{workday.therapyDate}}</h2>
-            <p>
-              {{workday.customersOfDay.length}}
-            </p>
-            <button ion-button item-right icon-only color="danger" clear (click)="removeCustomer(i)">
-              <ion-icon name="open"></ion-icon>  
-            </button>
-      </ion-item>
+    <ion-item text-wrap *ngFor="let workday of workdayHistory">     
+      {{printDate(workday)}}
+      <p>{{printCustomers(workday)}}</p>
+      <button *ngIf="!workday.isUploaded" ion-button item-right clear icon-only (click)="uploadWorkday(workday)">
+        <ion-icon name="cloud-upload"></ion-icon>  
+      </button>
+      <ion-badge *ngIf="workday.isUploaded" item-right>Archiviert</ion-badge>
+    </ion-item>
   </ion-list>
 </ion-content>

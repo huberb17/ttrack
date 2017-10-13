@@ -13,16 +13,27 @@ class WorkdayServiceState {
 }
 
 export class Workday {
+    public id: string;
     public therapyDate: string;
     public milage: number;
     public startAddress: TTrackAddress;
     public endAddress: TTrackAddress;
     public customersOfDay: CustomerAtWorkday[];
+    public isUploaded: boolean;
     public constructor() {
+        this.id = Workday.newGuid();
         this.customersOfDay = [];
         this.startAddress = new TTrackAddress();
         this.endAddress = new TTrackAddress();
-    }   
+        this.isUploaded = false;
+    }
+    
+    public static newGuid() {
+        return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+            var r = Math.random()*16|0, v = c == 'x' ? r : (r&0x3|0x8);
+            return v.toString(16);
+        });
+    }
 }
 
 @Injectable()
@@ -89,6 +100,11 @@ export class WorkdayService {
         this.storeWorkday(this.workday);
     }
 
+    uploadWorkday(workday: Workday) {
+        // todo add gdrive upload
+        workday.isUploaded = true;
+        this.updateHistory(workday);
+    }
     markUploadCompleted(): void {
         if (this.state.needsUpload) {
             this.state.needsUpload = false;
@@ -99,6 +115,17 @@ export class WorkdayService {
     private addWorkdayToHistory(workday: Workday): void {
         this.workdayHistory.push(workday);
         this.storeWorkdayHistory();
+    }
+
+    private updateHistory(workday: Workday): void {
+        for (var wd of this.workdayHistory) {
+            if (wd.id == workday.id) {
+                wd = workday;
+                this.storeWorkdayHistory();
+                return;
+            }
+        }
+        console.log('workday ' + workday.id + ' not found');
     }
 
     private storeWorkday(workday: Workday) {
@@ -243,6 +270,7 @@ export class WorkdayService {
 
     private serializeWorkday(workday: Workday): any {
         var serWorkday = {};
+        serWorkday['id'] = workday.id;
         serWorkday['date'] = workday.therapyDate;
         serWorkday['milage'] = workday.milage;
         var serCustList = [];
@@ -253,6 +281,7 @@ export class WorkdayService {
         serWorkday['customers'] = serCustList;
         serWorkday['startAddress'] = this.serializeAddress(workday.startAddress);
         serWorkday['endAddress'] = this.serializeAddress(workday.endAddress);
+        serWorkday['isUploaded'] = workday.isUploaded;
         return serWorkday;
     }
 
@@ -298,6 +327,9 @@ export class WorkdayService {
         var workday = new Workday();
         if (serWorkday === undefined)
             return workday;
+        workday.id = serWorkday['id'];
+        if (workday.id === undefined)
+            workday.id = Workday.newGuid();
         workday.therapyDate = serWorkday['date'];
         workday.milage = serWorkday['milage']
         for (var serCust of serWorkday['customers']) {
@@ -306,6 +338,8 @@ export class WorkdayService {
         }
         workday.startAddress = this.deserializeAddress(serWorkday['startAddress']);
         workday.endAddress = this.deserializeAddress(serWorkday['endAddress']);
+        workday.isUploaded = serWorkday['isUploaded'];
         return workday;
     }
+
 }
