@@ -56,6 +56,39 @@ export class TTrackAddress {
     public city: string;
     public note: string;
     public isActive: boolean;
+
+    public static deserialize(serAddress: any): TTrackAddress {
+        var address = new TTrackAddress();
+        if (serAddress === undefined) 
+            return address;
+        address.id = serAddress['id'];
+        address.street = serAddress['street'];
+        address.streetNumber = serAddress['streetNumber'];
+        address.doorNumber = serAddress['doorNumber'];
+        address.zipCode = serAddress['zipCode'];
+        address.city = serAddress['city'];
+        address.note = serAddress['note'];
+        address.isActive = serAddress['isActive'];
+        return address;        
+    }
+
+    public static serialize(address: TTrackAddress): any {
+        var serAddress = {};
+        serAddress['id'] = address.id;
+        serAddress['street'] = address.street;
+        serAddress['streetNumber'] = address.streetNumber;
+        serAddress['doorNumber'] = address.doorNumber;
+        serAddress['zipCode'] = address.zipCode;
+        serAddress['city'] = address.city;
+        serAddress['note'] = address.note;
+        serAddress['isActive'] = address.isActive;
+        return serAddress;
+    }
+
+    public toString(): string {
+        return this.street + ' ' + this.streetNumber +
+              ', ' + this.zipCode + ' ' + this.city;
+    }
 }
 
 export class TTrackRoute {

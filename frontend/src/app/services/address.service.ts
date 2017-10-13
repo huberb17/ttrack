@@ -13,6 +13,54 @@ class AddressServiceState {
     }
 }
 
+class AddressServiceSettings {
+    public defaultStartAddress: TTrackAddress;
+    public defaultEndAddress: TTrackAddress;
+    private storage: Storage;
+    private observers;
+
+    public constructor() {
+        this.observers = [];
+        this.defaultStartAddress = ADDR_ZIEGELFELD;
+        this.defaultEndAddress = ADDR_ZIEGELFELD;
+        this.storage = new Storage();
+        this.reloadSettings();
+    }
+
+    public registerCallback(callback): void {
+        this.observers.push(callback);
+    }
+
+    public reloadSettings() {
+        this.storage.get('addressServiceSettings').then((data) => {
+            if (data) {           
+                this.defaultStartAddress = TTrackAddress.deserialize(data['defaultStartAddress']);
+                this.defaultEndAddress = TTrackAddress.deserialize(data['defaultEndAddress']);                
+                this.notify();
+            }
+        }, (error) => {
+            console.log(error.err);
+        });
+    }
+    
+    public storeSettings() {
+        var serSettings = {};
+        serSettings['defaultStartAddress'] = this.defaultStartAddress;
+        serSettings['defaultEndAddress'] = this.defaultEndAddress;
+        this.storage.set('addressServiceSettings', serSettings).then((data) => {
+            this.notify();
+        }, (error) => {
+            console.log(error.err);
+        });
+    }
+
+    private notify() {
+        for (var observer of this.observers) {
+            observer(this.defaultStartAddress, this.defaultEndAddress);
+        }
+    }
+}
+
 @Injectable()
 export class AddressService {
     private addressList: TTrackAddress[];
@@ -20,6 +68,7 @@ export class AddressService {
     private state: AddressServiceState;
     private stateObservers;
     private addressObservers;
+    private settings: AddressServiceSettings;
 
     public constructor() {
         this.storage = new Storage();
@@ -27,9 +76,13 @@ export class AddressService {
         this.state = this.getStateFromStorage();
         this.stateObservers = [];
         this.addressObservers = [];
-
+        this.settings = new AddressServiceSettings();
     }
 
+    registSettingsCallback(callback): void {
+        this.settings.registerCallback(callback);
+    }
+    
     registerStateCallback(callback): void {
         this.stateObservers.push(callback);
 
@@ -61,8 +114,22 @@ export class AddressService {
         return null;
     }
 
-    getHomeAddress(): TTrackAddress {
-        return ADDR_ZIEGELFELD;
+    getDefaultStartAddress(): TTrackAddress {
+        return this.settings.defaultStartAddress;
+    }
+
+    setDefaultStartAddress(address: TTrackAddress): void {
+        this.settings.defaultStartAddress = address;
+        this.settings.storeSettings();
+    }
+
+    getDefaultEndAddress(): TTrackAddress {
+        return this.settings.defaultEndAddress;
+    }
+    
+    setDefaultEndAddress(address: TTrackAddress): void {
+        this.settings.defaultEndAddress = address;
+        this.settings.storeSettings();
     }
 
     deleteAddress(address: TTrackAddress): TTrackAddress[] {
@@ -108,15 +175,7 @@ export class AddressService {
     private storeAddresses() {
         var serAddrList = [];
         for (var addr of this.addressList) {
-            var serAddr = {};
-            serAddr['id'] = addr.id;
-            serAddr['street'] = addr.street;
-            serAddr['streetNumber'] = addr.streetNumber;
-            serAddr['doorNumber'] = addr.doorNumber;
-            serAddr['zipCode'] = addr.zipCode;
-            serAddr['city'] = addr.city;
-            serAddr['note'] = addr.note;
-            serAddr['isActive'] = addr.isActive;
+            var serAddr = TTrackAddress.serialize(addr);
             serAddrList.push(serAddr);
         }
         this.storage.set('addresses', serAddrList).then((data) => {
@@ -198,4 +257,5 @@ export class AddressService {
             }
         }
     }
+
 }

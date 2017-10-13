@@ -47,7 +47,10 @@ export class WorkDayPage implements OnInit {
     this.customerList = [];
     this.observeAddressChange = this.observeAddressChange.bind(this);
     this.addressService.registerAddressCallback(this.observeAddressChange);
-    
+
+    this.observeSettingsChange = this.observeSettingsChange.bind(this);
+    this.addressService.registSettingsCallback(this.observeSettingsChange);    
+
     this.observeCustomerChange = this.observeCustomerChange.bind(this);
     this.customerService.registerCustomerCallback(this.observeCustomerChange);    
 
@@ -58,22 +61,22 @@ export class WorkDayPage implements OnInit {
 
   ngOnInit(): void {
     this.therapyDate = new Date().toISOString();
-    this.startAddress = this.addressService.getHomeAddress();
-    this.endAddress = this.addressService.getHomeAddress();
+    this.startAddress = this.addressService.getDefaultStartAddress();
+    this.endAddress = this.addressService.getDefaultEndAddress();
     this.lastRoute = new TTrackRoute();
   }
 
   createWorkDay(): void {
     this.customersOfDay = [];
-    this.startAddress = this.addressService.getHomeAddress();
-    this.endAddress = this.addressService.getHomeAddress();
+    this.startAddress = this.addressService.getDefaultStartAddress();
+    this.endAddress = this.addressService.getDefaultEndAddress();
     this.isCreated = true;
     this.isDayEmpty = true;
     this.isDaySaved = true;
   }
 
   getStartAddress(): string {
-    return this.getAddressString(this.startAddress);
+    return this.startAddress.toString();
   }
 
   changeStartAddress(): void {
@@ -90,7 +93,7 @@ export class WorkDayPage implements OnInit {
   }
 
    getEndAddress(): string {
-    return this.getAddressString(this.endAddress);
+    return this.endAddress.toString();
   }
 
   changeEndAddress(): void {
@@ -126,8 +129,8 @@ export class WorkDayPage implements OnInit {
         route.start = startAdress;
         route.end = newCustomer.address;
         newCustomer.routeToCustomer = route;
-        this.distanceService.getDistance(this.getAddressString(newCustomer.routeToCustomer.start),
-          this.getAddressString(newCustomer.routeToCustomer.end))
+        this.distanceService.getDistance(newCustomer.routeToCustomer.start.toString(),
+          newCustomer.routeToCustomer.end.toString())
           .then(response => {
             if (typeof response !== 'undefined') {
               newCustomer.routeToCustomer.lengthInKm = response.value / 1000;
@@ -144,8 +147,7 @@ export class WorkDayPage implements OnInit {
         this.lastRoute.start = newCustomer.address;
         console.log('Route to End (end): ' + this.endAddress.street)
         this.lastRoute.end = this.endAddress;
-        this.distanceService.getDistance(this.getAddressString(this.lastRoute.start),
-          this.getAddressString(this.lastRoute.end))
+        this.distanceService.getDistance(this.lastRoute.start.toString(), this.lastRoute.end.toString())
           .then(response => {
             if (typeof response !== 'undefined') {
               this.lastRoute.lengthInKm = response.value / 1000;
@@ -183,11 +185,6 @@ export class WorkDayPage implements OnInit {
       }
     })
     modal.present();
-  }
-
-  private getAddressString(address: TTrackAddress): string {
-    return address.street + ' ' + address.streetNumber +
-      ',' + address.zipCode + ' ' + address.city;
   }
 
   saveWorkday(): void {
@@ -297,22 +294,29 @@ export class WorkDayPage implements OnInit {
       this.isDayEmpty = true;
     }
     if (workday.startAddress === undefined) {
-      this.startAddress = this.addressService.getHomeAddress();
+      this.startAddress = this.addressService.getDefaultStartAddress();
     }
     else if (workday.startAddress.street === undefined) {
-      this.startAddress = this.addressService.getHomeAddress();
+      this.startAddress = this.addressService.getDefaultStartAddress();
     }
     else {
       this.startAddress = workday.startAddress;
     }
     if (workday.endAddress === undefined) {
-      this.endAddress = this.addressService.getHomeAddress();
+      this.endAddress = this.addressService.getDefaultEndAddress();
     }
     else if (workday.endAddress.street === undefined) {
-      this.endAddress = this.addressService.getHomeAddress();
+      this.endAddress = this.addressService.getDefaultEndAddress();
     }
     else {
       this.endAddress = workday.endAddress;
     }
   }
+
+  private observeSettingsChange(defaultStartAddress: TTrackAddress,
+    defaultEndAddress: TTrackAddress): void {
+    this.startAddress = defaultStartAddress;
+    this.endAddress = defaultEndAddress;
+  }
+
 }

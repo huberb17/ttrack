@@ -235,18 +235,7 @@ export class WorkdayService {
                 observer();
             }
         }
-    }
-
-    private serializeAddress(address: TTrackAddress): any {
-        var serAddress = {};
-        serAddress['street'] = address.street;
-        serAddress['streetNumber'] = address.streetNumber;
-        serAddress['doorNumber'] = address.doorNumber;
-        serAddress['zipCode'] = address.zipCode;
-        serAddress['city'] = address.city;
-        serAddress['note'] = address.note;
-        return serAddress;
-    }
+    }  
 
     private serializeRoute(route: TTrackRoute): any {
         var serRoute = {};
@@ -263,7 +252,7 @@ export class WorkdayService {
         serCustomer['firstName'] = customer.firstName;
         serCustomer['lastName'] = customer.lastName;
         serCustomer['active'] = customer.isActive;
-        serCustomer['address'] = this.serializeAddress(customer.address);
+        serCustomer['address'] = TTrackAddress.serialize(customer.address);
         serCustomer['route'] = this.serializeRoute(customer.routeToCustomer);
         return serCustomer;
     }
@@ -279,23 +268,10 @@ export class WorkdayService {
             serCustList.push(serCust);
         }
         serWorkday['customers'] = serCustList;
-        serWorkday['startAddress'] = this.serializeAddress(workday.startAddress);
-        serWorkday['endAddress'] = this.serializeAddress(workday.endAddress);
+        serWorkday['startAddress'] = TTrackAddress.serialize(workday.startAddress);
+        serWorkday['endAddress'] = TTrackAddress.serialize(workday.endAddress);
         serWorkday['isUploaded'] = workday.isUploaded;
         return serWorkday;
-    }
-
-    private deserializeAddress(serAddress: any): TTrackAddress {
-        var address = new TTrackAddress();
-        if (serAddress === undefined) 
-            return address;
-        address.street = serAddress['street'];
-        address.streetNumber = serAddress['streetNumber'];
-        address.doorNumber = serAddress['doorNumber'];
-        address.zipCode = serAddress['zipCode'];
-        address.city = serAddress['city'];
-        address.note = serAddress['note'];
-        return address;
     }
 
     private deserializeRoute(serRoute: any): TTrackRoute {
@@ -317,7 +293,7 @@ export class WorkdayService {
         customer.firstName = serCustomer['firstName'];
         customer.lastName = serCustomer['lastName'];
         var serAddress = serCustomer['address']
-        customer.address = this.deserializeAddress(serAddress);
+        customer.address = TTrackAddress.deserialize(serAddress);
         var serRoute = serCustomer['route'];
         customer.routeToCustomer = this.deserializeRoute(serRoute);
         return customer;
@@ -336,8 +312,8 @@ export class WorkdayService {
             var customer = this.deserializeCustomer(serCust);
             workday.customersOfDay.push(customer);
         }
-        workday.startAddress = this.deserializeAddress(serWorkday['startAddress']);
-        workday.endAddress = this.deserializeAddress(serWorkday['endAddress']);
+        workday.startAddress = TTrackAddress.deserialize(serWorkday['startAddress']);
+        workday.endAddress = TTrackAddress.deserialize(serWorkday['endAddress']);
         workday.isUploaded = serWorkday['isUploaded'];
         return workday;
     }
