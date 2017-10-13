@@ -1,14 +1,15 @@
 import { Component } from '@angular/core';
 
 import { NavController } from 'ionic-angular';
-import { Workday, WorkdayService } from '../../app/services/workday.service'
+import { WorkdayService } from '../../app/services/workday.service'
+import { CustomerAtWorkday }  from '../../app/domain-model/domain-model'
 
 @Component({
   selector: 'page-history',
   templateUrl: 'history.html'
 })
 export class HistoryListPage {
-  workdayHistory: Workday[];
+  workdayHistory: CustomerAtWorkday[];
   constructor(public navCtrl: NavController,
               private wdService: WorkdayService) {
 
@@ -18,7 +19,7 @@ export class HistoryListPage {
     this.wdService.reloadHistory();
   }
 
-  private observeHistoryChange(history: Workday[]): void {
+  private observeHistoryChange(history: CustomerAtWorkday[]): void {
     console.log(history);
     this.workdayHistory = history;
   }

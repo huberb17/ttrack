@@ -157,6 +157,7 @@ export class WorkdayService {
             if (data) {
                 for (var serWorkday of data) {
                     var workday = this.deserializeWorkday(serWorkday);                   
+                    console.log(workday);
                     workdayList.push(workday);
                 }
             }
