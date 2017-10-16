@@ -105,6 +105,18 @@ export class WorkdayService {
         workday.isUploaded = true;
         this.updateHistory(workday);
     }
+
+    public removeArchived(): void {
+        var newHistory: Workday[] = [];
+        for (var workday of this.workdayHistory) {
+            if (!workday.isUploaded) {
+                newHistory.push(workday);
+            }
+        }
+        this.workdayHistory = newHistory;
+        this.storeWorkdayHistory();
+    }
+
     markUploadCompleted(): void {
         if (this.state.needsUpload) {
             this.state.needsUpload = false;

@@ -2,14 +2,13 @@ import { Component } from '@angular/core';
 
 import { NavController } from 'ionic-angular';
 import { WorkdayService, Workday } from '../../app/services/workday.service'
-import { CustomerAtWorkday }  from '../../app/domain-model/domain-model'
 
 @Component({
   selector: 'page-history',
   templateUrl: 'history.html'
 })
 export class HistoryListPage {
-  workdayHistory: CustomerAtWorkday[];
+  workdayHistory: Workday[];
   constructor(public navCtrl: NavController,
               private wdService: WorkdayService) {
 
@@ -19,11 +18,11 @@ export class HistoryListPage {
     this.wdService.reloadHistory();
   }
 
-  printDate(workday: Workday): string {
+  public printDate(workday: Workday): string {
     return new Date(workday.therapyDate).toLocaleDateString();
   }
 
-  printCustomers(workday: Workday): string {
+  public printCustomers(workday: Workday): string {
     var custList: string = "";
     for (var cust of workday.customersOfDay) {
       custList += cust.firstName + ' ' + cust.lastName +  ", ";
@@ -34,12 +33,41 @@ export class HistoryListPage {
     return custList;
   }
 
-  uploadWorkday(workday: Workday): void {
+  public uploadNeeded(): number {
+    var uploadNeeded = 0;
+    for (var workday of this.workdayHistory) {
+      if (!workday.isUploaded) {
+        uploadNeeded++;
+      }
+    }
+    return uploadNeeded;
+  }
+
+  public foundArchived(): number {
+    var archived = 0;
+    for (var workday of this.workdayHistory) {
+      if (workday.isUploaded) {
+        archived++;
+      }
+    }
+    return archived;
+  }
+
+  public uploadWorkday(workday: Workday): void {
     this.wdService.uploadWorkday(workday);
   }
 
-  private observeHistoryChange(history: CustomerAtWorkday[]): void {
-    console.log(history);
+  public uploadAllWorkdays(): void {
+    for (var workday of this.workdayHistory) {
+      this.wdService.uploadWorkday(workday);
+    }
+  }
+
+  public removeArchivedFromHistory(): void {
+    this.wdService.removeArchived();
+  }
+
+  private observeHistoryChange(history: Workday[]): void {
     this.workdayHistory = history;
   }
 

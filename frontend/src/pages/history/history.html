@@ -8,6 +8,16 @@
 
 <ion-content>
   <ion-list>
+    <ion-item *ngIf="uploadNeeded() > 0">
+      <button ion-button block (click)="uploadAllWorkdays()">
+        {{uploadNeeded()}} Arbeitstag(e) hochladen         
+      </button>
+    </ion-item>
+    <ion-item *ngIf="foundArchived() > 0">
+        <button ion-button block (click)="removeArchivedFromHistory()">
+          Archivierte Arbeitstage entfernen         
+        </button>
+      </ion-item>
     <ion-item *ngFor="let workday of workdayHistory">     
       {{printDate(workday)}}
       <div text-wrap>
