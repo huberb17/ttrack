@@ -8,9 +8,11 @@
 
 <ion-content>
   <ion-list>
-    <ion-item text-wrap *ngFor="let workday of workdayHistory">     
+    <ion-item *ngFor="let workday of workdayHistory">     
       {{printDate(workday)}}
-      <p>{{printCustomers(workday)}}</p>
+      <div text-wrap>
+        <p>{{printCustomers(workday)}}</p>
+      </div>
       <button *ngIf="!workday.isUploaded" ion-button item-right clear icon-only (click)="uploadWorkday(workday)">
         <ion-icon name="cloud-upload"></ion-icon>  
       </button>

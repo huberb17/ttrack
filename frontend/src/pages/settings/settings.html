@@ -8,7 +8,7 @@
 
 <ion-content>
   <ion-list>
-    <ion-list-header>Globale Einstellungen</ion-list-header>
+    <ion-list-header>Allgemeine Einstellungen</ion-list-header>
     <ion-item>
       <h2>Default Start-Adresse</h2>
       <p>{{defaultStartAddress.toString()}}</p>
@@ -23,6 +23,7 @@
             <ion-icon name="create"></ion-icon>  
         </button>
     </ion-item>
+    <ion-list-header>Datensynchronisation</ion-list-header>
     <ion-item>
       <button ion-button [disabled]="needsSync ? null : true" (click)="doSync()" block>Synchronisieren</button>
     </ion-item>

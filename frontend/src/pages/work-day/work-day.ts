@@ -57,6 +57,8 @@ export class WorkDayPage implements OnInit {
     this.observeWorkdayChange = this.observeWorkdayChange.bind(this);
     this.workdayService.registerWorkdayCallback(this.observeWorkdayChange);
     this.workdayService.reloadWorkday();
+
+    this.distanceCallback = this.distanceCallback.bind(this);
   }
 
   ngOnInit(): void {
@@ -86,7 +88,12 @@ export class WorkDayPage implements OnInit {
       if (data)
       {
         this.startAddress = data.address;
+        if (this.customersOfDay.length > 0) {
+          this.customersOfDay[0].routeToCustomer.start = this.startAddress;
+          this.distanceService.calculateRoute(this.customersOfDay[0].routeToCustomer, this.distanceCallback, 0);
+        }
         this.isDaySaved = false;
+
       }
     })
     modal.present();
@@ -103,6 +110,10 @@ export class WorkDayPage implements OnInit {
       if (data)
       {
         this.endAddress = data.address;
+        if (this.customersOfDay.length > 0) {
+          this.lastRoute.end = this.endAddress;
+          this.distanceService.calculateRoute(this.lastRoute, this.distanceCallback, this.customersOfDay.length);
+        }
         this.isDaySaved = false;
       }
     })
@@ -115,51 +126,22 @@ export class WorkDayPage implements OnInit {
     modal.onDidDismiss(data => {
       if (data)
       {
-        console.log('this.customersOfDay.length: ' + this.customersOfDay.length)
-        let lastCustomer = this.customersOfDay.length;
-        console.log('this.startAdress: '+ this.startAddress);
-        let startAdress = this.startAddress;
-        if (lastCustomer != 0) {
-          // this is not the first customer -> use the customers startAdress
-          // for calculating the route
-          startAdress = this.customersOfDay[lastCustomer-1].address;
-        }
         let newCustomer = new CustomerAtWorkday(<TTrackCustomer> data);
-        let route = new TTrackRoute();
-        route.start = startAdress;
-        route.end = newCustomer.address;
-        newCustomer.routeToCustomer = route;
-        this.distanceService.getDistance(newCustomer.routeToCustomer.start.toString(),
-          newCustomer.routeToCustomer.end.toString())
-          .then(response => {
-            if (typeof response !== 'undefined') {
-              newCustomer.routeToCustomer.lengthInKm = response.value / 1000;
-            }
-            else {
-              newCustomer.routeToCustomer.lengthInKm = 0;
-            }
-            this.customersOfDay.push(newCustomer);
-            this.isDayEmpty = false;
-            this.isDaySaved = false;
-          });
-        // TODO: this does not work -> why?
-        console.log('Route to End (start): ' + newCustomer.address.street)
+        newCustomer.routeToCustomer = new TTrackRoute();
+        newCustomer.routeToCustomer.end = newCustomer.address;
+        this.customersOfDay.push(newCustomer);
+        if (this.customersOfDay.length == 1) { // this is the first customer
+          newCustomer.routeToCustomer.start = this.startAddress;
+        }
+        else {
+          newCustomer.routeToCustomer.start = this.customersOfDay[this.customersOfDay.length - 2].address;
+        }
+        this.distanceService.calculateRoute(newCustomer.routeToCustomer, this.distanceCallback, this.customersOfDay.length-1);
         this.lastRoute.start = newCustomer.address;
-        console.log('Route to End (end): ' + this.endAddress.street)
         this.lastRoute.end = this.endAddress;
-        this.distanceService.getDistance(this.lastRoute.start.toString(), this.lastRoute.end.toString())
-          .then(response => {
-            if (typeof response !== 'undefined') {
-              this.lastRoute.lengthInKm = response.value / 1000;
-              console.log('Route to End (distance): ' + this.lastRoute.lengthInKm)
-            }
-            else {
-              this.lastRoute.lengthInKm = 0;
-            }
-          }).catch(error => {
-            console.log(error);
-          }
-        )
+        this.distanceService.calculateRoute(this.lastRoute, this.distanceCallback, this.customersOfDay.length);
+        this.isDayEmpty = false;
+        this.isDaySaved = false;     
       }
     });
     modal.present();
@@ -169,21 +151,45 @@ export class WorkDayPage implements OnInit {
     this.customersOfDay.splice(idx, 1);
     if (this.customersOfDay.length == 0) {
       this.isDayEmpty = true;
+      this.lastRoute.lengthInKm = 0;
+    }
+    else {
+      if (idx == 0) {
+        this.customersOfDay[idx].routeToCustomer.start = this.startAddress;
+        this.distanceService.calculateRoute(this.customersOfDay[idx].routeToCustomer, this.distanceCallback, idx);
+      }
+      else if (idx == this.customersOfDay.length) {
+        this.lastRoute.start = this.customersOfDay[idx-1].address;
+        this.distanceService.calculateRoute(this.lastRoute, this.distanceCallback, idx);
+      }
+      else {
+        this.customersOfDay[idx].routeToCustomer.start = this.customersOfDay[idx-1].address;
+        this.distanceService.calculateRoute(this.customersOfDay[idx].routeToCustomer, this.distanceCallback, idx);
+      }
+
     }
   }
 
   changeCustomerAddress(idx: number): void {
-    // TODO change also rooute of customer!
     let modal = this.modalCtrl.create(ChangeAddressModalPage, 
                   { addresses: this.addressList });
     modal.onDidDismiss(data => {
       if (data)
       {
         this.customersOfDay[idx].address = data.address;
-        this.isDaySaved = false;
-        console.log(this.customersOfDay[idx].address);
+        this.customersOfDay[idx].routeToCustomer.end = data.address;
+        this.distanceService.calculateRoute(this.customersOfDay[idx].routeToCustomer, this.distanceCallback, idx);
+        if (idx == this.customersOfDay.length - 1) {
+          this.lastRoute.start = data.address;
+          this.distanceService.calculateRoute(this.lastRoute, this.distanceCallback, this.customersOfDay.length);
+        }
+        else {
+          this.customersOfDay[idx+1].routeToCustomer.start = data.address;
+          this.distanceService.calculateRoute(this.customersOfDay[idx+1].routeToCustomer, this.distanceCallback, idx+1);
+        }
+        this.isDaySaved = false;        
       }
-    })
+    });
     modal.present();
   }
 
@@ -317,6 +323,16 @@ export class WorkDayPage implements OnInit {
     defaultEndAddress: TTrackAddress): void {
     this.startAddress = defaultStartAddress;
     this.endAddress = defaultEndAddress;
+  }
+
+  private distanceCallback(idx: number, distance: number): void {
+    var distanceInKm = Math.round(distance / 10) / 100;
+    if (idx == this.customersOfDay.length) {
+      this.lastRoute.lengthInKm = distanceInKm;
+    }
+    else {
+      this.customersOfDay[idx].routeToCustomer.lengthInKm = distanceInKm;
+    }
   }
 
 }

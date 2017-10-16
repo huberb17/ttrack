@@ -13,9 +13,10 @@ export class TTrackCustomer {
 }
 
 export class CustomerAtWorkday extends TTrackCustomer {
-    public routeToCustomer: TTrackRoute = null;
+    public routeToCustomer: TTrackRoute;
     constructor(customer: TTrackCustomer) {
         super();
+        this.id = customer.id;
         this.title = customer.title;
         this.firstName = customer.firstName;
         this.lastName = customer.lastName;
