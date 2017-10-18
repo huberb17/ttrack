@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { Storage } from '@ionic/storage';
 import { TTrackAddress } from '../domain-model/domain-model';
 import { ADDR_ZIEGELFELD } from '../domain-model/mock-addresses';
+import { GdriveService } from "../../app/services/gdrive.service";
 
 class AddressServiceState {
     public needsUpload: boolean;
@@ -70,7 +71,7 @@ export class AddressService {
     private addressObservers;
     private settings: AddressServiceSettings;
 
-    public constructor() {
+    public constructor(private gdriveService: GdriveService) {
         this.storage = new Storage();
         this.refreshAddressList(); 
         this.state = this.getStateFromStorage();
@@ -137,6 +138,7 @@ export class AddressService {
         for (var item of this.addressList) {
             if (item.id == address.id) {
                 this.addressList.splice(idx, 1);
+                this.gdriveService.addToChangeHistory("address", "delete", { 'id': address.id });
                 this.storeAddresses();
                 break;
             }
@@ -150,6 +152,7 @@ export class AddressService {
             address.id = this.newGuid();
         }
         this.addressList.push(address);
+        this.gdriveService.addToChangeHistory("address", "create", TTrackAddress.serialize(address));
         this.storeAddresses();
     }
 
@@ -158,6 +161,7 @@ export class AddressService {
         for  (var item of this.addressList) {
             if (item.id == id) {
                 this.addressList[idx] = address;
+                this.gdriveService.addToChangeHistory("address", "update", TTrackAddress.serialize(address));
                 this.storeAddresses();
                 return;
             }
@@ -196,15 +200,7 @@ export class AddressService {
         this.storage.get('addresses').then((data) => {
             if (data) {           
                 for (var serAddr of data) {
-                    var addr = new TTrackAddress();
-                    addr.id = serAddr['id'];
-                    addr.street = serAddr['street'];
-                    addr.streetNumber = serAddr['streetNumber'];
-                    addr.doorNumber = serAddr['doorNumber'];
-                    addr.zipCode = serAddr['zipCode'];
-                    addr.city = serAddr['city'];
-                    addr.note = serAddr['note'];
-                    addr.isActive = serAddr['isActive'];
+                    var addr = TTrackAddress.deserialize(serAddr);
                     addrList.push(addr);
                 }
             }

@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { Storage } from '@ionic/storage';
 import { TTrackCustomer, TTrackAddress } from '../domain-model/domain-model';
 import { AddressService } from "../../app/services/address.service";
+import { GdriveService } from "../../app/services/gdrive.service";
 
 class CustomerServiceState {
     public needsUpload: boolean;
@@ -22,7 +23,8 @@ export class CustomerService {
     private customerObservers;
     private state: CustomerServiceState;
     
-    public constructor(private addrService: AddressService) {
+    public constructor(private addrService: AddressService,
+        private gdriveService: GdriveService) {
         this.customerList = [];
         this.storage = new Storage();
         this.refreshCustomerList(); 
@@ -61,20 +63,30 @@ export class CustomerService {
         for (var item of this.customerList) {
             if (item.id == customer.id) {
                 this.customerList.splice(idx, 1);
+                this.gdriveService.addToChangeHistory("customer", "delete", {'id': customer.id});
                 this.storeCustomers();
             }
-        }      
+        }
         return this.customerList;
     }
 
     toggleCustomer(customer: TTrackCustomer) {
-        if (customer.isActive) {
-            customer.isActive = false;
+        var idx = 0;
+        for (var item of this.customerList) {
+            if (item.id == customer.id) {
+                if (customer.isActive) {
+                    customer.isActive = false;
+                }
+                else {
+                    customer.isActive = true;
+                }
+                this.customerList[idx] = customer;
+                this.storeCustomers();
+                this.gdriveService.addToChangeHistory("customer", "update", TTrackCustomer.serialize(customer));
+                return;
+            }
+            idx++;
         }
-        else {
-            customer.isActive = true;
-        }
-        this.storeCustomers();
     }
 
     addCustomer(customer: TTrackCustomer) {
@@ -82,6 +94,7 @@ export class CustomerService {
             customer.id = this.newGuid();
         }
         this.customerList.push(customer);
+        this.gdriveService.addToChangeHistory("customer", "create", TTrackCustomer.serialize(customer));
         this.storeCustomers();
     }
 
@@ -91,6 +104,7 @@ export class CustomerService {
             if (item.id == id) {
                 this.customerList[idx] = customer;
                 this.storeCustomers();
+                this.gdriveService.addToChangeHistory("customer", "update", TTrackCustomer.serialize(customer));
                 return;
             }
             idx++;
@@ -107,13 +121,7 @@ export class CustomerService {
     private storeCustomers() {
         var serCustList = [];
         for (var cust of this.customerList) {
-            var serCust = {};
-            serCust['id'] = cust.id;
-            serCust['title'] = cust.title;
-            serCust['firstName'] = cust.firstName;
-            serCust['lastName'] = cust.lastName;
-            serCust['active'] = cust.isActive;
-            serCust['address'] = cust.address.id;
+            var serCust = TTrackCustomer.serialize(cust);
             serCustList.push(serCust);
         }
         this.storage.set('customers', serCustList).then((data) => {
@@ -135,15 +143,8 @@ export class CustomerService {
             if (data) {
                 addrList = this.addrService.getAddresses();
                 for (var serCust of data) {
-                    var cust = new TTrackCustomer();
-                    cust.id = serCust['id'];
-                    cust.title = serCust['title'];
-                    cust.firstName = serCust['firstName'];
-                    cust.lastName = serCust['lastName'];
-                    cust.isActive = serCust['active'];
+                    var cust = TTrackCustomer.deserialize(serCust);
                     if (cust.isActive == undefined) cust.isActive = true;
-                    cust.address = new TTrackAddress();
-                    cust.address.id = serCust['address'];
                     if (addrList) {
                         for (var address of addrList) {
                             if (address.id == cust.address.id) {

@@ -10,6 +10,29 @@ export class TTrackCustomer {
     public address: TTrackAddress;
     public prescriptions: TTrackPrescription[];
     public isActive: boolean;
+
+    public static serialize(customer: TTrackCustomer): any {
+        var serCustomer = {};
+        serCustomer['id'] = customer.id;
+        serCustomer['title'] = customer.title;
+        serCustomer['firstName'] = customer.firstName;
+        serCustomer['lastName'] = customer.lastName;
+        serCustomer['address'] = customer.address.id;
+        serCustomer['isActive'] = customer.isActive;
+        return serCustomer;
+    }
+
+    public static deserialize(serCustomer: any): TTrackCustomer {
+        var customer = new TTrackCustomer();
+        customer.id = serCustomer['id'];
+        customer.title = serCustomer['title'];
+        customer.firstName = serCustomer['firstName'];
+        customer.lastName = serCustomer['lastName'];
+        customer.address = new TTrackAddress();
+        customer.address.id = serCustomer['address'];
+        customer.isActive = serCustomer['isActive'];
+        return customer;
+    }
 }
 
 export class CustomerAtWorkday extends TTrackCustomer {

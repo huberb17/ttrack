@@ -4,6 +4,7 @@ import { NavController, AlertController, ModalController } from 'ionic-angular';
 import { TTrackCustomer, TTrackAddress } from "../../app/domain-model/domain-model";
 import { AddressService } from "../../app/services/address.service";
 import { CustomerService } from "../../app/services/customer.service";
+import { GdriveService } from "../../app/services/gdrive.service";
 import { CreateOrChangeCustomerModalPage } from "./modals/create-change-customer-modal";
 import { CreateOrChangeAddressModalPage } from "./modals/create-change-address-modal";
 
@@ -17,12 +18,14 @@ export class CustomerListPage {
   public visibleCustomers: TTrackCustomer[];
   public addresses: TTrackAddress[];
   public showInactive: boolean;
-
+  public isHistoryEmpty: boolean;
+  
   constructor(public navCtrl: NavController,
               public alertCtrl: AlertController,
               public modalCtrl: ModalController,
               private custService: CustomerService,
-              private addrService: AddressService) {
+              private addrService: AddressService,
+              private gdriveService: GdriveService) {
   
     this.customerData = "customers";
     this.showInactive = false;
@@ -36,6 +39,14 @@ export class CustomerListPage {
     this.observeCustomerChange = this.observeCustomerChange.bind(this);
     this.custService.registerCustomerCallback(this.observeCustomerChange);
     this.custService.reloadCustomers();
+
+    //this.observeChangeHistoryChange = this.observeChangeHistoryChange.bind(this);
+    this.gdriveService.registerUploadCallback(this.observeChangeHistoryChange);    
+    this.gdriveService.reloadChangeHistory();
+  }
+
+  public doSync(): void {
+    this.gdriveService.uploadChangeHistory();
   }
 
   reloadCustomerList(): void {
@@ -51,7 +62,7 @@ export class CustomerListPage {
         {
           text: 'Löschen',
           handler: () => {
-            this.customers = this.custService.deleteCustomer(this.customers[idx]);
+            this.custService.deleteCustomer(this.visibleCustomers[idx]);
           }
         },
         {
@@ -66,15 +77,12 @@ export class CustomerListPage {
   }
 
   changeCustomer(idx: number): void {
-    console.log('pressed customer edit with idx '  + idx);
     let modal = this.modalCtrl.create(CreateOrChangeCustomerModalPage, 
-                  { customer: this.customers[idx] });
+                  { customer: this.visibleCustomers[idx] });
     modal.onDidDismiss(data => {
       if (data)
       {
-        console.log(data);
         this.custService.updateCustomer(data['customer'], data['customer'].id);
-        this.customers = this.custService.getCustomers();
       }
     })
     modal.present();
@@ -87,25 +95,22 @@ export class CustomerListPage {
       if (data)
       {
         this.custService.addCustomer(data['customer']);
-        this.customers = this.custService.getCustomers();
       }
     })
     modal.present();
   }
 
-  toggleCustomer(idx: number): void {
-    this.custService.toggleCustomer(this.customers[idx]);
+  toggleCustomer(customer: TTrackCustomer): void {
+    this.custService.toggleCustomer(customer);
   }
 
   changeAddress(idx: number): void {
-    console.log('pressed address edit with idx '  + idx);
     var id = this.addresses[idx].id;
     let modal = this.modalCtrl.create(CreateOrChangeAddressModalPage, 
                   { address: this.addresses[idx] });
     modal.onDidDismiss(data => {
       if (data)
       {
-        console.log('edit address with idx '  + idx);
         this.addrService.updateAddress(data['address'], id);
         this.addresses = this.addrService.getAddresses();
       }
@@ -150,14 +155,11 @@ export class CustomerListPage {
 
   private observeAddressChange(addressList: TTrackAddress[]): void {
     this.addresses = addressList;
-    console.log('callback observeAddressChange called');
   }
 
   private observeCustomerChange(customerList: TTrackCustomer[]): void {
     this.customers = customerList;
     this.visibleCustomers = [];
-    console.log('callback observeCustomerChange called');
-    console.log(this.customers);
     for (var cust of this.customers) {
       if (this.showInactive) {
         this.visibleCustomers.push(cust);
@@ -166,5 +168,10 @@ export class CustomerListPage {
         if (cust.isActive) this.visibleCustomers.push(cust);
       }
     }
+  }
+
+  private observeChangeHistoryChange = (isHistoryEmpty: boolean) => {
+    console.log('observed gdrive change: %s', isHistoryEmpty);
+    this.isHistoryEmpty = isHistoryEmpty;
   }
 }

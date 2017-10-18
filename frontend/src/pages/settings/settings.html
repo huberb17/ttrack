@@ -25,7 +25,13 @@
     </ion-item>
     <ion-list-header>Datensynchronisation</ion-list-header>
     <ion-item>
-      <button ion-button [disabled]="needsSync ? null : true" (click)="doSync()" block>Synchronisieren</button>
+      <button ion-button (click)="syncCustomers()" block>Alle Kundendaten hochladen</button>
     </ion-item>
+    <ion-item>
+        <button ion-button (click)="syncAddresses()" block>Alle Adressdaten hochladen</button>
+    </ion-item>
+    <ion-item>
+        <button ion-button (click)="syncWorkdayHistory()" block>Alle Arbeitstage hochladen</button>
+      </ion-item>
   </ion-list>
 </ion-content>

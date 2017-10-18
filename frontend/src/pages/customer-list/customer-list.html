@@ -13,7 +13,14 @@
 </ion-header>
 
 <ion-content padding>
-  <div>
+  <ion-list>
+    <ion-item>
+        <button ion-button block [disabled]="isHistoryEmpty" (click)="doSync()">
+            Kundendaten synchronisieren
+        </button>
+    </ion-item>
+  </ion-list
+  ><div>
   <ion-segment [(ngModel)]="customerData">
     <ion-segment-button value="customers">
       Kundenliste
@@ -39,7 +46,7 @@
             <button ion-button item-right icon-only color="secondary" clear (click)="changeCustomer(i)">
               <ion-icon name="create"></ion-icon>  
             </button>
-            <button ion-button item-right icon-only collor="light" clear (click)="toggleCustomer(i)">
+            <button ion-button item-right icon-only collor="light" clear (click)="toggleCustomer(customer)">
               <ion-icon name="eye" *ngIf="customer.isActive == true"></ion-icon>
               <ion-icon name="eye-off" *ngIf="customer.isActive == false"></ion-icon>
             </button>
