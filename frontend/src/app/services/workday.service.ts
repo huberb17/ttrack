@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Storage } from '@ionic/storage';
 import { CustomerAtWorkday, TTrackCustomer, TTrackAddress, TTrackRoute } from '../domain-model/domain-model';
+import { GdriveService } from './gdrive.service';
 
 class WorkdayServiceState {
     public needsUpload: boolean;
@@ -46,7 +47,7 @@ export class WorkdayService {
     private workdayHistoryObservers;
     private state: WorkdayServiceState;
     
-    public constructor() {
+    public constructor(private gdriveService: GdriveService) {
         this.workday = new Workday();
         this.workdayHistory = [];
         this.storage = new Storage();
@@ -54,6 +55,8 @@ export class WorkdayService {
         this.workdayObservers = [];
         this.workdayHistoryObservers = [];
         this.state = this.getStateFromStorage();    
+        this.observeWorkdayUpload = this.observeWorkdayUpload.bind(this);
+        this.gdriveService.registerUploadWorkdayCallback(this.observeWorkdayUpload);
     }
 
     registerStateCallback(callback): void {
@@ -101,9 +104,13 @@ export class WorkdayService {
     }
 
     uploadWorkday(workday: Workday) {
-        // todo add gdrive upload
-        workday.isUploaded = true;
+        this.gdriveService.uploadWorkdays([workday]);
         this.updateHistory(workday);
+    }
+
+    uploadWorkdays(workdays: Workday[]) {
+        this.gdriveService.uploadWorkdays(workdays);
+        this.updateHistoryWorkdays(workdays);
     }
 
     public removeArchived(): void {
@@ -138,6 +145,18 @@ export class WorkdayService {
             }
         }
         console.log('workday ' + workday.id + ' not found');
+    }
+
+    private updateHistoryWorkdays(workdays: Workday[]): void {
+        for (let workday of workdays) {
+            for (var wd of this.workdayHistory) {
+                if (wd.id == workday.id) {
+                    wd = workday;
+                    break;
+                }
+            }
+        }
+        this.storeWorkdayHistory();
     }
 
     private storeWorkday(workday: Workday) {
@@ -247,7 +266,23 @@ export class WorkdayService {
                 observer();
             }
         }
-    }  
+    }
+
+    private observeWorkdayUpload(workdayIds: string[]): void {
+        console.log(workdayIds);
+        if (workdayIds) {
+          for (let workday of this.workdayHistory) {
+              for (let workdayId of workdayIds) {
+                  if (workday.id == workdayId) {
+                      workday.isUploaded = true;
+                      break;
+                  }
+              }
+          }
+          this.storeWorkdayHistory();
+          this.notifyWorkdayHistoryChange();
+        }
+      }
 
     private serializeRoute(route: TTrackRoute): any {
         var serRoute = {};

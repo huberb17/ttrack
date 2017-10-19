@@ -63,20 +63,29 @@ export class GdriveService {
     private changeHistory: ChangeHistoryItem[];
     private storage: Storage;
     private observers;
+    private workdayUploadObservers;
+    private pendingWorkdayUploads;
 
     public constructor(private toastCtrl: ToastController,) {
         console.log('constructor called');
         this.loginToGoogle();
         this.uploadCallback = this.uploadCallback.bind(this);
         this.uploadChangeHistoryCallback = this.uploadChangeHistoryCallback.bind(this);
+        this.uploadWorkdayCallback = this.uploadWorkdayCallback.bind(this);
         this.changeHistory = [];
         this.storage = new Storage();
         this.observers = [];
+        this.workdayUploadObservers = [];
+        this.pendingWorkdayUploads = [];
         this.refreshChangeHistory();
     }
 
     public registerUploadCallback(callback): void {
         this.observers.push(callback);
+    }
+
+    public registerUploadWorkdayCallback(callback): void {
+        this.workdayUploadObservers.push(callback);
     }
 
     public reloadChangeHistory(): void {
@@ -126,7 +135,16 @@ export class GdriveService {
         var jsonWorkdays = JSON.stringify(workdays);
         var workdayFileContent = this.encryptString(jsonWorkdays);
         var fileName = new Date().toISOString() + '_workdays.bin';
-        this.uploadFile(fileName, workdayFileContent, this.uploadCallback);
+        var workdaysToUpload = [];
+        for (let wd of workdays) {
+            workdaysToUpload.push(wd.id);
+        }
+        var pendingUpload = {};
+        pendingUpload['id'] = fileName;
+        pendingUpload['workdays'] = workdaysToUpload;
+        console.log(pendingUpload);
+        this.pendingWorkdayUploads.push(pendingUpload);        
+        this.uploadFile(fileName, workdayFileContent, this.uploadWorkdayCallback);
     }
     
     private loginToGoogle(): void {
@@ -290,6 +308,45 @@ export class GdriveService {
                 position: 'bottom'
               })
               toast.present();
+        }
+    }
+
+    private uploadWorkdayCallback(data: any): void {
+        if (data['error']) {
+            console.log('Error: %s', data['error'].message);
+            let toast = this.toastCtrl.create({
+                message: 'Übertragung fehlgeschlagen.' + data['error'].message,
+                duration: 2000,
+                position: 'bottom'
+              })
+              toast.present();
+        }
+        else {
+            let toast = this.toastCtrl.create({
+                message: 'Übertragung erfolgreich.',
+                duration: 1000,
+                position: 'bottom'
+              })
+              toast.present();
+              console.log(data);
+              this.notifyWorkdayUploadObservers(data['name']);
+        }
+    }
+
+    private notifyWorkdayUploadObservers(fileName: string): void {
+        let workdays;
+        let pendingUpload = this.pendingWorkdayUploads.find( (obj) => {
+            return (obj.id == fileName)
+        });
+        if (pendingUpload) {
+            workdays = pendingUpload['workdays'];
+            this.pendingWorkdayUploads = this.pendingWorkdayUploads.filter( (obj) => {
+                return (obj.id != fileName);
+            });
+        }
+        console.log(workdays);
+        for (let observer of this.workdayUploadObservers) {
+            observer(workdays);
         }
     }
 

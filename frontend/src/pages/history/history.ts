@@ -58,9 +58,13 @@ export class HistoryListPage {
   }
 
   public uploadAllWorkdays(): void {
+    let workdaysNeedUpload = [];
     for (var workday of this.workdayHistory) {
-      this.wdService.uploadWorkday(workday);
+      if (!workday.isUploaded) {
+        workdaysNeedUpload.push(workday);
+      }
     }
+    this.wdService.uploadWorkdays(workdaysNeedUpload);
   }
 
   public removeArchivedFromHistory(): void {
