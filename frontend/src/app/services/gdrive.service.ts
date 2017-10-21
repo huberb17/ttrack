@@ -68,6 +68,7 @@ export class GdriveService {
 
     public constructor(private toastCtrl: ToastController,) {
         console.log('constructor called');
+        this.initClient = this.initClient.bind(this);
         this.loginToGoogle();
         this.uploadCallback = this.uploadCallback.bind(this);
         this.uploadChangeHistoryCallback = this.uploadChangeHistoryCallback.bind(this);
@@ -131,7 +132,7 @@ export class GdriveService {
         this.uploadFile(fileName, addressFileContent, this.uploadCallback);
     }
 
-    public uploadWorkdays(workdays: Workday[]): void {
+    public uploadWorkdays(workdays: Workday[], auth_code: string): void {
         var jsonWorkdays = JSON.stringify(workdays);
         var workdayFileContent = this.encryptString(jsonWorkdays);
         var fileName = new Date().toISOString() + '_workdays.bin';
@@ -144,20 +145,23 @@ export class GdriveService {
         pendingUpload['workdays'] = workdaysToUpload;
         console.log(pendingUpload);
         this.pendingWorkdayUploads.push(pendingUpload);        
-        this.uploadFile(fileName, workdayFileContent, this.uploadWorkdayCallback);
+        this.uploadFile(fileName, workdayFileContent, this.uploadWorkdayCallback, auth_code);
     }
     
     private loginToGoogle(): void {
+        console.log("loginToGoogle");
         gapi.load('client:auth2', this.initClient);
     }
 
     private initClient() {
+        console.log("initClient");
         gapi.client.init({
             apiKey: gdriveWrapper.API_KEY,
             clientId: gdriveWrapper.CLIENT_ID,
             discoveryDocs: gdriveWrapper.DISCOVERY_DOCS,
             scope: gdriveWrapper.SCOPES
         }).then(() => {
+            console.log("inticlient callback");
             gdriveWrapper.googleAuth = gapi.auth2.getAuthInstance();
             gdriveWrapper.googleAuth.isSignedIn.listen(gdriveWrapper.updateSigninStatus);            
             console.log('Already signed in? ' + gdriveWrapper.googleAuth.isSignedIn.get());
@@ -229,12 +233,13 @@ export class GdriveService {
         }
     }
 
-    private uploadFile(fileName: string, data: string, callback): void {
-        if (gdriveWrapper.googleAuth == null) {
-            console.log('gdrive not ready yet');
-            return;
-        }
-        if (gdriveWrapper.googleAuth.isSignedIn.get()) {
+    private uploadFile(fileName: string, data: string, callback, auth_key=''): void {
+//        if (gdriveWrapper.googleAuth == null) {
+//            console.log('gdrive not ready yet');
+//            this.loginToGoogle();
+//            return;
+//        }
+//        if (gdriveWrapper.googleAuth.isSignedIn.get()) {
             
             const boundary = '-------314159265358979323846';
             const delimiter = "\r\n--" + boundary + "\r\n";
@@ -261,12 +266,14 @@ export class GdriveService {
                 'method': 'POST',
                 'params': {'uploadType': 'multipart'},
                 'headers': {
-                'Content-Type': 'multipart/related; boundary="' + boundary + '"'
+                    'Authorization': 'Bearer ' + auth_key,
+                    'Content-Type': 'multipart/related; boundary="' + boundary + '"'
                 },
                 'body': multipartRequestBody});
+                
             
             request.execute(callback);
-        } 
+//        } 
     }
 
     private uploadChangeHistoryCallback(data: any): void {
