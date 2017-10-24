@@ -1,9 +1,10 @@
 import { Injectable } from '@angular/core';
 import { Storage } from '@ionic/storage';
 import CryptoJS from 'crypto-js'
-import { ToastController } from 'ionic-angular';
+import { ToastController, AlertController } from 'ionic-angular';
 import { TTrackCustomer, TTrackAddress } from '../domain-model/domain-model';
 import { Workday } from './workday.service';
+import { GooglePlus } from 'ionic-native';
 
 declare var gapi;
 
@@ -17,7 +18,10 @@ class GdriveWrapper {
     // included, separated by spaces.
     //public SCOPES = 'https://www.googleapis.com/auth/drive.metadata.readonly';
     public SCOPES = 'https://www.googleapis.com/auth/drive';
+    public SECRET = '5lBDA9qk8nkfS2INMf8tQiOH';
     public googleAuth;
+    public initOk;
+    public isLocal;
 
     public updateSigninStatus(isSignedIn: Boolean): void {
         if (isSignedIn) {
@@ -65,11 +69,12 @@ export class GdriveService {
     private observers;
     private workdayUploadObservers;
     private pendingWorkdayUploads;
-
-    public constructor(private toastCtrl: ToastController,) {
-        console.log('constructor called');
-        this.initClient = this.initClient.bind(this);
-        this.loginToGoogle();
+    private authToken: string;
+    
+    public constructor(private toastCtrl: ToastController, private alertCtrl: AlertController) {
+        this.tryLogin = this.tryLogin.bind(this);
+        this.loginToGoogle = this.loginToGoogle.bind(this);
+        // this.loginToGoogle();
         this.uploadCallback = this.uploadCallback.bind(this);
         this.uploadChangeHistoryCallback = this.uploadChangeHistoryCallback.bind(this);
         this.uploadWorkdayCallback = this.uploadWorkdayCallback.bind(this);
@@ -78,7 +83,131 @@ export class GdriveService {
         this.observers = [];
         this.workdayUploadObservers = [];
         this.pendingWorkdayUploads = [];
-        this.refreshChangeHistory();
+        this.refreshChangeHistory(); 
+    }
+
+    public login(is_local: boolean): void {
+        if (is_local) {
+            console.log('on the real devices');
+            gdriveWrapper.isLocal = true;
+            this.trySilentLogin();
+          }
+          else {
+            console.log('emulating on browser');
+            gdriveWrapper.isLocal = false;
+            this.webLogin();
+          }
+    }
+
+    private webLogin(): void {
+        this.loginToGoogle();
+    }
+
+    private trySilentLogin() {
+        if (typeof gapi === 'undefined') {
+            let toast = this.toastCtrl.create({
+                message: 'Zugriff auf Google aktuell nicht möglich. Laden Sie neu, sobald Internetverbindung vorhanden.',
+                duration: 2000,
+                position: 'bottom'
+            })
+            toast.present();
+            return;
+        }
+
+        gapi.load('client', { callback: function() {
+            GooglePlus.trySilentLogin({
+                'scopes': gdriveWrapper.SCOPES,
+                'webClientId': gdriveWrapper.CLIENT_ID,
+                'offline': true
+            })
+            .then(res => {
+                console.log(JSON.stringify(res));
+                var auth_code = res['serverAuthCode'];
+          
+                gapi.client.request({
+                  'path': '/oauth2/v4/token',
+                  'method': 'POST',
+                  'params': {'code': auth_code, 
+                      'client_id': gdriveWrapper.CLIENT_ID,
+                      'client_secret': gdriveWrapper.SECRET,
+                      'redirect_uri': '',
+                      'grant_type': 'authorization_code'
+                  },
+                    'headers': { },
+                    'body': {}})
+                .then( res => { 
+                    console.log(JSON.stringify(res));
+                    this.authToken = res['result']['access_token'];
+                })
+                .catch( err => {
+                    console.log(JSON.stringify(err));
+                });
+            })
+            .catch( err => {
+                console.log(JSON.stringify(err));
+            });
+            },
+            onerror: function () {
+                console.log('failed to log google api library');
+            }
+        });
+    }
+    
+    public tryLogin(callback) {
+        GooglePlus.login({
+            'scopes': gdriveWrapper.SCOPES,
+            'webClientId': gdriveWrapper.CLIENT_ID,
+            'offline': true
+        })
+        .then(res => {
+            console.log(JSON.stringify(res));
+            var auth_code = res['serverAuthCode'];
+      
+            gapi.client.request({
+              'path': '/oauth2/v4/token',
+              'method': 'POST',
+              'params': {'code': auth_code, 
+                  'client_id': gdriveWrapper.CLIENT_ID,
+                  'client_secret': gdriveWrapper.SECRET,
+                  'redirect_uri': '',
+                  'grant_type': 'authorization_code'
+              },
+                'headers': { },
+                'body': {}})
+            .then( res => { 
+                console.log(JSON.stringify(res));
+                this.authToken = res['result']['access_token'];
+                callback(true);
+            })
+            .catch( err => {
+                console.log(JSON.stringify(err));
+                callback(false);
+            });
+        })
+        .catch( err => {
+            console.log(JSON.stringify(err));
+            callback(false);
+        });
+    }
+
+    public logout(): void {
+        if (!gapi) {
+            return;
+        }
+
+        if (this.authToken) {
+            GooglePlus.logout()
+                .then(res => {
+                    console.log(res);
+                    this.authToken = undefined;
+                })
+                .catch(err => console.log(err));
+        }
+        else {
+            if (gapi.auth2 && gdriveWrapper.googleAuth) {
+                gdriveWrapper.googleAuth.signOut();
+            }
+        }
     }
 
     public registerUploadCallback(callback): void {
@@ -132,7 +261,7 @@ export class GdriveService {
         this.uploadFile(fileName, addressFileContent, this.uploadCallback);
     }
 
-    public uploadWorkdays(workdays: Workday[], auth_code: string): void {
+    public uploadWorkdays(workdays: Workday[]): void {
         var jsonWorkdays = JSON.stringify(workdays);
         var workdayFileContent = this.encryptString(jsonWorkdays);
         var fileName = new Date().toISOString() + '_workdays.bin';
@@ -145,29 +274,45 @@ export class GdriveService {
         pendingUpload['workdays'] = workdaysToUpload;
         console.log(pendingUpload);
         this.pendingWorkdayUploads.push(pendingUpload);        
-        this.uploadFile(fileName, workdayFileContent, this.uploadWorkdayCallback, auth_code);
+        this.uploadFile(fileName, workdayFileContent, this.uploadWorkdayCallback);
     }
     
     private loginToGoogle(): void {
         console.log("loginToGoogle");
-        gapi.load('client:auth2', this.initClient);
-    }
+        if (typeof gapi === 'undefined') {
+            let toast = this.toastCtrl.create({
+                message: 'Zugriff auf Google nicht möglich. Laden Sie neu, sobald Internetverbindung vorhanden.',
+                duration: 2000,
+                position: 'bottom'
+            })
+            toast.present();
+            return;
+        }
 
-    private initClient() {
-        console.log("initClient");
-        gapi.client.init({
-            apiKey: gdriveWrapper.API_KEY,
-            clientId: gdriveWrapper.CLIENT_ID,
-            discoveryDocs: gdriveWrapper.DISCOVERY_DOCS,
-            scope: gdriveWrapper.SCOPES
-        }).then(() => {
-            console.log("inticlient callback");
-            gdriveWrapper.googleAuth = gapi.auth2.getAuthInstance();
-            gdriveWrapper.googleAuth.isSignedIn.listen(gdriveWrapper.updateSigninStatus);            
-            console.log('Already signed in? ' + gdriveWrapper.googleAuth.isSignedIn.get());
-            if (!gdriveWrapper.googleAuth.isSignedIn.get())  {
-                gdriveWrapper.googleAuth.signIn();
-            }
+        gapi.load('client:auth2', { callback: function() {
+            console.log('try to init google client');
+            console.log(JSON.stringify(gapi.client));
+            gapi.client.init({
+                apiKey: gdriveWrapper.API_KEY,
+                clientId: gdriveWrapper.CLIENT_ID,
+                discoveryDocs: gdriveWrapper.DISCOVERY_DOCS,
+                scope: gdriveWrapper.SCOPES
+            }).then(() => {
+                console.log('enter init function');
+                gdriveWrapper.initOk = true; 
+                gdriveWrapper.googleAuth = gapi.auth2.getAuthInstance();
+                gdriveWrapper.googleAuth.isSignedIn.listen(gdriveWrapper.updateSigninStatus);            
+                console.log('Already signed in? ' + gdriveWrapper.googleAuth.isSignedIn.get());
+                if (!gdriveWrapper.googleAuth.isSignedIn.get())  {
+                    gdriveWrapper.googleAuth.signIn();
+                }
+            }).catch ( (err) => {
+              console.log(JSON.stringify(err));
+            });
+        },
+        onerror: function () {
+            console.log('failed to log google api library');
+        }
         });
     }
 
@@ -202,79 +347,104 @@ export class GdriveService {
         });     
     }
 
-    public printFileList(): void {
-        if (gdriveWrapper.googleAuth == null) {
-            console.log('gdrive not ready yet');
-            return;
-        }
-        if (gdriveWrapper.googleAuth.isSignedIn.get()) {
-            gapi.client.drive.files.list({
-                'pageSize': 10,
-                'fields': "nextPageToken, files(id, name)"
-            }).then(response => {
-            console.log('Files:');
-            var files = response.result.files;
-            if (files && files.length > 0) {
-                for (var i = 0; i < files.length; i++) {
-                    var file = files[i];
-                    console.log(file.name + ' (' + file.id + ')');
-                }
-            } else {
-                console.log('No files found.');
-            }
-            });
-        }     
-    
-    }
-
     private notify(): void {
         for (let observer of this.observers) {
             observer(this.changeHistoryEmpty());
         }
     }
 
-    private uploadFile(fileName: string, data: string, callback, auth_key=''): void {
-//        if (gdriveWrapper.googleAuth == null) {
-//            console.log('gdrive not ready yet');
-//            this.loginToGoogle();
-//            return;
-//        }
-//        if (gdriveWrapper.googleAuth.isSignedIn.get()) {
-            
-            const boundary = '-------314159265358979323846';
-            const delimiter = "\r\n--" + boundary + "\r\n";
-            const close_delim = "\r\n--" + boundary + "--";
-          
-            const contentType = 'application/json';
-            
-            var metadata = {
-                'name': fileName,
-                'mimeType': contentType
-              };
-          
-            var multipartRequestBody =
-                delimiter +
-                'Content-Type: ' + contentType + '\r\n\r\n' +
-                JSON.stringify(metadata) +
-                delimiter +
-                'Content-Type: ' + contentType + '\r\n\r\n' +
-                data +
-                close_delim;
+    private uploadFile(fileName: string, data: string, callback): void {
+        const boundary = '-------314159265358979323846';
+        const delimiter = "\r\n--" + boundary + "\r\n";
+        const close_delim = "\r\n--" + boundary + "--";
+      
+        const contentType = 'application/json';
         
-            var request = gapi.client.request({
-                'path': '/upload/drive/v3/files',
-                'method': 'POST',
-                'params': {'uploadType': 'multipart'},
-                'headers': {
-                    'Authorization': 'Bearer ' + auth_key,
-                    'Content-Type': 'multipart/related; boundary="' + boundary + '"'
-                },
-                'body': multipartRequestBody});
-                
-            
-            request.execute(callback);
-//        } 
+        var metadata = {
+            'name': fileName,
+            'mimeType': contentType
+          };
+      
+        var multipartRequestBody =
+            delimiter +
+            'Content-Type: ' + contentType + '\r\n\r\n' +
+            JSON.stringify(metadata) +
+            delimiter +
+            'Content-Type: ' + contentType + '\r\n\r\n' +
+            data +
+            close_delim;
+    
+        console.log('gdw 339: auth_token: %s', JSON.stringify(this.authToken));
+        //this.displayAlert(JSON.stringify(this.authToken), 'Log');
+        if (gdriveWrapper.initOk) {
+            if (this.authToken) {
+                gapi.client.setToken( { 'access_token': this.authToken });
+                this.sendRequest(boundary, multipartRequestBody, callback);
+            }
+            else {
+                if (gapi.auth2) {
+                    if (gdriveWrapper.googleAuth) {
+                        if (gdriveWrapper.googleAuth.isSignedIn.get()) {
+                            this.sendRequest(boundary, multipartRequestBody, callback);
+                        }
+                        else {
+                            gdriveWrapper.googleAuth.signIn()
+                                .then( () => this.sendRequest(boundary, multipartRequestBody, callback))
+                                .catch( (err) => console.log(JSON.stringify(err)));
+                        }
+                    }
+                }
+                else {
+                    this.tryLogin( (success) => {
+                        if (success) {
+                            gapi.client.setToken( { 'access_token': this.authToken });
+                            this.sendRequest(boundary, multipartRequestBody, callback);
+                        }
+                        else {
+                            console.log('Google authentication failed!');
+                            let toast = this.toastCtrl.create({
+                                message: 'Google Login fehlgeschlagen',
+                                duration: 1000,
+                                position: 'bottom'
+                            })
+                            toast.present();
+                        }
+                    } );
+                }
+            }
+        }
+        else {
+            console.log('google API not loaded - check internet connection');
+            let toast = this.toastCtrl.create({
+                message: 'Übertragung fehlgeschlagen. Überprüfen Sie die Internetverbindung und versuchen Sie es erneut.',
+                duration: 2000,
+                position: 'bottom'
+              })
+            toast.present();
+            if (gdriveWrapper.isLocal) {
+                console.log('on the real devices');
+                this.trySilentLogin();
+            }
+            else {
+                console.log('emulating on browser');
+                this.webLogin();
+            }            
+        }
     }
+    
+    private sendRequest(boundary, multipartRequestBody, callback): void {
+        var request = gapi.client.request({
+            'path': '/upload/drive/v3/files',
+            'method': 'POST',
+            'params': {'uploadType': 'multipart'},
+            'headers': {
+                //'Authorization': 'Bearer ' + this.authToken,
+                'Content-Type': 'multipart/related; boundary="' + boundary + '"'
+            },
+            'body': multipartRequestBody});
+                   
+        request.execute(callback);
+    }        
 
     private uploadChangeHistoryCallback(data: any): void {
         if (data['error']) {
@@ -366,4 +536,5 @@ export class GdriveService {
         console.log('iv + cipher: ' + result);
         return result;
       }
+
 }

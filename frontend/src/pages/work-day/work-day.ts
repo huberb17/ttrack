@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, NgZone } from '@angular/core';
 
 import { ModalController, NavController, ToastController } from 'ionic-angular';
 
@@ -33,6 +33,7 @@ export class WorkDayPage implements OnInit {
   constructor(public navCtrl: NavController,
               public modalCtrl: ModalController,
               public toastCtrl: ToastController,
+              private zone: NgZone,
               private customerService: CustomerService,
               private addressService: AddressService,
               private distanceService: DistanceService,
@@ -112,7 +113,7 @@ export class WorkDayPage implements OnInit {
         this.endAddress = data.address;
         if (this.customersOfDay.length > 0) {
           this.lastRoute.end = this.endAddress;
-          this.distanceService.calculateRoute(this.lastRoute, this.distanceCallback, this.customersOfDay.length);
+          this.distanceService.calculateRoute(this.lastRoute, this.distanceCallback, this.customersOfDay.length);          
         }
         this.isDaySaved = false;
       }
@@ -136,6 +137,7 @@ export class WorkDayPage implements OnInit {
         else {
           newCustomer.routeToCustomer.start = this.customersOfDay[this.customersOfDay.length - 2].address;
         }
+
         this.distanceService.calculateRoute(newCustomer.routeToCustomer, this.distanceCallback, this.customersOfDay.length-1);
         this.lastRoute.start = newCustomer.address;
         this.lastRoute.end = this.endAddress;
@@ -326,13 +328,15 @@ export class WorkDayPage implements OnInit {
   }
 
   private distanceCallback(idx: number, distance: number): void {
-    var distanceInKm = Math.round(distance / 10) / 100;
-    if (idx == this.customersOfDay.length) {
-      this.lastRoute.lengthInKm = distanceInKm;
-    }
-    else {
-      this.customersOfDay[idx].routeToCustomer.lengthInKm = distanceInKm;
-    }
+    this.zone.run( () => {
+      var distanceInKm = Math.round(distance / 10) / 100;
+      if (idx == this.customersOfDay.length) {
+        this.lastRoute.lengthInKm = distanceInKm;
+      }
+      else {
+        this.customersOfDay[idx].routeToCustomer.lengthInKm = distanceInKm;
+      }
+    });
   }
 
 }

@@ -3,6 +3,14 @@
     <ion-title>
       Einstellungen
     </ion-title>
+    <ion-buttons end>
+      <button ion-button item-right icon-only clear (click)="doGoogleLogout()">
+        <ion-icon name="log-out"></ion-icon>
+      </button>
+      <button ion-button item-right icon-only clear (click)="reload()">
+          <ion-icon name="refresh"></ion-icon>  
+      </button>      
+    </ion-buttons>
   </ion-navbar>
 </ion-header>
 
@@ -33,12 +41,5 @@
     <ion-item>
         <button ion-button (click)="syncWorkdayHistory()" block>Alle Arbeitstage hochladen</button>
       </ion-item>
-      <ion-item>
-        <button ion-button (click)="doGoogleLogin()" block>Google Login</button>
-      </ion-item>
-      <ion-item>
-        <button ion-button (click)="doGoogleLogout()" block>Google Logout</button>
-      </ion-item>
-      
   </ion-list>
 </ion-content>

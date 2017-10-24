@@ -18,8 +18,6 @@ declare var gapi;
 export class SettingsPage {
   public defaultStartAddress: TTrackAddress;
   public defaultEndAddress: TTrackAddress;
-  private auth_code: string;
-  private auth_token: string;
   
   constructor(public navCtrl: NavController,
       public modalCtrl: ModalController,
@@ -36,42 +34,8 @@ export class SettingsPage {
 
   }
 
-  doGoogleLogin(){
-    
-    GooglePlus.login({
-      'scopes': 'https://www.googleapis.com/auth/drive', // optional, space-separated list of scopes, If not included or empty, defaults to `profile` and `email`.
-      'webClientId': '452487708050-b3fl6dukhcr59ta22ku9el2mo5b4jl9q.apps.googleusercontent.com', //'452487708050-bv4qlfm7rk98sh36751vjdhog7ta2m1m.apps.googleusercontent.com', // optional clientId of your Web application from Credentials settings of your project - On Android, this MUST be included to get an idToken. On iOS, it is not required.
-      'offline': true
-    })
-    .then(res => {
-      console.log(res);
-      this.auth_code = res['serverAuthCode'];
-
-      var request = gapi.client.request({
-        'path': '/oauth2/v4/token',
-        'method': 'POST',
-        'params': {'code': this.auth_code, 
-            'client_id': '452487708050-b3fl6dukhcr59ta22ku9el2mo5b4jl9q.apps.googleusercontent.com',
-            'client_secret': '5lBDA9qk8nkfS2INMf8tQiOH',
-            'redirect_uri': '',
-            'grant_type': 'authorization_code'
-        },
-        'headers': { },
-        //    'Content-Type': 'multipart/related; boundary="' + boundary + '"'
-        //},
-        'body': {}});//multipartRequestBody});
-      request.execute( (res) => { 
-        console.log(res);
-        this.auth_token = res['access_token'];
-      });
-    })
-    .catch(err => console.log(err));
-  }
-
   doGoogleLogout(){
-    GooglePlus.logout()
-    .then(res => console.log(res))
-    .catch(err => console.log(err));
+    this.gdriveService.logout();
   }
 
 
@@ -113,7 +77,12 @@ export class SettingsPage {
   }
 
   public syncWorkdayHistory(): void {
-    console.log(this.auth_token);
-    this.gdriveService.uploadWorkdays(this.wdService.getWorkdayHistory(), this.auth_token);
+    this.gdriveService.uploadWorkdays(this.wdService.getWorkdayHistory());
+  }
+
+  public reload(): void {
+    var lastPage = this.navCtrl.last;
+    window.location.reload();
+    this.navCtrl.push(lastPage);
   }
 }

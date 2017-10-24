@@ -104,12 +104,12 @@ export class WorkdayService {
     }
 
     uploadWorkday(workday: Workday) {
-        this.gdriveService.uploadWorkdays([workday], "");
+        this.gdriveService.uploadWorkdays([workday]);
         this.updateHistory(workday);
     }
 
     uploadWorkdays(workdays: Workday[]) {
-        this.gdriveService.uploadWorkdays(workdays, "");
+        this.gdriveService.uploadWorkdays(workdays);
         this.updateHistoryWorkdays(workdays);
     }
 
