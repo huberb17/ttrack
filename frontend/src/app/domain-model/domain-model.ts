@@ -132,6 +132,7 @@ export class TTrackExpense {
     public date: string;
     public textForReport: string;
     public value: number;
+	public category: string;
 }
 
 export class TTrackKilometreExpense extends TTrackExpense {
