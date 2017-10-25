@@ -47,7 +47,7 @@ class GdriveConnector:
             # self._update_file_list()
             self._file_list = result_list
             # title_list = map(lambda x: x['title'], self._file_list)
-            self._action_files = filter(lambda x: x['title'].rfind('bin') == -1, self._file_list)
+            self._action_files = filter(lambda x: x['title'].rfind('actions') > 0, self._file_list)
             self._customer_data_files = filter(lambda x: x['title'].rfind('customers') > 0, self._file_list)
             self._address_data_files = filter(lambda x: x['title'].rfind('addresses') > 0, self._file_list)
             self._workday_data_files = filter(lambda x: x['title'].rfind('workdays') > 0, self._file_list)
@@ -115,7 +115,7 @@ class GdriveConnector:
         #                                         'orderBy': 'title'}).GetList()
         self._file_list = self._drive.ListFile({'q': "'root' in parents and trashed=false",
                                                 'orderBy': 'title'}).GetList()
-        self._action_files = filter(lambda x: x['title'].rfind('bin') == -1, self._file_list)
+        self._action_files = filter(lambda x: x['title'].rfind('actions') > 0, self._file_list)
 
     def populate_drive(self):
         """Function to populate the drive first - will be removed."""

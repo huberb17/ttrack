@@ -220,20 +220,18 @@ class DataStore:
         addresses = json.loads(data)
         self._drop_table_content('addresses')
         for address_obj in addresses:
-            address = Address(address_obj)
             self.update({'type': 'address',
                        'command': 'create',
-                       'data': address.convert_to_db_object()
+                       'data': address_obj
                        })
 
     def _force_customer_data_storage(self, data):
         customers = json.loads(data)
         self._drop_table_content('customers')
         for customer_obj in customers:
-            customer = Customer(customer_obj)
             self.update({'type': 'customer',
                        'command': 'create',
-                       'data': customer.convert_to_db_object()
+                       'data': customer_obj
                        })
 
     def _force_workday_data_storage(self, data):
@@ -245,7 +243,7 @@ class DataStore:
             for route in driven_routes:
                 self.update({'type': 'driven_route',
                            'command': 'create',
-                           'data': route.convert_to_db_object()})
+                           'data': route })
 
     def _drop_table_content(self, table_name):
         try:
