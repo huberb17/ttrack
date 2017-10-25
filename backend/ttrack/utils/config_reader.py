@@ -10,6 +10,7 @@ class ConfigReader:
     def __init__(self, file_name):
         """The initializer of the class.
         
+        :type file_name: str
         :param file_name: the name of the configuration file (in JSON format).
         """
         try:
@@ -17,6 +18,7 @@ class ConfigReader:
             with open(file_name, 'rb') as json_file:
                 config = json.load(json_file)
             self.dbname = config['dbName']
+            self.db_backup_path = config['dbBackupPath']
             self.share = config['shareName']
             self.oaut_settings = config['oauthSettingsFile']
             self.export_milage = config['exportMilage']

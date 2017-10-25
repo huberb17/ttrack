@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-
+"""Export the data of the data store into Excel reports while preserving manually entered data"""
 import logging
 import os
 
@@ -9,19 +9,29 @@ import datetime
 
 from openpyxl import load_workbook
 from openpyxl.styles import Border, Side
-from openpyxl.worksheet import Worksheet
-
 from backend.ttrack.utils.errors import ExcelWriterError
 
 logger = logging.getLogger(__name__)
 
 class ExcelWriter:
+    """Handle the data export to MS Excel."""
     def __init__(self, config):
+        """The initializer of the class.
+        
+        :type config: backend.ttrack.utils.config_reader.ConfigReader
+        :param config: the current configuration of ttrack 
+        """
         self._milage_filename = config.export_milage
         self._income_filename = config.export_income
         self._export_path = config.export_path
 
     def backup_and_create(self, data_store):
+        """Create a backup of the current reports and re-export the data.
+        
+        :type data_store: backend.ttrack.persistence.data_store.DataStore
+        :param data_store: the current data to export
+        :return: None
+        """
         try:
             self._backup_files()
             self._create_export(data_store)
@@ -37,6 +47,7 @@ class ExcelWriter:
             raise ExcelWriterError(msg)
 
     def _backup_files(self):
+        """Create a backup of the current reports."""
         try:
             backup_prefix = datetime.datetime.now().strftime("%Y%m%d_%H%M%S_")
             if not os.path.exists(self._export_path):
@@ -53,10 +64,23 @@ class ExcelWriter:
             raise ExcelWriterError(msg)
 
     def _create_export(self, data_store):
-            self._create_milage_export(data_store)
-            # self._create_income_export(data_store)
+        """Export the current data of data_store into MS Excel reports.
+
+               :type data_store: backend.ttrack.persistence.data_store.DataStore
+               :param data_store: the data to be exported
+               :return: None
+       """
+        self._create_milage_export(data_store)
+        # TODO: add income_export
+        # self._create_income_export(data_store)
 
     def _create_milage_export(self, data_store):
+        """Create the milage report as MS Excel file.
+        
+        :type data_store: backend.ttrack.persistence.data_store.DataStore
+        :param data_store: the data to be exported
+        :return: None
+        """
         try:
             wb = load_workbook(self._milage_filename)
             wb = self._generate_milage_rows(wb, data_store)
@@ -65,6 +89,12 @@ class ExcelWriter:
             raise ExcelWriterError(err.message)
 
     def _create_income_export(self, data_store):
+        """Create the income/expense report as MS Excel file.
+        
+        :type data_store: backend.ttrack.persistence.data_store.DataStore
+        :param data_store: the data to be exported
+        :return: None
+        """
         try:
             wb = load_workbook(self._income_filename)
             wb = self._generate_income_rows(wb, data_store)
@@ -73,6 +103,14 @@ class ExcelWriter:
             raise ExcelWriterError(err.message)
 
     def _find_start_marker(self, max_row, sheet):
+        """Find the row with the 'start_generated' marker. 
+        
+        :type max_row: int
+        :param max_row: the maximum row number in the worksheet
+        :type sheet: openpyxl.worksheet.worksheet.Worksheet
+        :param sheet: the worksheet to be processed
+        :return: number of row with start marker
+        """
         start_row = 0
         for row_num in range(1, max_row):
             cell_name = 'A{0}'.format(row_num)

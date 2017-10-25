@@ -6,7 +6,7 @@ from pydrive.auth import GoogleAuth, AuthenticationRejected, AuthError
 from pydrive.drive import GoogleDrive
 from pydrive.settings import InvalidConfigError
 
-from backend.ttrack.utils.action_decryptor import ActionDecryptor
+from backend.ttrack.utils.ttrack_decryptor import TTrackDecryptor
 from backend.ttrack.utils.errors import GdriveConnectorError
 
 logger = logging.getLogger(__name__)
@@ -21,6 +21,10 @@ class GdriveConnector:
         """
         self._drive = None
         self._file_list = None
+        self._action_files = None
+        self._customer_data_files = None
+        self._address_data_files = None
+        self._workday_data_files = None
         self._share = config.share
         self._settings = config.oaut_settings
         logger.info('initialized object with share: {0} and settings: {1}'.format(self._share, self._settings))
@@ -35,13 +39,20 @@ class GdriveConnector:
         try:
             gauth = GoogleAuth(settings_file=self._settings)
             self._drive = GoogleDrive(gauth)
-            query_string = "'root' in parents and trashed=false and title = 'frontend'"
-            result_list = self._drive.ListFile({'q': query_string}).GetList()
-            self._share_id = result_list[0]['id']
+            # query_string = "'root' in parents and trashed=false and title = 'frontend'"
+            query_string = "'root' in parents and trashed=false"
+            result_list = self._drive.ListFile({'q': query_string, 'orderBy': 'title'}).GetList()
+            # self._share_id = result_list[0]['id']
             logger.info('connection to Google Drive established')
-            self._update_file_list()
-            title_list = map(lambda x: x['title'], self._file_list)
-            logger.info('found files in share "{0}": {1}'.format(self._share, title_list))
+            # self._update_file_list()
+            self._file_list = result_list
+            # title_list = map(lambda x: x['title'], self._file_list)
+            self._action_files = filter(lambda x: x['title'].rfind('bin') == -1, self._file_list)
+            self._customer_data_files = filter(lambda x: x['title'].rfind('customers') > 0, self._file_list)
+            self._address_data_files = filter(lambda x: x['title'].rfind('addresses') > 0, self._file_list)
+            self._workday_data_files = filter(lambda x: x['title'].rfind('workdays') > 0, self._file_list)
+            print (len(self._workday_data_files))
+            # logger.info('found files in share "{0}": {1}'.format(self._share, title_list))
         except IOError as io_err:
             logger.info('received InvalidConfigError exception: {0}'.format(io_err.message))
             msg = 'Unable to connect to GoogleDrive.'
@@ -71,9 +82,9 @@ class GdriveConnector:
         """
         try:
             # TODO: delete action in _share at _drive
-            for f in self._file_list:
+            for f in self._action_files:
                 if f['id'] == file_id:
-                    self._file_list.remove(f)
+                    self._action_files.remove(f)
                     logger.info('removed file with id "{0} from list.'.format(file_id))
                     f.Trash()
                     logger.info('moved file with id "{0} to trash on Google Drive.'.format(file_id))
@@ -86,23 +97,25 @@ class GdriveConnector:
 
     def _get_next_action(self):
         """Internal method that retrieves and decrypts the next action from Google Drive."""
-        if len(self._file_list) == 0:
+        if len(self._action_files) == 0:
             logger.info('file list is empty')
             self._update_file_list()
-            if len(self._file_list) == 0:
+            if len(self._action_files) == 0:
                 return None, None
-        next_file = self._file_list[0]
+        next_file = self._action_files[0]
         file_id = next_file['id']
         logger.info('got file with id "{0} from list.'.format(file_id))
         next_file.GetContentFile('tmpfile')
-        action = ActionDecryptor.decrypt('tmpfile')
+        action = TTrackDecryptor.decrypt('tmpfile')
         return file_id, action
 
     def _update_file_list(self):
         logger.info('retrieve file list from Google Drive')
-        self._file_list = self._drive.ListFile({'q': "'{0}' in parents and trashed=false".format(self._share_id),
+        # self._file_list = self._drive.ListFile({'q': "'{0}' in parents and trashed=false".format(self._share_id),
+        #                                         'orderBy': 'title'}).GetList()
+        self._file_list = self._drive.ListFile({'q': "'root' in parents and trashed=false",
                                                 'orderBy': 'title'}).GetList()
-
+        self._action_files = filter(lambda x: x['title'].rfind('bin') == -1, self._file_list)
 
     def populate_drive(self):
         """Function to populate the drive first - will be removed."""
@@ -115,9 +128,50 @@ class GdriveConnector:
         with open(filename, 'rb') as json_file:
             data = json_file.read()
             bin_name = os.path.basename(filename).split('.')[0] + '.bin'
-            ActionDecryptor.encrypt(data, bin_name)
+            TTrackDecryptor.encrypt(data, bin_name)
         tmpfile = self._drive.CreateFile({"parents": [{"kind": "drive#fileLink", "id": self._share_id}]})
         tmpfile.SetContentFile(bin_name)
         tmpfile.Upload()
+
+    def get_last_address_data_file(self):
+        """Get the last address data file from Google Drive (if available)."""
+        try:
+            file_id, data = self._get_last_data_file(self._address_data_files)
+            return file_id, data
+        except Exception as e:
+            logger.error('Error on getting last address data file: {0}'.format(e.message))
+            return None, None
+
+    def get_last_customer_data_file(self):
+        """Get the last customer data file from Google Drive (if available)."""
+        try:
+            file_id, data = self._get_last_data_file(self._customer_data_files)
+            return file_id, data
+        except Exception as e:
+            logger.error('Error on getting last customer data file: {0}'.format(e.message))
+            return None, None
+
+    def get_last_workday_data_file(self):
+        """Get the last workday data file from Google Drive (if available)."""
+        try:
+            file_id, data = self._get_last_data_file(self._workday_data_files)
+            return file_id, data
+        except Exception as e:
+            logger.error('Error on getting last workday data file: {0}'.format(e.message))
+            return None, None
+
+    def _get_last_data_file(self, file_list):
+        """Internal method that retrieves and decrypts the address data file with the largest date (the newest)
+        from Google Drive."""
+        count = len(file_list)
+        if  count == 0:
+            logger.info('address data file list is empty')
+            return None, None
+        last_file = file_list[count-1]
+        file_id = last_file['id']
+        logger.info('got file with id "{0} from list.'.format(file_id))
+        last_file.GetContentFile('tmpfile')
+        data = TTrackDecryptor.decrypt('tmpfile')
+        return file_id, data
 
 
