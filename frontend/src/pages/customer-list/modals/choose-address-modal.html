@@ -1,0 +1,27 @@
+<ion-header>
+    <ion-toolbar>
+      <ion-title>
+        Adresse auswählen
+      </ion-title>
+      <ion-buttons start>
+        <button ion-button (click)="dismiss()">
+          <ion-icon name="md-close"></ion-icon>
+        </button>
+      </ion-buttons>
+    </ion-toolbar>  
+  </ion-header>
+  
+  <ion-content>
+    <ion-list>
+        <ion-item *ngFor="let address of addressList; let i = index" (click)="selectAddress(i)">
+          <h2>{{address.note}}</h2>
+            <p>
+              {{address.street}} {{address.streetNumber}}, 
+              {{address.zipCode}} {{address.city}}
+          </p>
+          <button ion-button item-right icon-only clear (click)="selectAddress(i)">
+            <ion-icon name="select"></ion-icon>  
+          </button>       
+        </ion-item>
+      </ion-list>
+  </ion-content>

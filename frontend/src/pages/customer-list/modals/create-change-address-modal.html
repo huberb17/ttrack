@@ -1,0 +1,44 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>
+      Adressdaten editieren
+    </ion-title>
+    <ion-buttons start>
+      <button ion-button (click)="dismiss()">
+        <ion-icon name="md-close"></ion-icon>
+      </button>
+    </ion-buttons>
+  </ion-toolbar>  
+</ion-header>
+
+<ion-content>
+  <ion-list>
+    <ion-item>
+        <ion-label fixed>Straße</ion-label>
+        <ion-input type="text" [(ngModel)]="address.street"></ion-input>
+    </ion-item>
+    <ion-item>
+        <ion-label fixed>Hausnummer</ion-label>
+        <ion-input type="number" [(ngModel)]="address.streetNumber"></ion-input>
+    </ion-item>
+    <ion-item>
+        <ion-label fixed>Tür</ion-label>
+        <ion-input type="number" [(ngModel)]="address.doorNumber"></ion-input>
+    </ion-item>
+    <ion-item>
+        <ion-label fixed>PLZ</ion-label>
+        <ion-input type="number" [(ngModel)]="address.zipCode"></ion-input>
+    </ion-item>
+    <ion-item>
+        <ion-label fixed>Ort</ion-label>
+        <ion-input type="text" [(ngModel)]="address.city"></ion-input>
+    </ion-item>
+    <ion-item>
+        <ion-label fixed>Notiz</ion-label>
+        <ion-input type="text" [(ngModel)]="address.note"></ion-input>
+    </ion-item>
+    <ion-item>
+      <button ion-button block (click)="saveCustomer()">Speichern</button>
+    </ion-item>    
+  </ion-list>
+</ion-content>

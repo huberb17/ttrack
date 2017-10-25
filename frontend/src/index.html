@@ -11,9 +11,6 @@
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#4e8ef7">
   
-  <!-- cordova.js required for cordova apps -->
-  <script src="cordova.js"></script>
-
   <!-- un-comment this code to enable service worker
   <script>
     if ('serviceWorker' in navigator) {
@@ -30,6 +27,15 @@
 
   <!-- Ionic's root component and where the app will load -->
   <ion-app></ion-app>
+
+   <!-- cordova.js required for cordova apps -->
+  <script src="cordova.js"></script>
+
+  <!-- Google APIs (for Google Drive) -->
+  <script src="https://apis.google.com/js/api.js"></script>
+  
+  <!-- Google Maps API for distance matrix service -->
+  <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyALBVbo66dGGIjA8bI-_xPXX6dULV1G8WA"></script>
 
   <!-- The polyfills js is generated during the build process -->
   <script src="build/polyfills.js"></script>

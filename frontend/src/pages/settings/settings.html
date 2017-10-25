@@ -3,21 +3,43 @@
     <ion-title>
       Einstellungen
     </ion-title>
+    <ion-buttons end>
+      <button ion-button item-right icon-only clear (click)="doGoogleLogout()">
+        <ion-icon name="log-out"></ion-icon>
+      </button>
+      <button ion-button item-right icon-only clear (click)="reload()">
+          <ion-icon name="refresh"></ion-icon>  
+      </button>      
+    </ion-buttons>
   </ion-navbar>
 </ion-header>
 
 <ion-content>
   <ion-list>
-    <ion-list-header>Globale Einstellungen</ion-list-header>
+    <ion-list-header>Allgemeine Einstellungen</ion-list-header>
     <ion-item>
-      <ion-icon name="ionic" item-left></ion-icon>
-      Kilometerpauschale
+      <h2>Default Start-Adresse</h2>
+      <p>{{defaultStartAddress.toString()}}</p>
+      <button ion-button item-right icon-only color="secondary" clear (click)="changeStartAddress()">
+          <ion-icon name="create"></ion-icon>  
+      </button>
     </ion-item>
     <ion-item>
-      Default Start-Adresse
+        <h2>Default End-Adresse</h2>
+        <p>{{defaultEndAddress.toString()}}</p>
+        <button ion-button item-right icon-only color="secondary" clear (click)="changeEndAddress()">
+            <ion-icon name="create"></ion-icon>  
+        </button>
+    </ion-item>
+    <ion-list-header>Datensynchronisation</ion-list-header>
+    <ion-item>
+      <button ion-button (click)="syncCustomers()" block>Alle Kundendaten hochladen</button>
     </ion-item>
     <ion-item>
-      Default End-Adresse
+        <button ion-button (click)="syncAddresses()" block>Alle Adressdaten hochladen</button>
     </ion-item>
+    <ion-item>
+        <button ion-button (click)="syncWorkdayHistory()" block>Alle Arbeitstage hochladen</button>
+      </ion-item>
   </ion-list>
 </ion-content>

@@ -1,24 +1,45 @@
 <ion-header>
   <ion-toolbar>
     <ion-title>
-      Kunde auswählen
+      Kundendaten editieren
     </ion-title>
     <ion-buttons start>
       <button ion-button (click)="dismiss()">
         <ion-icon name="md-close"></ion-icon>
       </button>
     </ion-buttons>
-  </ion-toolbar> 
+  </ion-toolbar>  
 </ion-header>
-
+ 
 <ion-content>
   <ion-list>
-    <ion-item *ngFor="let customer of customers; let i = index" (click)="useCustomer(i)">
-        <h2>{{customer.title}} {{customer.lastName}} {{customer.firstName}}</h2>
-            <p>
-              {{customer.address.street}} {{customer.address.streetNumber}},
-              {{customer.address.zipCode}} {{customer.address.city}}
-            </p>
+    <ion-item>
+        <ion-label fixed>Anrede</ion-label>
+        <ion-input type="text" [(ngModel)]="customer.title"></ion-input>
     </ion-item>
+    <ion-item>
+        <ion-label fixed>Vorname</ion-label>
+        <ion-input type="text" [(ngModel)]="customer.firstName"></ion-input>
+    </ion-item>
+    <ion-item>
+        <ion-label fixed>Nachname</ion-label>
+        <ion-input type="text" [(ngModel)]="customer.lastName"></ion-input>
+    </ion-item>
+    <ion-item>
+      <ion-label>Adresse:</ion-label>
+      <button button ion-button item-right (click)="createAddress()">Neu anlegen</button>
+      <button button ion-button item-right (click)="chooseAddress()">Auswählen</button>
+    </ion-item>
+    <ion-item *ngIf="hasAddress == true">
+        <p>
+            {{customer.address.street}} {{customer.address.streetNumber}}
+        </p>
+        <p>
+            {{customer.address.zipCode}} {{customer.address.city}}
+        </p>
+    </ion-item>
+    <ion-item>
+        <button ion-button block [disabled]="hasAddress ? null : true" (click)="saveCustomer()">Speichern</button>
+      </ion-item> 
   </ion-list>
 </ion-content>

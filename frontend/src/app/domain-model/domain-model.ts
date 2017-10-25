@@ -3,18 +3,43 @@
 // the model evolves.
 
 export class TTrackCustomer {
+    public id: string;
     public title: string;
     public firstName: string;
     public lastName: string;
     public address: TTrackAddress;
     public prescriptions: TTrackPrescription[];
     public isActive: boolean;
+
+    public static serialize(customer: TTrackCustomer): any {
+        var serCustomer = {};
+        serCustomer['id'] = customer.id;
+        serCustomer['title'] = customer.title;
+        serCustomer['firstName'] = customer.firstName;
+        serCustomer['lastName'] = customer.lastName;
+        serCustomer['address'] = customer.address.id;
+        serCustomer['isActive'] = customer.isActive;
+        return serCustomer;
+    }
+
+    public static deserialize(serCustomer: any): TTrackCustomer {
+        var customer = new TTrackCustomer();
+        customer.id = serCustomer['id'];
+        customer.title = serCustomer['title'];
+        customer.firstName = serCustomer['firstName'];
+        customer.lastName = serCustomer['lastName'];
+        customer.address = new TTrackAddress();
+        customer.address.id = serCustomer['address'];
+        customer.isActive = serCustomer['isActive'];
+        return customer;
+    }
 }
 
 export class CustomerAtWorkday extends TTrackCustomer {
-    public routeToCustomer: TTrackRoute = null;
+    public routeToCustomer: TTrackRoute;
     constructor(customer: TTrackCustomer) {
         super();
+        this.id = customer.id;
         this.title = customer.title;
         this.firstName = customer.firstName;
         this.lastName = customer.lastName;
@@ -47,6 +72,7 @@ export class TTrackTherapyItem {
 }
 
 export class TTrackAddress {
+    public id: string;
     public street: string;
     public streetNumber: string;
     public doorNumber: string;
@@ -54,6 +80,39 @@ export class TTrackAddress {
     public city: string;
     public note: string;
     public isActive: boolean;
+
+    public static deserialize(serAddress: any): TTrackAddress {
+        var address = new TTrackAddress();
+        if (serAddress === undefined) 
+            return address;
+        address.id = serAddress['id'];
+        address.street = serAddress['street'];
+        address.streetNumber = serAddress['streetNumber'];
+        address.doorNumber = serAddress['doorNumber'];
+        address.zipCode = serAddress['zipCode'];
+        address.city = serAddress['city'];
+        address.note = serAddress['note'];
+        address.isActive = serAddress['isActive'];
+        return address;        
+    }
+
+    public static serialize(address: TTrackAddress): any {
+        var serAddress = {};
+        serAddress['id'] = address.id;
+        serAddress['street'] = address.street;
+        serAddress['streetNumber'] = address.streetNumber;
+        serAddress['doorNumber'] = address.doorNumber;
+        serAddress['zipCode'] = address.zipCode;
+        serAddress['city'] = address.city;
+        serAddress['note'] = address.note;
+        serAddress['isActive'] = address.isActive;
+        return serAddress;
+    }
+
+    public toString(): string {
+        return this.street + ' ' + this.streetNumber +
+              ', ' + this.zipCode + ' ' + this.city;
+    }
 }
 
 export class TTrackRoute {

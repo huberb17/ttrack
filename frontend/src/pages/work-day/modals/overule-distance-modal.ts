@@ -20,13 +20,11 @@ export class OveruleDistanceModalPage implements OnInit {
     )
     { 
         this.customer = this.params.get('customer');
-        console.log(this.customer.address);
         this.tempDistance = this.customer.routeToCustomer.lengthInKm;
+        this.distanceCallback = this.distanceCallback.bind(this);
     }
 
     ngOnInit(): void {
-        console.log('called onInit');
-        console.log(this.customer.address);
         this.customer = this.params.get('customer');
         this.tempDistance = this.customer.routeToCustomer.lengthInKm;
     }
@@ -37,24 +35,14 @@ export class OveruleDistanceModalPage implements OnInit {
 
     saveDistance(): void {
         this.viewCtrl.dismiss(this.tempDistance);
-    }
+    } 
 
     getDistance(): void {
-        this.distService.getDistance(
-            this.getAddressString(this.customer.routeToCustomer.start),
-            this.getAddressString(this.customer.routeToCustomer.end))
-            .then(response => {
-                if (typeof response !== 'undefined') {
-                    this.tempDistance = response.value / 1000;
-                }
-                else {
-                    this.tempDistance = 0;
-                }
-          });
+        this.distService.calculateRoute(this.customer.routeToCustomer, this.distanceCallback, 0);
     }
 
-    private getAddressString(address: TTrackAddress): string {
-    return address.street + ' ' + address.streetNumber +
-      ',' + address.zipCode + ' ' + address.city;
-  }
+    private distanceCallback(dummy: number, distance: number): void {
+        var distanceInKm = Math.round(distance / 10) / 100;
+        this.tempDistance = distanceInKm;
+    }
 }
