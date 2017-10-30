@@ -36,9 +36,23 @@ export class SettingsPage {
 
   doGoogleLogout(){
     this.gdriveService.logout();
+    //GooglePlus.logout();
   }
 
-
+  doGoogleLogin(){
+    this.gdriveService.tryLogin( (res) => console.log(res) );
+    // GooglePlus.login( {
+    //   'scopes': 'https://www.googleapis.com/auth/drive',
+    //   'webClientId': '894125857880-7bj3f8ttc59i021vmi9qnn0mhc4s34v4.apps.googleusercontent.com', //gdriveWrapper.CLIENT_ID,
+    //   'offline': true
+    // }).then(function (user) {
+    //   console.log(JSON.stringify(user));
+    //   alert(JSON.stringify(user))
+    // }, function (error) {
+    //   console.log(JSON.stringify(error));
+    //   alert(JSON.stringify(error))
+    // });
+  }
 
   public changeStartAddress(): void {
     let modal = this.modalCtrl.create(ChangeAddressModalPage, 

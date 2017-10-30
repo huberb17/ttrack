@@ -1,34 +1,35 @@
-import { Injectable } from '@angular/core';
 import { Storage } from '@ionic/storage';
 import CryptoJS from 'crypto-js'
 import { ToastController, AlertController } from 'ionic-angular';
 import { TTrackCustomer, TTrackAddress } from '../domain-model/domain-model';
 import { Workday } from './workday.service';
 import { GooglePlus } from 'ionic-native';
+import { Injectable } from '@angular/core';
 
 declare var gapi;
 
 class GdriveWrapper {
     // Client ID and API key from the Developer Console
-    public CLIENT_ID = '452487708050-b3fl6dukhcr59ta22ku9el2mo5b4jl9q.apps.googleusercontent.com';
-    public API_KEY = 'AIzaSyALBVbo66dGGIjA8bI-_xPXX6dULV1G8WA';
+    public CLIENT_ID = '894125857880-7bj3f8ttc59i021vmi9qnn0mhc4s34v4.apps.googleusercontent.com';
+    public API_KEY = 'AIzaSyASFA_hBwTUpdRQHtepeVNHUNXAUqfttEU';
     // Array of API discovery doc URLs for APIs
     public DISCOVERY_DOCS = ["https://www.googleapis.com/discovery/v1/apis/drive/v3/rest"];
     // Authorization scopes required by the API; multiple scopes can be
     // included, separated by spaces.
     //public SCOPES = 'https://www.googleapis.com/auth/drive.metadata.readonly';
     public SCOPES = 'https://www.googleapis.com/auth/drive';
-    public SECRET = '5lBDA9qk8nkfS2INMf8tQiOH';
+    public SECRET = '8wKFqIfy8nMhrBCdWRe4Qq3q';
     public googleAuth;
     public initOk;
     public isLocal;
+    public authToken;
 
     public updateSigninStatus(isSignedIn: Boolean): void {
         if (isSignedIn) {
-            console.log('Client signed in');
+            console.log('line 29' + 'Client signed in');
         }
         else {
-            console.log('Client not signed in');
+            console.log('line 32' + 'Client not signed in');
         }
     }
 }
@@ -69,7 +70,6 @@ export class GdriveService {
     private observers;
     private workdayUploadObservers;
     private pendingWorkdayUploads;
-    private authToken: string;
     
     public constructor(private toastCtrl: ToastController, private alertCtrl: AlertController) {
         this.tryLogin = this.tryLogin.bind(this);
@@ -88,12 +88,12 @@ export class GdriveService {
 
     public login(is_local: boolean): void {
         if (is_local) {
-            console.log('on the real devices');
+            console.log('line 91' + 'on the real device');
             gdriveWrapper.isLocal = true;
             this.trySilentLogin();
           }
           else {
-            console.log('emulating on browser');
+            console.log('line 96' + 'emulating on browser');
             gdriveWrapper.isLocal = false;
             this.webLogin();
           }
@@ -117,11 +117,11 @@ export class GdriveService {
         gapi.load('client', { callback: function() {
             GooglePlus.trySilentLogin({
                 'scopes': gdriveWrapper.SCOPES,
-                'webClientId': gdriveWrapper.CLIENT_ID,
+                'webClientId': '894125857880-7bj3f8ttc59i021vmi9qnn0mhc4s34v4.apps.googleusercontent.com', //gdriveWrapper.CLIENT_ID',
                 'offline': true
             })
             .then(res => {
-                console.log(JSON.stringify(res));
+                console.log('line 124' + JSON.stringify(res));
                 var auth_code = res['serverAuthCode'];
           
                 gapi.client.request({
@@ -134,33 +134,35 @@ export class GdriveService {
                       'grant_type': 'authorization_code'
                   },
                     'headers': { },
-                    'body': {}})
+                    'body': {}
+                })
                 .then( res => { 
-                    console.log(JSON.stringify(res));
-                    this.authToken = res['result']['access_token'];
+                    console.log('line 139' + JSON.stringify(res));
+                    gdriveWrapper.initOk = true; 
+                    gdriveWrapper.authToken = res['result']['accesss_token'];
                 })
                 .catch( err => {
-                    console.log(JSON.stringify(err));
+                    console.log('line 144' + JSON.stringify(err));
                 });
             })
             .catch( err => {
-                console.log(JSON.stringify(err));
+                console.log('line 148' + JSON.stringify(err));
             });
             },
             onerror: function () {
-                console.log('failed to log google api library');
+                console.log('line 152' + 'failed to log google api library');
             }
         });
     }
     
     public tryLogin(callback) {
-        GooglePlus.login({
+        GooglePlus.login( {
             'scopes': gdriveWrapper.SCOPES,
-            'webClientId': gdriveWrapper.CLIENT_ID,
+            'webClientId': '894125857880-7bj3f8ttc59i021vmi9qnn0mhc4s34v4.apps.googleusercontent.com', //gdriveWrapper.CLIENT_ID,
             'offline': true
-        })
+          })
         .then(res => {
-            console.log(JSON.stringify(res));
+            console.log('line 164' + JSON.stringify(res));
             var auth_code = res['serverAuthCode'];
       
             gapi.client.request({
@@ -175,33 +177,35 @@ export class GdriveService {
                 'headers': { },
                 'body': {}})
             .then( res => { 
-                console.log(JSON.stringify(res));
-                this.authToken = res['result']['access_token'];
+                console.log('line 179' + JSON.stringify(res));
+                gdriveWrapper.initOk = true; 
+                gdriveWrapper.authToken = res['result']['access_token'];
                 callback(true);
             })
             .catch( err => {
-                console.log(JSON.stringify(err));
+                console.log('line 185' + JSON.stringify(err));
                 callback(false);
             });
         })
         .catch( err => {
-            console.log(JSON.stringify(err));
+            console.log('line 190' + JSON.stringify(err));
             callback(false);
         });
     }
 
     public logout(): void {
         if (!gapi) {
+            console.log('line 197' + 'gapi not defined - no logout');
             return;
         }
 
-        if (this.authToken) {
+        if (gdriveWrapper.authToken) {
             GooglePlus.logout()
                 .then(res => {
-                    console.log(res);
-                    this.authToken = undefined;
+                    console.log('line 204' + JSON.stringify(res));
+                    gdriveWrapper.authToken = undefined;
                 })
-                .catch(err => console.log(err));
+                .catch(err => console.log('line 207' + JSON.stringify(err)));
         }
         else {
             if (gapi.auth2 && gdriveWrapper.googleAuth) {
@@ -272,13 +276,13 @@ export class GdriveService {
         var pendingUpload = {};
         pendingUpload['id'] = fileName;
         pendingUpload['workdays'] = workdaysToUpload;
-        console.log(pendingUpload);
+        console.log('line 278' + JSON.stringify(pendingUpload));
         this.pendingWorkdayUploads.push(pendingUpload);        
         this.uploadFile(fileName, workdayFileContent, this.uploadWorkdayCallback);
     }
     
     private loginToGoogle(): void {
-        console.log("loginToGoogle");
+        console.log('line 284' + "loginToGoogle");
         if (typeof gapi === 'undefined') {
             let toast = this.toastCtrl.create({
                 message: 'Zugriff auf Google nicht möglich. Laden Sie neu, sobald Internetverbindung vorhanden.',
@@ -290,28 +294,28 @@ export class GdriveService {
         }
 
         gapi.load('client:auth2', { callback: function() {
-            console.log('try to init google client');
-            console.log(JSON.stringify(gapi.client));
+            console.log('line 296' + 'try to init google client');
+            console.log('line 297' + JSON.stringify(gapi.client));
             gapi.client.init({
                 apiKey: gdriveWrapper.API_KEY,
                 clientId: gdriveWrapper.CLIENT_ID,
                 discoveryDocs: gdriveWrapper.DISCOVERY_DOCS,
                 scope: gdriveWrapper.SCOPES
             }).then(() => {
-                console.log('enter init function');
+                console.log('line 304' + 'enter init function');
                 gdriveWrapper.initOk = true; 
                 gdriveWrapper.googleAuth = gapi.auth2.getAuthInstance();
                 gdriveWrapper.googleAuth.isSignedIn.listen(gdriveWrapper.updateSigninStatus);            
-                console.log('Already signed in? ' + gdriveWrapper.googleAuth.isSignedIn.get());
+                console.log('line 308' + 'Already signed in? ' + gdriveWrapper.googleAuth.isSignedIn.get());
                 if (!gdriveWrapper.googleAuth.isSignedIn.get())  {
                     gdriveWrapper.googleAuth.signIn();
                 }
             }).catch ( (err) => {
-              console.log(JSON.stringify(err));
+              console.log('line 313' + JSON.stringify(err));
             });
         },
         onerror: function () {
-            console.log('failed to log google api library');
+            console.log('line 317' + 'failed to log google api library');
         }
         });
     }
@@ -328,7 +332,7 @@ export class GdriveService {
             this.changeHistory = history;
             this.notify();
         }, (error) => {
-            console.log(error.err);
+            console.log('line 334' + JSON.stringify(error.err));
             this.changeHistory = history;
             this.notify();
         });     
@@ -343,7 +347,7 @@ export class GdriveService {
         this.storage.set('changeHistory', serHistory).then((data) => {
             this.notify();
         }, (error) => {
-            console.log('address storage failed: ' + error);
+            console.log('line 349' + 'address storage failed: ' + error);
         });     
     }
 
@@ -374,11 +378,11 @@ export class GdriveService {
             data +
             close_delim;
     
-        console.log('gdw 339: auth_token: %s', JSON.stringify(this.authToken));
+        console.log('gdw 380: auth_token: %s', JSON.stringify(gdriveWrapper.authToken));
         //this.displayAlert(JSON.stringify(this.authToken), 'Log');
         if (gdriveWrapper.initOk) {
-            if (this.authToken) {
-                gapi.client.setToken( { 'access_token': this.authToken });
+            if (gdriveWrapper.authToken) {
+                gapi.client.setToken( { 'access_token': gdriveWrapper.authToken });
                 this.sendRequest(boundary, multipartRequestBody, callback);
             }
             else {
@@ -390,18 +394,18 @@ export class GdriveService {
                         else {
                             gdriveWrapper.googleAuth.signIn()
                                 .then( () => this.sendRequest(boundary, multipartRequestBody, callback))
-                                .catch( (err) => console.log(JSON.stringify(err)));
+                                .catch( (err) => console.log('line 396' + JSON.stringify(err)));
                         }
                     }
                 }
                 else {
                     this.tryLogin( (success) => {
                         if (success) {
-                            gapi.client.setToken( { 'access_token': this.authToken });
+                            gapi.client.setToken( { 'access_token': gdriveWrapper.authToken });
                             this.sendRequest(boundary, multipartRequestBody, callback);
                         }
                         else {
-                            console.log('Google authentication failed!');
+                            console.log('line 407' + 'Google authentication failed!');
                             let toast = this.toastCtrl.create({
                                 message: 'Google Login fehlgeschlagen',
                                 duration: 1000,
@@ -414,7 +418,7 @@ export class GdriveService {
             }
         }
         else {
-            console.log('google API not loaded - check internet connection');
+            console.log('line 420' + 'google API not loaded - check internet connection');
             let toast = this.toastCtrl.create({
                 message: 'Übertragung fehlgeschlagen. Überprüfen Sie die Internetverbindung und versuchen Sie es erneut.',
                 duration: 2000,
@@ -422,11 +426,11 @@ export class GdriveService {
               })
             toast.present();
             if (gdriveWrapper.isLocal) {
-                console.log('on the real devices');
+                console.log('line 428' + 'on the real devices');
                 this.trySilentLogin();
             }
             else {
-                console.log('emulating on browser');
+                console.log('line 432' + 'emulating on browser');
                 this.webLogin();
             }            
         }
@@ -448,7 +452,7 @@ export class GdriveService {
 
     private uploadChangeHistoryCallback(data: any): void {
         if (data['error']) {
-            console.log('Error: %s', data['error'].message);
+            console.log('line 454' + 'Error: %s', data['error'].message);
             let toast = this.toastCtrl.create({
                 message: 'Übertragung fehlgeschlagen.' + data['error'].message,
                 duration: 2000,
@@ -470,7 +474,7 @@ export class GdriveService {
 
     private uploadCallback(data: any): void {
         if (data['error']) {
-            console.log('Error: %s', data['error'].message);
+            console.log('line 476' + 'Error: %s', data['error'].message);
             let toast = this.toastCtrl.create({
                 message: 'Übertragung fehlgeschlagen.' + data['error'].message,
                 duration: 2000,
@@ -490,7 +494,7 @@ export class GdriveService {
 
     private uploadWorkdayCallback(data: any): void {
         if (data['error']) {
-            console.log('Error: %s', data['error'].message);
+            console.log('line 496' + 'Error: %s', data['error'].message);
             let toast = this.toastCtrl.create({
                 message: 'Übertragung fehlgeschlagen.' + data['error'].message,
                 duration: 2000,
@@ -505,7 +509,7 @@ export class GdriveService {
                 position: 'bottom'
               })
               toast.present();
-              console.log(data);
+              console.log('line 511' + JSON.stringify(data));
               this.notifyWorkdayUploadObservers(data['name']);
         }
     }
@@ -521,19 +525,19 @@ export class GdriveService {
                 return (obj.id != fileName);
             });
         }
-        console.log(workdays);
+        console.log('line 527' + JSON.stringify(workdays));
         for (let observer of this.workdayUploadObservers) {
             observer(workdays);
         }
     }
 
     private encryptString(plainText: string): string {
-        console.log('The following will be enrypted: ' + plainText);
+        console.log('line 534' + 'The following will be enrypted: ' + plainText);
         var key = CryptoJS.enc.Latin1.parse('1234567890123456');
         var iv = CryptoJS.enc.Latin1.parse('1234567890123456');
         var encrypted = CryptoJS.AES.encrypt(plainText, key, { iv: iv });
         var result = encrypted.iv.toString() + encrypted.toString();
-        console.log('iv + cipher: ' + result);
+        console.log('line 539' + 'iv + cipher: ' + result);
         return result;
       }
 

@@ -40,6 +40,6 @@
     <plugin name="cordova-plugin-whitelist" spec="1.3.1" />
     <plugin name="ionic-plugin-keyboard" spec="~2.2.1" />
     <plugin name="cordova-plugin-googleplus" spec="~5.1.1">
-        <variable name="REVERSED_CLIENT_ID" value="com.googleusercontent.apps.452487708050-bv4qlfm7rk98sh36751vjdhog7ta2m1m" />
+        <variable name="REVERSED_CLIENT_ID" value="com.googleusercontent.apps.894125857880-e9onmds7qsdfmjo86pjsk9h8a7nctj82" />
     </plugin>
 </widget>
