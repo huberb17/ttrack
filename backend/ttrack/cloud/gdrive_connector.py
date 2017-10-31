@@ -51,7 +51,6 @@ class GdriveConnector:
             self._customer_data_files = filter(lambda x: x['title'].rfind('customers') > 0, self._file_list)
             self._address_data_files = filter(lambda x: x['title'].rfind('addresses') > 0, self._file_list)
             self._workday_data_files = filter(lambda x: x['title'].rfind('workdays') > 0, self._file_list)
-            print (len(self._workday_data_files))
             # logger.info('found files in share "{0}": {1}'.format(self._share, title_list))
         except IOError as io_err:
             logger.info('received InvalidConfigError exception: {0}'.format(io_err.message))
@@ -73,6 +72,15 @@ class GdriveConnector:
             return  file_id, action
         except Exception as e:
             logger.error('Error on getting next action: {0}'.format(e.message))
+            return None, None
+
+    def get_next_workday(self):
+        """Get the next workday file from Google Drive (if available)."""
+        try:
+            file_id, workday = self._get_next_workday()
+            return file_id, workday
+        except Exception as e:
+            logger.error('Error on getting next workday file: {0}'.format(e.message))
             return None, None
 
     def delete_action(self, file_id):
@@ -108,6 +116,17 @@ class GdriveConnector:
         next_file.GetContentFile('tmpfile')
         action = TTrackDecryptor.decrypt('tmpfile')
         return file_id, action
+
+    def _get_next_workday(self):
+        """Internal method that retrieves and decrypts the next workday file from Google Drive."""
+        if len(self._workday_data_files) == 0:
+            return None, None
+        next_file = self._workday_data_files.pop(0)
+        file_id = next_file['id']
+        logger.info('got file with id "{0} from list.'.format(file_id))
+        next_file.GetContentFile('tmpfile')
+        workday = TTrackDecryptor.decrypt('tmpfile')
+        return file_id, workday
 
     def _update_file_list(self):
         logger.info('retrieve file list from Google Drive')
@@ -149,15 +168,6 @@ class GdriveConnector:
             return file_id, data
         except Exception as e:
             logger.error('Error on getting last customer data file: {0}'.format(e.message))
-            return None, None
-
-    def get_last_workday_data_file(self):
-        """Get the last workday data file from Google Drive (if available)."""
-        try:
-            file_id, data = self._get_last_data_file(self._workday_data_files)
-            return file_id, data
-        except Exception as e:
-            logger.error('Error on getting last workday data file: {0}'.format(e.message))
             return None, None
 
     def _get_last_data_file(self, file_list):

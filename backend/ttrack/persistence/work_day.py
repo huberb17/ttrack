@@ -31,9 +31,9 @@ class WorkDay:
                 start_km += int(route_distance)
                 last_id = end_id
                 count = count + 1
-            # TODO: add when uploaded data is fixed: last_route = workday['lastRoute']
-            end_id = '1' # last_route['end']['id']
-            route_distance = 17 # last_route['lengthInKm']
+            last_route = workday['lastRoute']
+            end_id = last_route['end']['id']
+            route_distance = last_route['lengthInKm']
             comment = u'Rückfahrt'
             dr_id = '{0}_dr_{1}'.format(workday_id, count)
             self._driven_routes.append(DrivenRoute(dr_id, date, start_km, last_id, end_id, route_distance, comment))

@@ -16,12 +16,12 @@ from backend.ttrack.utils.config_reader import ConfigReader
 from backend.ttrack.utils.errors import ConfigReaderError, GdriveConnectorError, DataStoreError
 from backend.ttrack.export.excel_writer import ExcelWriter
 from backend.ttrack.persistence.data_store import DataStore
+from backend.ttrack.utils.ttrack_decryptor import TTrackDecryptor
 
 
 def process_actions(gd_conn, ds):
     """This function creates a backup of the database and processes all update
-    actions on Google Drive."""
-
+    actions on Google Drive and delete them on success."""
     ds.backup_db_content()
 
     file_id, data = gd_conn.get_next_action()
@@ -32,6 +32,20 @@ def process_actions(gd_conn, ds):
         file_id, data = gd_conn.get_next_action()
 
 
+def process_workdays(gd_conn, ds):
+    """This function creates a backup of the database and processes all workday
+    files on Google Drive (they remain there)."""
+    ds.backup_db_content()
+
+    # file_id, data = gd_conn.get_next_workday()
+    # while file_id is not None:
+    #     workdays = json.loads(data)
+    #     ds.try_add(workdays)
+    #     file_id, data = gd_conn.get_next_workday()
+    data = TTrackDecryptor.decrypt('2017-10-25T14_41_57.885Z_workdays.bin')
+    workdays = json.loads(data)
+    ds.try_add(workdays)
+
 def main():
     """The main function for the ttrack module."""
 
@@ -41,11 +55,11 @@ def main():
 
     try:
         config = ConfigReader('./resources/config.json')
-        gd_conn = GdriveConnector(config)
+#        gd_conn = GdriveConnector(config)
         ds = DataStore(config)
         excel_writer = ExcelWriter(config)
 
-        gd_conn.connect()
+#        gd_conn.connect()
         # gd_conn.populate_drive() # remove this after tests are finished
         # the following is some kind of admin functionality - is not done in every
         # months usage
@@ -56,7 +70,8 @@ def main():
         # file_id, data = gd_conn.get_last_workday_data_file()
         # ds.force_data_storage('workday', data)
 
-        process_actions(gd_conn, ds)
+#        process_actions(gd_conn, ds)
+#        process_workdays(gd_conn, ds)
 
         excel_writer.backup_and_create(ds)
     except (ConfigReaderError, GdriveConnectorError, DataStoreError) as err:
