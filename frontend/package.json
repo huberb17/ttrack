@@ -19,6 +19,7 @@
     "@angular/platform-browser": "2.4.8",
     "@angular/platform-browser-dynamic": "2.4.8",
     "@angular/platform-server": "2.4.8",
+    "@ionic-native/core": "^4.3.2",
     "@ionic-native/google-plus": "^4.3.2",
     "@ionic/storage": "2.0.0",
     "@types/crypto-js": "^3.1.35",
@@ -61,7 +62,7 @@
       "cordova-plugin-whitelist": {},
       "ionic-plugin-keyboard": {},
       "cordova-plugin-googleplus": {
-        "REVERSED_CLIENT_ID": "com.googleusercontent.apps.452487708050-bv4qlfm7rk98sh36751vjdhog7ta2m1m"
+        "REVERSED_CLIENT_ID": "com.googleusercontent.apps.894125857880-e9onmds7qsdfmjo86pjsk9h8a7nctj82"
       }
     },
     "platforms": [
