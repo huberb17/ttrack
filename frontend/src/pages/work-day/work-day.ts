@@ -202,6 +202,7 @@ export class WorkDayPage implements OnInit {
     workday.customersOfDay = this.customersOfDay;
     workday.startAddress = this.startAddress;
     workday.endAddress = this.endAddress;
+    workday.lastRoute = this.lastRoute;
     this.workdayService.saveWorkday(workday);
 
     let toast = this.toastCtrl.create({
@@ -221,6 +222,7 @@ export class WorkDayPage implements OnInit {
     workday.customersOfDay = this.customersOfDay;
     workday.startAddress = this.startAddress;
     workday.endAddress = this.endAddress;
+    workday.lastRoute = this.lastRoute;
     this.workdayService.submitWorkday(workday);
 
     let toast = this.toastCtrl.create({

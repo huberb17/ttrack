@@ -20,12 +20,14 @@ export class Workday {
     public startAddress: TTrackAddress;
     public endAddress: TTrackAddress;
     public customersOfDay: CustomerAtWorkday[];
+    public lastRoute: TTrackRoute;
     public isUploaded: boolean;
     public constructor() {
         this.id = Workday.newGuid();
         this.customersOfDay = [];
         this.startAddress = new TTrackAddress();
         this.endAddress = new TTrackAddress();
+        this.lastRoute = new TTrackRoute();
         this.isUploaded = false;
     }
     
@@ -317,6 +319,7 @@ export class WorkdayService {
         serWorkday['customers'] = serCustList;
         serWorkday['startAddress'] = TTrackAddress.serialize(workday.startAddress);
         serWorkday['endAddress'] = TTrackAddress.serialize(workday.endAddress);
+        serWorkday['lastRoute'] = this.serializeRoute(workday.lastRoute);
         serWorkday['isUploaded'] = workday.isUploaded;
         return serWorkday;
     }
@@ -361,6 +364,7 @@ export class WorkdayService {
         }
         workday.startAddress = TTrackAddress.deserialize(serWorkday['startAddress']);
         workday.endAddress = TTrackAddress.deserialize(serWorkday['endAddress']);
+        workday.lastRoute = this.deserializeRoute(serWorkday['lastRoute']);
         workday.isUploaded = serWorkday['isUploaded'];
         return workday;
     }
