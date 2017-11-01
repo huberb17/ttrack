@@ -103,6 +103,7 @@ export class WorkdayService {
         this.addWorkdayToHistory(workday);
         this.workday = new Workday();
         this.storeWorkday(this.workday);
+        this.uploadWorkday(workday);
     }
 
     uploadWorkday(workday: Workday) {
