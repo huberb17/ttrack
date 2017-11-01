@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 
 import { Platform, NavParams, ViewController } from 'ionic-angular';
-import { CustomerAtWorkday, TTrackAddress } from "../../../app/domain-model/domain-model";
+import { CustomerAtWorkday } from "../../../app/domain-model/domain-model";
 import { DistanceService } from "../../../app/services/distance.service";
 
 

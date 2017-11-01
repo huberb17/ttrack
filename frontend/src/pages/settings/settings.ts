@@ -7,7 +7,6 @@ import { GdriveService } from "../../app/services/gdrive.service";
 import { TTrackAddress } from '../../app/domain-model/domain-model';
 import { ChangeAddressModalPage } from '../work-day/modals/change-address-modal';
 import { WorkdayService } from '../../app/services/workday.service';
-import { GooglePlus } from 'ionic-native';
 
 declare var gapi;
 
