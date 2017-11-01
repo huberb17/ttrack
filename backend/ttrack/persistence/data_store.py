@@ -9,6 +9,7 @@ import datetime
 from backend.ttrack.persistence.address import Address
 from backend.ttrack.persistence.customer import Customer
 from backend.ttrack.persistence.driven_route import DrivenRoute
+from backend.ttrack.persistence.expense import Expense
 from backend.ttrack.persistence.work_day import WorkDay
 from backend.ttrack.utils.errors import DataStoreError
 
@@ -60,8 +61,6 @@ class DataStore:
                 self._fore_address_data_storage(data)
             elif type == 'customer':
                 self._force_customer_data_storage(data)
-            elif type == 'workday':
-                self._force_workday_data_storage(data)
             else:
                 raise DataStoreError('Wrong type detected: {0}'.format(type))
         except DataStoreError:
@@ -98,14 +97,15 @@ class DataStore:
                 data['note'], data['is_active']
             )
         elif type == 'driven_route':
-            data = DrivenRoute(data).convert_to_db_object()
+            data = data.convert_to_db_object()
             sql_string = '''INSERT OR IGNORE INTO driven_routes VALUES ('{0}', '{1}', {2}, 
                                 '{3}', '{4}', {5}, '{6}', '{7}')'''.format(
                 data['id'], data['date'], data['start_km'], data['start_address_id'], data['end_address_id'],
                 data['route_km'], data['invoice_ref'], data['comment']
             )
         elif type == 'expense':
-            sql_string = '''INSERT OR IGNORE INTO expenses VALUES ('{0}', '{1}', {2}, {3}, '{4}')'''.format(
+            data = data.convert_to_db_object()
+            sql_string = '''INSERT OR IGNORE INTO expenses VALUES ('{0}', '{1}', '{2}', {3}, '{4}')'''.format(
                 data['id'], data['date'], data['text_for_report'], data['value'], data['category']
             )
         elif type == 'income':
@@ -145,7 +145,8 @@ class DataStore:
                 data['route_km'], data['invoice_ref']
             )
         elif type == 'expense':
-            sql_string = '''UPDATE expenses SET id='{0}', date='{1}', text_for_report={2}, value={3}, 
+            data = data.convert_to_db_object()
+            sql_string = '''UPDATE expenses SET id='{0}', date='{1}', text_for_report='{2}', value={3}, 
             category='{4}'  WHERE id = '{0}' '''.format(
                 data['id'], data['date'], data['text_for_report'], data['value'], data['category']
             )
@@ -208,6 +209,86 @@ class DataStore:
 
         return data
 
+    def get_expense_data(self, month, year):
+        query_string = '''SELECT date, 
+                                 text_for_report, 
+                                 category,
+                                 value,
+                                 strftime('%m', date) as month, 
+                                 strftime('%Y', date) as year
+                            FROM expenses
+                            WHERE month = '{0:02d}' and year = '{1}' '''.format(month, year)
+
+        c = self._conn.cursor()
+        c.execute(query_string)
+        data = []
+        for row in c:
+            data_row = ('generated',)
+            index = 1
+            pre_empty_fields = 0
+            post_empty_fields = 0
+            for field in row:
+                if index == 1:
+                    # convert date
+                    converted_field = datetime.datetime.strptime(field.strip(), "%Y-%m-%d")
+                    data_row = data_row + (converted_field,)
+                elif index == 2:
+                    data_row = data_row + (field,)
+                elif index == 3:
+                    if field == 'income':
+                        pre_empty_fields = 1
+                        post_empty_fields = 11
+                    elif field == 'income_other':
+                        pre_empty_fields = 2
+                        post_empty_fields = 10
+                    elif field == 'rent':
+                        pre_empty_fields = 3
+                        post_empty_fields = 9
+                    elif field == 'consumable':
+                        pre_empty_fields = 4
+                        post_empty_fields = 8
+                    elif field == 'office_material':
+                        pre_empty_fields = 5
+                        post_empty_fields = 7
+                    elif field == 'training':
+                        pre_empty_fields = 6
+                        post_empty_fields = 6
+                    elif field == 'km':
+                        pre_empty_fields = 7
+                        post_empty_fields = 5
+                    elif field == 'clothes':
+                        pre_empty_fields = 8
+                        post_empty_fields = 4
+                    elif field == 'phone':
+                        pre_empty_fields = 9
+                        post_empty_fields = 3
+                    elif field == 'social_insurance':
+                        pre_empty_fields = 10
+                        post_empty_fields = 2
+                    elif field == 'property_insurance':
+                        pre_empty_fields = 11
+                        post_empty_fields = 1
+                    elif field == 'purchase':
+                        pre_empty_fields = 12
+                        post_empty_fields = 0
+                elif index == 4:
+                    i = 0
+                    while i < pre_empty_fields:
+                        data_row = data_row + (None,)
+                        i += 1
+                    data_row = data_row + (field,)
+                    i = 0
+                    while i < post_empty_fields:
+                        data_row = data_row + (None,)
+                        i += 1
+                else:
+                    # skip the rest
+                    pass
+                index += 1
+            data.append(data_row)
+
+        return data
+
     def backup_db_content(self):
         current_time = datetime.datetime.now()
         name = current_time.strftime("%Y-%m-%d_%H%M%S") + str(current_time.microsecond) + '.sql'
@@ -234,16 +315,30 @@ class DataStore:
                        'data': customer_obj
                        })
 
-    def _force_workday_data_storage(self, data):
-        workdays = json.loads(data)
-        self._drop_table_content('driven_routes')
+    def try_add(self, workdays):
         for workday_obj in workdays:
             workday = WorkDay(workday_obj)
             driven_routes = workday.get_driven_routes()
+            old_expense = None
             for route in driven_routes:
                 self.update({'type': 'driven_route',
                            'command': 'create',
                            'data': route })
+                if route._comment == 'Rückfahrt' and old_expense is not None:
+                    old_expense._value += route._route_distance * 0.42
+                    self.update( {
+                        'type': 'expense',
+                        'command': 'update',
+                        'data': old_expense
+                    })
+                else:
+                    expense = Expense('km', 0.42, route)
+                    self.update( {
+                        'type': 'expense',
+                        'command': 'create',
+                        'data': expense
+                    })
+                    old_expense = expense
 
     def _drop_table_content(self, table_name):
         try:
