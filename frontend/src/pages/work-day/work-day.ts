@@ -1,6 +1,6 @@
-import { Component, OnInit, NgZone } from '@angular/core';
+import { Component, OnInit, NgZone, ViewChild } from '@angular/core';
 
-import { ModalController, NavController, ToastController } from 'ionic-angular';
+import { ModalController, NavController, ToastController, Content } from 'ionic-angular';
 
 import { TTrackCustomer, TTrackAddress, CustomerAtWorkday, TTrackRoute } from '../../app/domain-model/domain-model';
 import { CustomerService } from '../../app/services/customer.service';
@@ -17,10 +17,12 @@ import { WorkdayService, Workday } from "../../app/services/workday.service";
   templateUrl: 'work-day.html'
 })
 export class WorkDayPage implements OnInit {
+  @ViewChild(Content) content: Content;
   public therapyDate: string;
   public isCreated: boolean;
   public isDayEmpty: boolean;
   public isDaySaved: boolean;
+  public showFooter: boolean;
   public customersOfDay: CustomerAtWorkday[];
   public milage: number;
   
@@ -76,6 +78,8 @@ export class WorkDayPage implements OnInit {
     this.isCreated = true;
     this.isDayEmpty = true;
     this.isDaySaved = true;
+    this.showFooter = true;
+    this.content.resize();
   }
 
   getStartAddress(): string {
