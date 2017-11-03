@@ -61,9 +61,10 @@
       </button>
     </ion-item> 
   </ion-list>
-
+</ion-content>
   <ion-footer *ngIf="isCreated == true">
     <ion-toolbar color=light>
+      <ion-title>Arbeitstag</ion-title>
       <ion-buttons start>
       <button ion-button [disabled]="isDaySaved" (click)="saveWorkday()">
         Speichern
@@ -71,11 +72,6 @@
       <button ion-button [disabled]="isDayEmpty || (milage === undefined) || (milage <= 0)" (click)="submitWorkday()">
         Abschließen
       </button>
-    </ion-buttons>
-
-    <ion-title>Arbeitstag</ion-title>
-
-    <ion-buttons end>
       <button ion-button (click)="deleteWorkday()">
         Löschen
       </button>
@@ -83,4 +79,4 @@
     </ion-toolbar>
   </ion-footer>
 
-</ion-content>
+
