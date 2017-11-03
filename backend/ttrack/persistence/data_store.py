@@ -357,3 +357,47 @@ class DataStore:
             self.update(action)
 
 
+    def get_customers(self):
+        addresses = self.get_addresses()
+        sql_string = "SELECT * FROM customers"
+        c = self._conn.cursor()
+        c.execute(sql_string)
+        data = c.fetchall()
+        customers = []
+        for item in data:
+            customer = {}
+            customer['id'] = item[0]
+            customer['title'] = item[1]
+            customer['firstName'] = item[2]
+            customer['lastName'] = item[3]
+            address_id = item[4]
+            address = {}
+            for addr in addresses:
+                if addr['id'] == address_id:
+                    address = addr
+                    break
+            customer['address'] = address
+            customer['isActive'] = item[5]
+            customers.append(customer)
+        return customers
+
+    def get_addresses(self):
+        sql_string = "SELECT * FROM addresses"
+        c = self._conn.cursor()
+        c.execute(sql_string)
+        data = c.fetchall()
+        addresses = []
+        for item in data:
+            address = {}
+            address['id'] = item[0]
+            address['street'] = item[1]
+            address['streetNumber'] = item[2]
+            address['doorNumber'] = item[3]
+            address['zipCode'] = item[4]
+            address['city'] = item[5]
+            address['comment'] = item[6]
+            address['isActive'] = item[7]
+            addresses.append(address)
+        return addresses
+
+
