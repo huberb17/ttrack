@@ -78,6 +78,7 @@ export class GdriveService {
         this.uploadCallback = this.uploadCallback.bind(this);
         this.uploadChangeHistoryCallback = this.uploadChangeHistoryCallback.bind(this);
         this.uploadWorkdayCallback = this.uploadWorkdayCallback.bind(this);
+        this.decryptString = this.decryptString.bind(this);        
         this.changeHistory = [];
         this.storage = new Storage();
         this.observers = [];
@@ -281,6 +282,14 @@ export class GdriveService {
         this.uploadFile(fileName, workdayFileContent, this.uploadWorkdayCallback);
     }
     
+    public getCustomerDataFromDrive(callback): void {
+        this.getContentOfFile('customerFile.bin', callback);
+    }
+
+    public getAddressDataFromDrive(callback): void {
+        this.getContentOfFile('addressFile.bin', callback);
+    }
+
     private loginToGoogle(): void {
         console.log('line 284' + "loginToGoogle");
         if (typeof gapi === 'undefined') {
@@ -357,6 +366,61 @@ export class GdriveService {
         }
     }
 
+    private  getContentOfFile(fileName: string, callback: any): void {
+        if (gdriveWrapper.initOk) {
+            if (gdriveWrapper.authToken) {
+                gapi.client.setToken( { 'access_token': gdriveWrapper.authToken });
+                this.sendFileListRequest(fileName, callback);
+            }
+            else {
+                if (gapi.auth2) {
+                    if (gdriveWrapper.googleAuth) {
+                        if (gdriveWrapper.googleAuth.isSignedIn.get()) {
+                            this.sendFileListRequest(fileName, callback);
+                        }
+                    }
+                }
+            }
+        }
+    }
+        
+    private sendFileListRequest(fileName: string, callback: any): any {
+        gapi.client.drive.files.list({
+            'pageSize': 10,
+            'fields': "nextPageToken, files(id, name)"
+        }).then( response => {
+            console.log('Files:');
+            var files = response.result.files;
+            if (files && files.length > 0) {
+                for (var i = 0; i < files.length; i++) {
+                    var file = files[i];
+                    console.log(file.name + ' (' + file.id + ')');
+                    if (file.name == fileName) {
+                        console.log('found correct file');
+                        this.getFileContent(file.id, callback);
+                    }
+                }
+            } else {
+                console.log('No files found.');
+            }
+        });
+    }
+
+    private getFileContent(fileId: any, callback: any): void {
+        gapi.client.drive.files.get({
+            "fileId": "0B-TUkLBdgjdCaWFIUjVmN2pVVmc",
+            "alt": "media"
+          })
+              .then( (response) => {
+                // Handle the results here (response.result has the parsed body).
+                console.log("Response", response);
+                let responseObject = JSON.parse(this.decryptString(response['body']));
+                callback(responseObject);
+              }, (error) => {
+                console.error("Execute error", error);
+              });
+    }
+    
     private uploadFile(fileName: string, data: string, callback): void {
         const boundary = '-------314159265358979323846';
         const delimiter = "\r\n--" + boundary + "\r\n";
@@ -539,6 +603,16 @@ export class GdriveService {
         var result = encrypted.iv.toString() + encrypted.toString();
         console.log('line 539' + 'iv + cipher: ' + result);
         return result;
+      }
+
+      private decryptString(cipherText: string): string {
+        console.log('line 607: Input: ' + cipherText);
+        console.log('line 610 ' + 'The following will be decrypted: ' + cipherText.slice(32));
+        var key = CryptoJS.enc.Latin1.parse('1234567890123456');
+        var iv = CryptoJS.enc.Latin1.parse('1234567890123456');
+        var decrypted = CryptoJS.AES.decrypt(cipherText.slice(32), key, { iv: iv });
+        console.log('line 614: ' + CryptoJS.enc.Utf8.stringify(decrypted));
+        return CryptoJS.enc.Utf8.stringify(decrypted);
       }
 
 }

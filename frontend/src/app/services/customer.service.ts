@@ -89,6 +89,15 @@ export class CustomerService {
         }
     }
 
+    public overwriteCustomers(customers: TTrackCustomer[]) {
+        if (customers) {
+            if (customers.length > 0) {
+                this.customerList = customers;
+                this.storeCustomers();
+            }
+        }
+    }
+
     addCustomer(customer: TTrackCustomer) {
         if (customer.id == undefined) {
             customer.id = this.newGuid();

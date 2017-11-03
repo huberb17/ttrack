@@ -1,10 +1,10 @@
 import { Component } from '@angular/core';
 
-import { NavController, ModalController } from 'ionic-angular';
+import { NavController, ModalController, AlertController } from 'ionic-angular';
 import { AddressService } from "../../app/services/address.service";
 import { CustomerService } from "../../app/services/customer.service";
 import { GdriveService } from "../../app/services/gdrive.service";
-import { TTrackAddress } from '../../app/domain-model/domain-model';
+import { TTrackAddress, TTrackCustomer } from '../../app/domain-model/domain-model';
 import { ChangeAddressModalPage } from '../work-day/modals/change-address-modal';
 import { WorkdayService } from '../../app/services/workday.service';
 
@@ -20,6 +20,7 @@ export class SettingsPage {
   
   constructor(public navCtrl: NavController,
       public modalCtrl: ModalController,
+      private alertCtrl: AlertController,
       private addrService: AddressService,
       private custService: CustomerService,
       private wdService: WorkdayService,
@@ -31,26 +32,61 @@ export class SettingsPage {
     this.addressSettingsCallback = this.addressSettingsCallback.bind(this);
     this.addrService.registSettingsCallback(this.addressSettingsCallback);
 
+    this.getAddressesFromGdriveCallback = this.getAddressesFromGdriveCallback.bind(this);
+    this.getCustomersFromGdriveCallback = this.getCustomersFromGdriveCallback.bind(this);
+
   }
 
-  doGoogleLogout(){
+  public doGoogleLogout(){
     this.gdriveService.logout();
-    //GooglePlus.logout();
   }
 
-  doGoogleLogin(){
+  public doGoogleLogin(){
     this.gdriveService.tryLogin( (res) => console.log(res) );
-    // GooglePlus.login( {
-    //   'scopes': 'https://www.googleapis.com/auth/drive',
-    //   'webClientId': '894125857880-7bj3f8ttc59i021vmi9qnn0mhc4s34v4.apps.googleusercontent.com', //gdriveWrapper.CLIENT_ID,
-    //   'offline': true
-    // }).then(function (user) {
-    //   console.log(JSON.stringify(user));
-    //   alert(JSON.stringify(user))
-    // }, function (error) {
-    //   console.log(JSON.stringify(error));
-    //   alert(JSON.stringify(error))
-    // });
+  }
+
+  public getCustomerData(): void {
+    let confirm = this.alertCtrl.create({
+      title: 'Kundendaten überschreiben?',
+      message: 'Sollen die Kundendaten wirklich überschrieben werdden?',
+      buttons: [
+        {
+          text: 'Überschreiben',
+          handler: () => {
+            this.gdriveService.getCustomerDataFromDrive(this.getCustomersFromGdriveCallback);
+          }
+        },
+        {
+          text: 'Abbrechen',
+          handler: () => {
+            console.log('get CustomerData canceled');
+          }
+        }
+      ]
+    });
+    confirm.present();
+  }
+
+  public getAddressData(): void {
+    let confirm = this.alertCtrl.create({
+      title: 'Adressdaten überschreiben?',
+      message: 'Sollen die Adressdaten wirklich überschrieben werdden?',
+      buttons: [
+        {
+          text: 'Überschreiben',
+          handler: () => {
+            this.gdriveService.getAddressDataFromDrive(this.getAddressesFromGdriveCallback);
+          }
+        },
+        {
+          text: 'Abbrechen',
+          handler: () => {
+            console.log('get CustomerData canceled');
+          }
+        }
+      ]
+    });
+    confirm.present();
   }
 
   public changeStartAddress(): void {
@@ -97,5 +133,22 @@ export class SettingsPage {
     var lastPage = this.navCtrl.last;
     window.location.reload();
     this.navCtrl.push(lastPage);
+  }
+
+  private getAddressesFromGdriveCallback(addresses: TTrackAddress[]): void {
+    if (addresses) {
+      if (addresses.length > 0) {
+        this.addrService.overwriteAddresses(addresses);
+      }
+    }
+  }
+
+  private getCustomersFromGdriveCallback(customers: TTrackCustomer[]): void {
+    if (customers) {
+      if (customers.length > 0) {
+        this.custService.overwriteCustomers(customers);
+      }
+    }
+    
   }
 }

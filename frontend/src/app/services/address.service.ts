@@ -147,6 +147,15 @@ export class AddressService {
         return this.addressList;
     }
 
+    public overwriteAddresses(addresses: TTrackAddress[]) {
+        if (addresses) {
+            if (addresses.length > 0) {
+                this.addressList = addresses;
+                this.storeAddresses();
+            }
+        }
+    }
+
     addAddress(address: TTrackAddress) {
         if (address.id == undefined) {
             address.id = this.newGuid();
