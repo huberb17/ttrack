@@ -85,6 +85,8 @@ export class GdriveService {
         this.workdayUploadObservers = [];
         this.pendingWorkdayUploads = [];
         this.refreshChangeHistory(); 
+        console.log('line88: ' + this.storage.driver);
+        this.storage.ready().then( () => console.log('line89: ' + this.storage.driver));
     }
 
     public login(is_local: boolean): void {

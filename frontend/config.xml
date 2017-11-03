@@ -42,4 +42,5 @@
     <plugin name="cordova-plugin-googleplus" spec="~5.1.1">
         <variable name="REVERSED_CLIENT_ID" value="com.googleusercontent.apps.894125857880-e9onmds7qsdfmjo86pjsk9h8a7nctj82" />
     </plugin>
+    <plugin name="cordova-sqlite-storage" spec="^2.1.0" />
 </widget>

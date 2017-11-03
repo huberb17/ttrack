@@ -22,7 +22,6 @@ export class WorkDayPage implements OnInit {
   public isCreated: boolean;
   public isDayEmpty: boolean;
   public isDaySaved: boolean;
-  public showFooter: boolean;
   public customersOfDay: CustomerAtWorkday[];
   public milage: number;
   
@@ -31,7 +30,6 @@ export class WorkDayPage implements OnInit {
   private startAddress: TTrackAddress;
   private endAddress: TTrackAddress;
   private lastRoute: TTrackRoute;
-
   constructor(public navCtrl: NavController,
               public modalCtrl: ModalController,
               public toastCtrl: ToastController,
@@ -78,7 +76,6 @@ export class WorkDayPage implements OnInit {
     this.isCreated = true;
     this.isDayEmpty = true;
     this.isDaySaved = true;
-    this.showFooter = true;
     this.content.resize();
   }
 
