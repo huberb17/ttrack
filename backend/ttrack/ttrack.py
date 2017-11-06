@@ -46,6 +46,21 @@ def process_workdays(gd_conn, ds):
     workdays = json.loads(data)
     ds.try_add(workdays)
 
+
+def upload_current_customers(data_store, google_drive):
+    """This function retrieves the customer data from the DB and uploads it with
+    the constant name 'customerFile.bin'."""
+    data = data_store.get_customers()
+    google_drive.encrypt_and_upload_data('customerFile.bin', json.dumps(data))
+
+
+def upload_current_addresses(data_store, google_drive):
+    """This function retrieves the address data from the DB and uploads it with
+    the constant name 'addressFile.bin'."""
+    data = data_store.get_addresses()
+    google_drive.encrypt_and_upload_data('addressFile.bin', json.dumps(data))
+
+
 def main():
     """The main function for the ttrack module."""
 
@@ -54,15 +69,23 @@ def main():
     ds = None
 
     try:
+        # read the configuration file
         config = ConfigReader('./resources/config.json')
-#        gd_conn = GdriveConnector(config)
+        # initialize the helper classes
+        gd_conn = GdriveConnector(config)
         ds = DataStore(config)
         excel_writer = ExcelWriter(config)
 
-#        gd_conn.connect()
-        # gd_conn.populate_drive() # remove this after tests are finished
+        # connect to Google Drive and get the current list of files
+        gd_conn.connect()
+
+        # this is optional: upload the current customers and addresses to the drive
+        upload_current_customers(ds, gd_conn)
+        upload_current_addresses(ds, gd_conn)
+
         # the following is some kind of admin functionality - is not done in every
-        # months usage
+        # months usage - it wipes the DB and stores only the last addresses, customers and
+        # workdays
         # file_id, data = gd_conn.get_last_address_data_file()
         # ds.force_data_storage('address', data)
         # file_id, data = gd_conn.get_last_customer_data_file()
@@ -70,10 +93,14 @@ def main():
         # file_id, data = gd_conn.get_last_workday_data_file()
         # ds.force_data_storage('workday', data)
 
+        # update the DB state by replaying all actions done at the frontend (address and customer)
 #        process_actions(gd_conn, ds)
+        # update the DB state by adding all workdays created at the frontend
 #        process_workdays(gd_conn, ds)
 
+        # re-create the excel reports
         excel_writer.backup_and_create(ds)
+
     except (ConfigReaderError, GdriveConnectorError, DataStoreError) as err:
         logger.error(err.message)
     except Exception as e:

@@ -30,13 +30,21 @@ class TTrackDecryptor:
         return data
 
     @staticmethod
-    def encrypt(msg, filename):
-        key = b'1234567890123456'
-        iv = Random.new().read(AES.block_size)
-        cipher = AES.new(key, AES.MODE_CFB, iv)
-        ciphertext = iv + cipher.encrypt(msg.encode())
+    def encrypt(msg):
+        key = '1234567890123456'
+        #iv = Random.new().read(AES.block_size)
+        iv = '1234567890123456'
+        cipher = AES.new(key, AES.MODE_CBC, iv)
+        padding = len(msg) % 16
+        if padding > 0:
+            for idx in xrange(16 - padding):
+                msg += ' '
 
-        file_out = open(filename, "wb")
-        file_out.write(ciphertext)
-        file_out.close()
-        logger.info('encrypt file: {0}'.format(filename))
+        ciphertext = iv + base64.b64encode(cipher.encrypt(msg.encode()))
+
+        # file_out = open(filename, "wb")
+        # file_out.write(ciphertext)
+        # file_out.close()
+        # logger.info('encrypt file: {0}'.format(filename))
+
+        return ciphertext
