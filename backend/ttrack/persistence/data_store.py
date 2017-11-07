@@ -395,7 +395,7 @@ class DataStore:
             address['doorNumber'] = item[3]
             address['zipCode'] = item[4]
             address['city'] = item[5]
-            address['comment'] = item[6]
+            address['note'] = item[6]
             address['isActive'] = item[7]
             addresses.append(address)
         return addresses

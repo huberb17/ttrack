@@ -80,7 +80,7 @@ def main():
         gd_conn.connect()
 
         # this is optional: upload the current customers and addresses to the drive
-        upload_current_customers(ds, gd_conn)
+#        upload_current_customers(ds, gd_conn)
         upload_current_addresses(ds, gd_conn)
 
         # the following is some kind of admin functionality - is not done in every
