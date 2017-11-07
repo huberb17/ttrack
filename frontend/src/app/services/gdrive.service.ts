@@ -410,7 +410,7 @@ export class GdriveService {
 
     private getFileContent(fileId: any, callback: any): void {
         gapi.client.drive.files.get({
-            "fileId": "0B-TUkLBdgjdCaWFIUjVmN2pVVmc",
+            "fileId": fileId,
             "alt": "media"
           })
               .then( (response) => {
@@ -609,12 +609,33 @@ export class GdriveService {
 
       private decryptString(cipherText: string): string {
         console.log('line 607: Input: ' + cipherText);
-        console.log('line 610 ' + 'The following will be decrypted: ' + cipherText.slice(32));
+        //console.log('line 610 ' + 'The following will be decrypted: ' + cipherText.slice(16));
         var key = CryptoJS.enc.Latin1.parse('1234567890123456');
         var iv = CryptoJS.enc.Latin1.parse('1234567890123456');
-        var decrypted = CryptoJS.AES.decrypt(cipherText.slice(32), key, { iv: iv });
-        console.log('line 614: ' + CryptoJS.enc.Utf8.stringify(decrypted));
-        return CryptoJS.enc.Utf8.stringify(decrypted);
+        //cipherText = cipherText.slice(16);
+        //console.log(CryptoJS.enc.Base64.parse(cipherText));
+        //var ciphertext = CryptoJS.enc.Base64.parse(cipherText);
+        //var iv = ciphertext.clone();
+        //iv.sigBytes = 16;
+        //iv.clamp();
+        //console.log(iv.toString(CryptoJS.enc.Latin1));
+        //ciphertext.words.splice(0, 4);
+        //ciphertext.sigBytes -= 16;
+
+        var decrypted = CryptoJS.AES.decrypt(cipherText, key, { iv: iv });
+        console.log('line 617: ' + decrypted);
+        var tmpDecrypted = CryptoJS.enc.Latin1.stringify(decrypted);
+        console.log('line 618: ' + tmpDecrypted);
+        var lastSquared = tmpDecrypted.lastIndexOf(']');
+        var lastCurled = tmpDecrypted.lastIndexOf('}');
+        if (lastSquared > lastCurled) {
+            tmpDecrypted = tmpDecrypted.slice(0, lastSquared + 1);
+        }
+        else {
+            tmpDecrypted = tmpDecrypted.slice(0, lastCurled + 1);
+        }
+        console.log('line 637: ' + tmpDecrypted);
+        return tmpDecrypted;
       }
 
 }
