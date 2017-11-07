@@ -8,7 +8,7 @@ export class TTrackCustomer {
     public firstName: string;
     public lastName: string;
     public address: TTrackAddress;
-    public prescriptions: TTrackPrescription[];
+    public invoiceConfiguration: TTrackIncome;
     public isActive: boolean;
 
     public static serialize(customer: TTrackCustomer): any {
@@ -18,6 +18,7 @@ export class TTrackCustomer {
         serCustomer['firstName'] = customer.firstName;
         serCustomer['lastName'] = customer.lastName;
         serCustomer['address'] = customer.address.id;
+        serCustomer['invoiceConfig'] = TTrackIncome.serialize(customer.invoiceConfiguration);
         serCustomer['isActive'] = customer.isActive;
         return serCustomer;
     }
@@ -30,6 +31,7 @@ export class TTrackCustomer {
         customer.lastName = serCustomer['lastName'];
         customer.address = new TTrackAddress();
         customer.address.id = serCustomer['address'];
+        customer.invoiceConfiguration = TTrackIncome.deserialize['invoiceConfig'];
         customer.isActive = serCustomer['isActive'];
         return customer;
     }
@@ -37,6 +39,7 @@ export class TTrackCustomer {
 
 export class CustomerAtWorkday extends TTrackCustomer {
     public routeToCustomer: TTrackRoute;
+    public invoice: TTrackIncome;
     constructor(customer: TTrackCustomer) {
         super();
         this.id = customer.id;
@@ -44,31 +47,11 @@ export class CustomerAtWorkday extends TTrackCustomer {
         this.firstName = customer.firstName;
         this.lastName = customer.lastName;
         this.address = customer.address;
-        this.prescriptions = customer.prescriptions;
+        this.invoiceConfiguration = customer.invoiceConfiguration;
         this.isActive = customer.isActive;
         this.routeToCustomer = null;
+        this.invoice = null;
     }
-}
-
-export class TTrackPrescription {
-    public date: string;
-    public customer: TTrackCustomer;
-    public numTherapyItems: number;
-    public ratePerItem: number;
-    public itemsTillPayment: number;
-    public itemsTillInvoice: number;
-    public textForReport: string;
-    public therapyItems: TTrackTherapyItem[];
-    public invoices: TTrackInvoice[];
-    public isActive: boolean;
-}
-
-export class TTrackTherapyItem {
-    public date: string;
-    public routeStart: TTrackAddress;
-    public routeEnd: TTrackAddress;
-    public drivenKm: number;
-    public partOfInvoice: TTrackInvoice; 
 }
 
 export class TTrackAddress {
@@ -121,13 +104,6 @@ export class TTrackRoute {
     public lengthInKm: number;    
 }
 
-export class TTrackInvoice {
-    public date: string;
-    public partOfPrescription: TTrackPrescription;
-    public value: number;
-    public therapyItems: TTrackTherapyItem[];
-}
-
 export class TTrackExpense {
     public date: string;
     public textForReport: string;
@@ -140,10 +116,22 @@ export class TTrackKilometreExpense extends TTrackExpense {
 }
 
 export class TTrackIncome {
-    public date: string;
     public textForReport: string;
     public value: number;
-    public invoice: TTrackInvoice;
+
+    public static serialize(income: TTrackIncome): any {
+        var serIncome = {};
+        serIncome['text'] = income.textForReport;
+        serIncome['value'] = income.value;
+        return serIncome;
+    }
+
+    public static deserialize(serIncome: any): TTrackIncome {
+        var income = new TTrackIncome();
+        income.textForReport = serIncome['text'];
+        income.value = serIncome['value'];
+        return income;
+    }
 }
 
 export class TTrackConfiguration {

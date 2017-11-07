@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Storage } from '@ionic/storage';
-import { CustomerAtWorkday, TTrackCustomer, TTrackAddress, TTrackRoute } from '../domain-model/domain-model';
+import { CustomerAtWorkday, TTrackCustomer, TTrackAddress, TTrackRoute, TTrackIncome } from '../domain-model/domain-model';
 import { GdriveService } from './gdrive.service';
 
 class WorkdayServiceState {
@@ -303,6 +303,8 @@ export class WorkdayService {
         serCustomer['lastName'] = customer.lastName;
         serCustomer['active'] = customer.isActive;
         serCustomer['address'] = TTrackAddress.serialize(customer.address);
+        serCustomer['invoiceConfig'] = TTrackIncome.serialize(customer.invoiceConfiguration);
+        serCustomer['invoice'] = TTrackIncome.serialize(customer.invoice);
         serCustomer['route'] = this.serializeRoute(customer.routeToCustomer);
         return serCustomer;
     }
@@ -345,6 +347,10 @@ export class WorkdayService {
         customer.lastName = serCustomer['lastName'];
         var serAddress = serCustomer['address']
         customer.address = TTrackAddress.deserialize(serAddress);
+        var invoiceConfig = serCustomer['invoiceConfig'];
+        customer.invoiceConfiguration = TTrackIncome.deserialize(invoiceConfig);
+        var invoice = serCustomer['invoice'];
+        customer.invoice = TTrackIncome.deserialize(invoice);
         var serRoute = serCustomer['route'];
         customer.routeToCustomer = this.deserializeRoute(serRoute);
         return customer;
