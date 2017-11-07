@@ -603,29 +603,15 @@ export class GdriveService {
         var iv = CryptoJS.enc.Latin1.parse('1234567890123456');
         var encrypted = CryptoJS.AES.encrypt(plainText, key, { iv: iv });
         var result = encrypted.iv.toString() + encrypted.toString();
-        console.log('line 539' + 'iv + cipher: ' + result);
-        return result;
+         return result;
       }
 
       private decryptString(cipherText: string): string {
-        console.log('line 607: Input: ' + cipherText);
-        //console.log('line 610 ' + 'The following will be decrypted: ' + cipherText.slice(16));
         var key = CryptoJS.enc.Latin1.parse('1234567890123456');
-        var iv = CryptoJS.enc.Latin1.parse('1234567890123456');
-        //cipherText = cipherText.slice(16);
-        //console.log(CryptoJS.enc.Base64.parse(cipherText));
-        //var ciphertext = CryptoJS.enc.Base64.parse(cipherText);
-        //var iv = ciphertext.clone();
-        //iv.sigBytes = 16;
-        //iv.clamp();
-        //console.log(iv.toString(CryptoJS.enc.Latin1));
-        //ciphertext.words.splice(0, 4);
-        //ciphertext.sigBytes -= 16;
-
+        var iv = CryptoJS.enc.Latin1.parse(cipherText.slice(0,16));
+        cipherText = cipherText.slice(16);
         var decrypted = CryptoJS.AES.decrypt(cipherText, key, { iv: iv });
-        console.log('line 617: ' + decrypted);
         var tmpDecrypted = CryptoJS.enc.Latin1.stringify(decrypted);
-        console.log('line 618: ' + tmpDecrypted);
         var lastSquared = tmpDecrypted.lastIndexOf(']');
         var lastCurled = tmpDecrypted.lastIndexOf('}');
         if (lastSquared > lastCurled) {

@@ -34,6 +34,7 @@
             <ion-icon name="create"></ion-icon>  
         </button>
     </ion-item>
+
     <ion-list-header>Datensynchronisation</ion-list-header>
     <ion-item>
       <button ion-button (click)="syncCustomers()" block>Alle Kundendaten hochladen</button>
@@ -44,9 +45,8 @@
     <ion-item>
         <button ion-button (click)="syncWorkdayHistory()" block>Alle Arbeitstage hochladen</button>
       </ion-item>
-      <ion-item>
-        <h2>Stammdaten laden</h2>>
-      </ion-item>
+
+      <ion-list-header>Stammdaten laden</ion-list-header>    
     <ion-item>
       <button ion-button (click)="getCustomerData()" block>Kundendaten überschreiben</button>
     </ion-item>

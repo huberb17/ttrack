@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 
-import { NavController, ModalController, AlertController } from 'ionic-angular';
+import { NavController, ModalController, AlertController, ToastController } from 'ionic-angular';
 import { AddressService } from "../../app/services/address.service";
 import { CustomerService } from "../../app/services/customer.service";
 import { GdriveService } from "../../app/services/gdrive.service";
@@ -21,6 +21,7 @@ export class SettingsPage {
   constructor(public navCtrl: NavController,
       public modalCtrl: ModalController,
       private alertCtrl: AlertController,
+      private toastCtrl: ToastController,
       private addrService: AddressService,
       private custService: CustomerService,
       private wdService: WorkdayService,
@@ -139,6 +140,12 @@ export class SettingsPage {
     if (addresses) {
       if (addresses.length > 0) {
         this.addrService.overwriteAddresses(addresses);
+        let toast = this.toastCtrl.create({
+          message: 'Daten erfolgreich übernommen.',
+          duration: 1000,
+          position: 'bottom'
+      })
+      toast.present();
       }
     }
   }
@@ -147,6 +154,12 @@ export class SettingsPage {
     if (customers) {
       if (customers.length > 0) {
         this.custService.overwriteCustomers(customers);
+        let toast = this.toastCtrl.create({
+          message: 'Daten erfolgreich übernommen.',
+          duration: 1000,
+          position: 'bottom'
+      })
+      toast.present();
       }
     }
     
