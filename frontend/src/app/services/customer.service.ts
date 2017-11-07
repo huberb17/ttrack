@@ -153,7 +153,7 @@ export class CustomerService {
                 addrList = this.addrService.getAddresses();
                 for (var serCust of data) {
                     var cust = TTrackCustomer.deserialize(serCust);
-                    if (cust.isActive == undefined) cust.isActive = true;
+                    if (cust.isActive === undefined) cust.isActive = true;
                     if (addrList) {
                         for (var address of addrList) {
                             if (address.id == cust.address.id) {

@@ -2,7 +2,7 @@ import { Component } from '@angular/core';
 
 import { Platform, NavParams, ViewController, ModalController } from 'ionic-angular';
 
-import { TTrackCustomer, TTrackAddress } from '../../../app/domain-model/domain-model'
+import { TTrackCustomer, TTrackAddress, TTrackIncome } from '../../../app/domain-model/domain-model'
 import { CustomerService } from "../../../app/services/customer.service";
 import { CreateOrChangeAddressModalPage } from "./create-change-address-modal";
 import { ChooseAddressModalPage } from "./choose-address-modal";
@@ -26,13 +26,14 @@ export class CreateOrChangeCustomerModalPage {
     )
     { 
         this.isCreateNew = false;
-        //this.customer = Object.create(this.params.get('customer'));
         var oldCust = this.params.get('customer');
         console.log(oldCust);
-        console.log(oldCust.address);
         if (oldCust.address === undefined) {
             this.customer = oldCust;
             this.hasAddress = false;
+            this.customer.invoiceConfiguration = new TTrackIncome();
+            this.customer.invoiceConfiguration.textForReport = "";
+            this.customer.invoiceConfiguration.value = 450;
         }
         else {
             this.customer = new TTrackCustomer();
@@ -41,19 +42,18 @@ export class CreateOrChangeCustomerModalPage {
             this.customer.lastName = oldCust.lastName;
             this.customer.isActive = oldCust.isActive;
             this.customer.title = oldCust.title;
-            this.customer.address = oldCust.address;
+            this.customer.address = oldCust.address;           
+            if (oldCust.invoiceConfiguration === undefined) {
+                this.customer.invoiceConfiguration = new TTrackIncome();
+                this.customer.invoiceConfiguration.textForReport = this.customer.firstName + " " + this.customer.lastName;
+                this.customer.invoiceConfiguration.value = 450;
+            }
+            else {
+                this.customer.invoiceConfiguration = oldCust.invoiceConfiguration;
+            }
             this.hasAddress = true;
         }
-        console.log('CreateOrChangeCustomer');
         console.log(this.customer);
-        // if (this.customer.address == null) {
-        //     console.log('null address found');
-        //     this.hasAddress = false;
-        // }
-        // else {
-        //     console.log('address found');
-        //     this.hasAddress = true;
-        // }
     }
 
     dismiss(): void {

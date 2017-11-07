@@ -38,6 +38,16 @@
             {{customer.address.zipCode}} {{customer.address.city}}
         </p>
     </ion-item>
+    
+    <ion-list-header>Rechnungsdaten</ion-list-header>    
+    <ion-item>
+        <ion-label fixed>Honorar/h</ion-label>
+        <ion-input type="number" [(ngModel)]="customer.invoiceConfiguration.value"></ion-input>
+    </ion-item>
+    <ion-item>
+        <ion-label fixed>Notiz</ion-label>
+        <ion-input type="text" [(ngModel)]="customer.invoiceConfiguration.textForReport"></ion-input>
+    </ion-item>
     <ion-item>
         <button ion-button block [disabled]="hasAddress ? null : true" (click)="saveCustomer()">Speichern</button>
       </ion-item> 

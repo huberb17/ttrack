@@ -31,7 +31,7 @@ export class TTrackCustomer {
         customer.lastName = serCustomer['lastName'];
         customer.address = new TTrackAddress();
         customer.address.id = serCustomer['address'];
-        customer.invoiceConfiguration = TTrackIncome.deserialize['invoiceConfig'];
+        customer.invoiceConfiguration = TTrackIncome.deserialize(serCustomer['invoiceConfig']);
         customer.isActive = serCustomer['isActive'];
         return customer;
     }
@@ -121,8 +121,14 @@ export class TTrackIncome {
 
     public static serialize(income: TTrackIncome): any {
         var serIncome = {};
-        serIncome['text'] = income.textForReport;
-        serIncome['value'] = income.value;
+        if (income === undefined) {
+            serIncome['text'] = "";
+            serIncome['value'] = 0;
+        }
+        else {
+            serIncome['text'] = income.textForReport;
+            serIncome['value'] = income.value;
+        }
         return serIncome;
     }
 

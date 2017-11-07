@@ -34,6 +34,10 @@
         {{customer.address.street}} {{customer.address.streetNumber}},
         {{customer.address.zipCode}} {{customer.address.city}}
       </p>
+      <button ion-button *ngIf="hasInvoice(i)" item-right round="true" (click)="setInvoiceValue(i)">€{{getInvoiceValue(i)}}</button>
+      <button ion-button item-right icon-only [color]="hasInvoice(i) ? 'primary' : 'light'" clear (click)="changeInvoice(i)">
+          <ion-icon name="pricetag"></ion-icon>  
+        </button>
       <button ion-button item-right icon-only color="danger" clear (click)="removeCustomer(i)">
         <ion-icon name="trash"></ion-icon>  
       </button>

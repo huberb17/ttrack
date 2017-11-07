@@ -1,8 +1,8 @@
 import { Component, OnInit, NgZone, ViewChild } from '@angular/core';
 
-import { ModalController, NavController, ToastController, Content } from 'ionic-angular';
+import { ModalController, NavController, ToastController, Content, AlertController } from 'ionic-angular';
 
-import { TTrackCustomer, TTrackAddress, CustomerAtWorkday, TTrackRoute } from '../../app/domain-model/domain-model';
+import { TTrackCustomer, TTrackAddress, CustomerAtWorkday, TTrackRoute, TTrackIncome } from '../../app/domain-model/domain-model';
 import { CustomerService } from '../../app/services/customer.service';
 import { AddressService } from '../../app/services/address.service';
 import { AddCustomerModalPage } from './modals/add-customer-modal';
@@ -24,7 +24,7 @@ export class WorkDayPage implements OnInit {
   public isDaySaved: boolean;
   public customersOfDay: CustomerAtWorkday[];
   public milage: number;
-  
+    
   private customerList: TTrackCustomer[];
   private addressList: TTrackAddress[];
   private startAddress: TTrackAddress;
@@ -33,6 +33,7 @@ export class WorkDayPage implements OnInit {
   constructor(public navCtrl: NavController,
               public modalCtrl: ModalController,
               public toastCtrl: ToastController,
+              private alertCtrl: AlertController,
               private zone: NgZone,
               private customerService: CustomerService,
               private addressService: AddressService,
@@ -129,6 +130,7 @@ export class WorkDayPage implements OnInit {
       if (data)
       {
         let newCustomer = new CustomerAtWorkday(<TTrackCustomer> data);
+        newCustomer.invoice = new TTrackIncome();
         newCustomer.routeToCustomer = new TTrackRoute();
         newCustomer.routeToCustomer.end = newCustomer.address;
         this.customersOfDay.push(newCustomer);
@@ -163,14 +165,15 @@ export class WorkDayPage implements OnInit {
       }
       else if (idx == this.customersOfDay.length) {
         this.lastRoute.start = this.customersOfDay[idx-1].address;
+        console.log(this.lastRoute);
         this.distanceService.calculateRoute(this.lastRoute, this.distanceCallback, idx);
       }
       else {
         this.customersOfDay[idx].routeToCustomer.start = this.customersOfDay[idx-1].address;
         this.distanceService.calculateRoute(this.customersOfDay[idx].routeToCustomer, this.distanceCallback, idx);
       }
-
     }
+    this.isDaySaved = false;
   }
 
   changeCustomerAddress(idx: number): void {
@@ -194,6 +197,67 @@ export class WorkDayPage implements OnInit {
       }
     });
     modal.present();
+  }
+
+  changeInvoice(idx: number): void {
+    if (this.customersOfDay[idx].invoice == null || this.customersOfDay[idx].invoice.value === undefined) {
+      this.customersOfDay[idx].invoice = new TTrackIncome();
+      this.customersOfDay[idx].invoice.value = this.customersOfDay[idx].invoiceConfiguration.value;
+      this.customersOfDay[idx].invoice.textForReport = this.customersOfDay[idx].invoiceConfiguration.textForReport;
+    }
+    else {
+      this.customersOfDay[idx].invoice.value = undefined;
+    }
+    this.isDaySaved = false;
+  }
+
+  hasInvoice(idx: number): boolean {
+    console.log(this.customersOfDay[idx].invoice);
+    return (this.customersOfDay[idx].invoice != null && this.customersOfDay[idx].invoice.value !== undefined);
+  }
+
+  getInvoiceValue(idx: number): number {
+    return this.customersOfDay[idx].invoice.value;
+  }
+
+  setInvoiceValue(idx: number) {
+    let alert = this.alertCtrl.create({
+      title: 'Honorarnote',
+      inputs: [
+        {
+          name: 'value',
+          placeholder: 'Betrag'
+        }
+      ],
+      buttons: [
+        {
+          text: 'Abbrechen',
+          role: 'cancel',
+          handler: data => {           
+          }
+        },
+        {
+          text: 'Speichern',
+          handler: data => {
+            let newValue = Number(data['value']);
+            if (! isNaN(newValue))
+            {
+              this.customersOfDay[idx].invoice.value = newValue;
+              this.isDaySaved = false;
+            }
+            else {
+              let toast = this.toastCtrl.create({
+                message: 'Eingabe ungültig!',
+                duration: 1000,
+                position: 'bottom'
+              })
+              toast.present();
+            }
+          }
+        }
+      ]
+    });
+    alert.present();
   }
 
   saveWorkday(): void {
@@ -288,6 +352,7 @@ export class WorkDayPage implements OnInit {
 
   private observeWorkdayChange(workday: Workday): void {
     console.log(workday);
+    console.log(this.lastRoute);
     if (workday.therapyDate === undefined) {
       this.therapyDate = new Date().toISOString();
       this.isCreated = false;
@@ -322,6 +387,17 @@ export class WorkDayPage implements OnInit {
     else {
       this.endAddress = workday.endAddress;
     }
+    if (this.customersOfDay.length == 0) {
+      this.lastRoute.start = this.startAddress;
+      this.lastRoute.end = this.endAddress;
+      this.lastRoute.lengthInKm = 0;
+    }
+    else {
+      this.lastRoute.start = this.customersOfDay[this.customersOfDay.length-1].address;
+      this.lastRoute.end = this.endAddress;
+      this.distanceService.calculateRoute(this.lastRoute, this.distanceCallback, this.customersOfDay.length);
+    }
+    this.content.resize();    
   }
 
   private observeSettingsChange(defaultStartAddress: TTrackAddress,
