@@ -81,7 +81,7 @@ export class WorkDayPage implements OnInit {
   }
 
   getStartAddress(): string {
-    return this.startAddress.toString();
+    return TTrackAddress.toString(this.startAddress);
   }
 
   changeStartAddress(): void {
@@ -103,7 +103,7 @@ export class WorkDayPage implements OnInit {
   }
 
    getEndAddress(): string {
-    return this.endAddress.toString();
+    return TTrackAddress.toString(this.endAddress);
   }
 
   changeEndAddress(): void {
@@ -129,17 +129,22 @@ export class WorkDayPage implements OnInit {
     modal.onDidDismiss(data => {
       if (data)
       {
+        console.log(data);        
         let newCustomer = new CustomerAtWorkday(<TTrackCustomer> data);
+        console.log(newCustomer);
         newCustomer.invoice = new TTrackIncome();
         newCustomer.routeToCustomer = new TTrackRoute();
         newCustomer.routeToCustomer.end = newCustomer.address;
         this.customersOfDay.push(newCustomer);
         if (this.customersOfDay.length == 1) { // this is the first customer
+          console.log(this.startAddress);
           newCustomer.routeToCustomer.start = this.startAddress;
         }
         else {
+          console.log(this.customersOfDay[this.customersOfDay.length - 2].address);
           newCustomer.routeToCustomer.start = this.customersOfDay[this.customersOfDay.length - 2].address;
         }
+        console.log(newCustomer);
 
         this.distanceService.calculateRoute(newCustomer.routeToCustomer, this.distanceCallback, this.customersOfDay.length-1);
         this.lastRoute.start = newCustomer.address;
@@ -212,7 +217,6 @@ export class WorkDayPage implements OnInit {
   }
 
   hasInvoice(idx: number): boolean {
-    console.log(this.customersOfDay[idx].invoice);
     return (this.customersOfDay[idx].invoice != null && this.customersOfDay[idx].invoice.value !== undefined);
   }
 

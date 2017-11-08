@@ -24,8 +24,8 @@ export class AddCustomerModalPage {
     }
 
     useCustomer(idx: number): void {
-        let newCustomer: TTrackCustomer = Object.create(this.customers[idx]);
-        newCustomer.address = Object.create(this.customers[idx].address);
-        this.viewCtrl.dismiss(newCustomer);
+        // clone the object
+        let custString = JSON.stringify(this.customers[idx]);
+        this.viewCtrl.dismiss(JSON.parse(custString));
     }
 }

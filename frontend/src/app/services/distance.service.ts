@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Http } from '@angular/http'
-import { TTrackRoute } from '../domain-model/domain-model';
+import { TTrackRoute, TTrackAddress } from '../domain-model/domain-model';
 
 import 'rxjs/add/operator/catch';
 import 'rxjs/add/operator/map';
@@ -13,8 +13,10 @@ export class DistanceService {
     constructor (private http: Http) { }
 
     public calculateRoute(route: TTrackRoute, callback: any, param: any): void {
-        var startAddrString = route.start.toString();
-        var endAddrString = route.end.toString();
+        var startAddrString = TTrackAddress.toString(route.start);
+        var endAddrString = TTrackAddress.toString(route.end);
+        console.log(startAddrString);
+        console.log(endAddrString);
         this.getDistance(startAddrString, endAddrString, callback, param);        
     }
 

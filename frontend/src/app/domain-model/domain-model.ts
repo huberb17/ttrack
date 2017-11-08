@@ -92,9 +92,9 @@ export class TTrackAddress {
         return serAddress;
     }
 
-    public toString(): string {
-        return this.street + ' ' + this.streetNumber +
-              ', ' + this.zipCode + ' ' + this.city;
+    public static toString(address: TTrackAddress): string {
+        return address['street'] + ' ' + address['streetNumber'] +
+              ', ' + address['zipCode'] + ' ' + address['city'];
     }
 }
 
