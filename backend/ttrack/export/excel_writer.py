@@ -73,7 +73,7 @@ class ExcelWriter:
                :param data_store: the data to be exported
                :return: None
        """
-        # self._create_milage_export(data_store)
+#        self._create_milage_export(data_store)
         self._create_income_export(data_store)
 
     def _create_milage_export(self, data_store):

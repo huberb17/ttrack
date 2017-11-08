@@ -2,6 +2,7 @@
 import json
 
 from backend.ttrack.persistence.driven_route import DrivenRoute
+from backend.ttrack.persistence.income import Income
 from backend.ttrack.utils.errors import DataStoreError
 
 
@@ -11,6 +12,7 @@ class WorkDay:
         """The initializer method of the class."""
         self._data = json_data
         self._driven_routes = []
+        self._invoices = []
 
     def get_driven_routes(self):
         try:
@@ -30,6 +32,11 @@ class WorkDay:
                 self._driven_routes.append(DrivenRoute(dr_id, date, start_km, start_id, end_id, route_distance, comment))
                 start_km += int(route_distance)
                 last_id = end_id
+                if 'invoice' in customer:
+                    if 'value' in customer['invoice']:
+                        invoice_value = int(customer['invoice']['value'])
+                        invoice_text = customer['invoice']['textForReport']
+                        self._invoices.append(Income(dr_id, date, invoice_text, invoice_value))
                 count = count + 1
             last_route = workday['lastRoute']
             end_id = last_route['end']['id']
@@ -42,4 +49,5 @@ class WorkDay:
 
         return self._driven_routes
 
-
+    def get_invoices(self):
+        return self._invoices

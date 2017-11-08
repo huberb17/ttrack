@@ -42,7 +42,7 @@ def process_workdays(gd_conn, ds):
     #     workdays = json.loads(data)
     #     ds.try_add(workdays)
     #     file_id, data = gd_conn.get_next_workday()
-    data = TTrackDecryptor.decrypt('2017-10-25T14_41_57.885Z_workdays.bin')
+    data = TTrackDecryptor.decrypt('2017-11-08T09_48_12.708Z_workdays.bin')
     workdays = json.loads(data)
     ds.try_add(workdays)
 
@@ -72,26 +72,24 @@ def main():
         # read the configuration file
         config = ConfigReader('./resources/config.json')
         # initialize the helper classes
-        gd_conn = GdriveConnector(config)
+#        gd_conn = GdriveConnector(config)
         ds = DataStore(config)
         excel_writer = ExcelWriter(config)
 
         # connect to Google Drive and get the current list of files
-        gd_conn.connect()
+#        gd_conn.connect()
 
         # this is optional: upload the current customers and addresses to the drive
 #        upload_current_customers(ds, gd_conn)
-        upload_current_addresses(ds, gd_conn)
+#        upload_current_addresses(ds, gd_conn)
 
         # the following is some kind of admin functionality - is not done in every
         # months usage - it wipes the DB and stores only the last addresses, customers and
         # workdays
-        # file_id, data = gd_conn.get_last_address_data_file()
-        # ds.force_data_storage('address', data)
-        # file_id, data = gd_conn.get_last_customer_data_file()
-        # ds.force_data_storage('customer', data)
-        # file_id, data = gd_conn.get_last_workday_data_file()
-        # ds.force_data_storage('workday', data)
+#        file_id, data = gd_conn.get_last_address_data_file()
+#        ds.force_data_storage('address', data)
+#        file_id, data = gd_conn.get_last_customer_data_file()
+#        ds.force_data_storage('customer', data)
 
         # update the DB state by replaying all actions done at the frontend (address and customer)
 #        process_actions(gd_conn, ds)

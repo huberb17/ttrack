@@ -85,9 +85,9 @@ class DataStore:
         if type == 'customer':
             data = Customer(data).convert_to_db_object()
             sql_string = '''INSERT OR IGNORE INTO customers VALUES ('{0}', '{1}', '{2}', 
-                    '{3}', '{4}', {5})'''.format(
+                    '{3}', '{4}', {5}, '{6}', {7})'''.format(
                 data['id'], data['title'], data['first_name'], data['last_name'], data['address_id'],
-                data['active']
+                data['active'], data['report_text'], data['default_invoice']
             )
         elif type == 'address':
             data = Address(data).convert_to_db_object()
@@ -109,7 +109,8 @@ class DataStore:
                 data['id'], data['date'], data['text_for_report'], data['value'], data['category']
             )
         elif type == 'income':
-            sql_string = '''INSERT OR IGNORE INTO incomes VALUES ('{0}', '{1}', {2}, {3})'''.format(
+            data = data.convert_to_db_object()
+            sql_string = '''INSERT OR IGNORE INTO incomes VALUES ('{0}', '{1}', '{2}', {3})'''.format(
                 data['id'], data['date'], data['text_for_report'], data['value']
             )
         return sql_string
@@ -124,10 +125,10 @@ class DataStore:
         if type == 'customer':
             data = Customer(data).convert_to_db_object()
             sql_string = '''UPDATE customers SET id='{0}', title='{1}', first_name='{2}', 
-                    last_name='{3}', address_id='{4}', is_active={5} WHERE id = '{0}' '''.format(
-                data['id'], data['title'], data['first_name'], data['last_name'], data['address_id'],
-                data['active']
-            )
+                    last_name='{3}', address_id='{4}', is_active={5}, report_text='{6}', default_invoice={7} 
+                    WHERE id = '{0}' '''.format(data['id'], data['title'], data['first_name'], data['last_name'],
+                                                data['address_id'], data['active'], data['report_text'],
+                                                data['default_invoice'])
         elif type == 'address':
             data = Address(data).convert_to_db_object()
             sql_string = '''UPDATE addresses SET id='{0}', street='{1}', street_number='{2}', 
@@ -210,13 +211,16 @@ class DataStore:
         return data
 
     def get_expense_data(self, month, year):
-        query_string = '''SELECT date, 
-                                 text_for_report, 
-                                 category,
-                                 value,
-                                 strftime('%m', date) as month, 
-                                 strftime('%Y', date) as year
+        query_string = '''SELECT expenses.date, 
+                                 expenses.text_for_report as expense_note, 
+								 incomes.text_for_report as income_note,
+								 incomes.value as income, 
+                                 expenses.category,
+                                 expenses.value as expense,
+                                 strftime('%m', expenses.date) as month, 
+                                 strftime('%Y', expenses.date) as year
                             FROM expenses
+							LEFT OUTER JOIN incomes ON incomes.id = expenses.id
                             WHERE month = '{0:02d}' and year = '{1}' '''.format(month, year)
 
         c = self._conn.cursor()
@@ -228,50 +232,55 @@ class DataStore:
             pre_empty_fields = 0
             post_empty_fields = 0
             for field in row:
-                if index == 1:
+                if index == 1: # date
                     # convert date
                     converted_field = datetime.datetime.strptime(field.strip(), "%Y-%m-%d")
                     data_row = data_row + (converted_field,)
-                elif index == 2:
-                    data_row = data_row + (field,)
-                elif index == 3:
-                    if field == 'income':
+                elif index == 2: # expense_note (index == 3 -> income_note)
+                    if row[index] is not None: # index in row is zero based, so this is the next field -> income_note
+                        data_row = data_row + (row[index],)
+                    else:
+                        data_row = data_row + (field,)
+                elif index == 3: # income_note is already used -> skip the field
+                    pass
+                elif index == 4: # income_value
+                    data_row = data_row + (None,) # skip this column, its the 'Summen' column in the sheet
+                    if (field is not None):
+                        data_row = data_row + (field,)
+                    else:
+                        data_row = data_row + (None,)
+                elif index == 5: # expenses_category
+                    if field == 'rent':
                         pre_empty_fields = 1
-                        post_empty_fields = 11
-                    elif field == 'income_other':
-                        pre_empty_fields = 2
-                        post_empty_fields = 10
-                    elif field == 'rent':
-                        pre_empty_fields = 3
                         post_empty_fields = 9
                     elif field == 'consumable':
-                        pre_empty_fields = 4
+                        pre_empty_fields = 2
                         post_empty_fields = 8
                     elif field == 'office_material':
-                        pre_empty_fields = 5
+                        pre_empty_fields = 3
                         post_empty_fields = 7
                     elif field == 'training':
-                        pre_empty_fields = 6
+                        pre_empty_fields = 4
                         post_empty_fields = 6
                     elif field == 'km':
-                        pre_empty_fields = 7
+                        pre_empty_fields = 5
                         post_empty_fields = 5
                     elif field == 'clothes':
-                        pre_empty_fields = 8
+                        pre_empty_fields = 6
                         post_empty_fields = 4
                     elif field == 'phone':
-                        pre_empty_fields = 9
+                        pre_empty_fields = 7
                         post_empty_fields = 3
                     elif field == 'social_insurance':
-                        pre_empty_fields = 10
+                        pre_empty_fields = 8
                         post_empty_fields = 2
                     elif field == 'property_insurance':
-                        pre_empty_fields = 11
+                        pre_empty_fields = 9
                         post_empty_fields = 1
                     elif field == 'purchase':
-                        pre_empty_fields = 12
+                        pre_empty_fields = 10
                         post_empty_fields = 0
-                elif index == 4:
+                elif index == 6: # expense_value
                     i = 0
                     while i < pre_empty_fields:
                         data_row = data_row + (None,)
@@ -340,6 +349,14 @@ class DataStore:
                     })
                     old_expense = expense
 
+            invoices = workday.get_invoices()
+            for invoice in invoices:
+                self.update({
+                    'type': 'income',
+                    'command': 'create',
+                    'data': invoice
+                })
+
     def _drop_table_content(self, table_name):
         try:
             sql_string = "DELETE FROM {0}".format(table_name)
@@ -378,6 +395,9 @@ class DataStore:
                     break
             customer['address'] = address
             customer['isActive'] = item[5]
+            customer['invoiceConfiguration'] = {}
+            customer['invoiceConfiguration']['textForReport'] = item[6]
+            customer['invoiceConfiguration']['value'] = item[7]
             customers.append(customer)
         return customers
 

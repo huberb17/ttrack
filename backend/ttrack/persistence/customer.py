@@ -15,7 +15,7 @@ class Customer:
         if 'title' in json_data:
             self._title = json_data['title'].encode('utf-8')
         else:
-            self._title = 'None'
+            self._title = ''
         if 'firstName' in json_data:
             self._first_name = json_data['firstName'].encode('utf-8')
         else:
@@ -39,6 +39,19 @@ class Customer:
                 self._active = 0
         else:
             self._active = 0
+        if 'invoiceConfiguration' in json_data:
+            invConf = json_data['invoiceConfiguration']
+            if 'textForReport' in invConf:
+                self._report_text = invConf['textForReport']
+            else:
+                self._report_text = ''
+            if 'value' in invConf:
+                self._default_invoice = invConf['value']
+            else:
+                self._default_invoice = 0
+        else:
+            self._report_text = ''
+            self._default_invoice = 0
 
     def convert_to_db_object(self):
         data = {
@@ -48,6 +61,8 @@ class Customer:
             'last_name': self._last_name,
             'address_id': self._address,
             'active': self._active,
+            'report_text': self._report_text,
+            'default_invoice': self._default_invoice
         }
         return data
 
