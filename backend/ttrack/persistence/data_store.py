@@ -177,7 +177,7 @@ class DataStore:
 
     def get_milage_data(self, month, year):
         query_string = '''SELECT date, 
-	                            start_km, 
+	                            round(start_km) as start_km, 
                                 (start_addr.street || ' ' || start_addr.street_number || ', ' || start_addr.zip_code || ' ' || start_addr.city) as start_address, 
                                 (end_addr.street || ' ' || end_addr.street_number || ', ' || end_addr.zip_code || ' ' || end_addr.city) as end_address, 
                                 route_km, 
@@ -187,7 +187,8 @@ class DataStore:
                         FROM driven_routes 
 	                        JOIN addresses as start_addr ON start_addr.id = driven_routes.start_address_id 
 	                        JOIN addresses as end_addr ON end_addr.id = driven_routes.end_address_id
-                        WHERE month = '{0:02d}' and year = '{1}' '''.format(month, year)
+                        WHERE month = '{0:02d}' and year = '{1}'
+                        ORDER BY start_km'''.format(month, year)
 
         c = self._conn.cursor()
         c.execute(query_string)

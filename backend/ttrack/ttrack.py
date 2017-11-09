@@ -37,14 +37,11 @@ def process_workdays(gd_conn, ds):
     files on Google Drive (they remain there)."""
     ds.backup_db_content()
 
-    # file_id, data = gd_conn.get_next_workday()
-    # while file_id is not None:
-    #     workdays = json.loads(data)
-    #     ds.try_add(workdays)
-    #     file_id, data = gd_conn.get_next_workday()
-    data = TTrackDecryptor.decrypt('2017-11-08T09_48_12.708Z_workdays.bin')
-    workdays = json.loads(data)
-    ds.try_add(workdays)
+    file_id, data = gd_conn.get_next_workday()
+    while file_id is not None:
+        workdays = json.loads(data)
+        ds.try_add(workdays)
+        file_id, data = gd_conn.get_next_workday()
 
 
 def upload_current_customers(data_store, google_drive):
@@ -72,12 +69,12 @@ def main():
         # read the configuration file
         config = ConfigReader('./resources/config.json')
         # initialize the helper classes
-#        gd_conn = GdriveConnector(config)
+        gd_conn = GdriveConnector(config)
         ds = DataStore(config)
         excel_writer = ExcelWriter(config)
 
         # connect to Google Drive and get the current list of files
-#        gd_conn.connect()
+        gd_conn.connect()
 
         # this is optional: upload the current customers and addresses to the drive
 #        upload_current_customers(ds, gd_conn)
@@ -94,7 +91,7 @@ def main():
         # update the DB state by replaying all actions done at the frontend (address and customer)
 #        process_actions(gd_conn, ds)
         # update the DB state by adding all workdays created at the frontend
-#        process_workdays(gd_conn, ds)
+        process_workdays(gd_conn, ds)
 
         # re-create the excel reports
         excel_writer.backup_and_create(ds)

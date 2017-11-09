@@ -24,17 +24,17 @@ class WorkDay:
             count = 0
             for customer in workday['customersOfDay']:
                 route = customer['routeToCustomer']
-                route_distance = int(route['lengthInKm'])
+                route_distance = float(route['lengthInKm'])
                 start_id = route['start']['id']
                 end_id = customer['address']['id']
                 comment = customer['firstName'] + ' ' + customer['lastName']
                 dr_id = '{0}_dr_{1}'.format(workday_id, count)
                 self._driven_routes.append(DrivenRoute(dr_id, date, start_km, start_id, end_id, route_distance, comment))
-                start_km += int(route_distance)
+                start_km += float(route_distance)
                 last_id = end_id
                 if 'invoice' in customer:
                     if 'value' in customer['invoice']:
-                        invoice_value = int(customer['invoice']['value'])
+                        invoice_value = float(customer['invoice']['value'])
                         invoice_text = customer['invoice']['textForReport']
                         self._invoices.append(Income(dr_id, date, invoice_text, invoice_value))
                 count = count + 1
