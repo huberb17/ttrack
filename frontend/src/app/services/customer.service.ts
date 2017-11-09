@@ -164,6 +164,9 @@ export class CustomerService {
                     custList.push(cust);
                 }
             }
+            custList.sort(function(a, b) {
+                return a.lastName.localeCompare(b.lastName)
+            });
             this.customerList = custList;
             this.notifyCustomerChange();
         }, (error) => {

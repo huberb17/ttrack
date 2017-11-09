@@ -213,6 +213,9 @@ export class AddressService {
                     addrList.push(addr);
                 }
             }
+            addrList.sort( function(a, b) {
+                return (a.city.localeCompare(b.city) == 0 ? a.street.localeCompare(b.street) : a.city.localeCompare(b.city));
+            });
             this.addressList = addrList;
             this.notifyAddressChange();
         }, (error) => {
