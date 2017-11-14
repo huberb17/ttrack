@@ -136,21 +136,6 @@ class GdriveConnector:
                                                 'orderBy': 'title'}).GetList()
         self._action_files = filter(lambda x: x['title'].rfind('actions') > 0, self._file_list)
 
-    # def populate_drive(self):
-    #     """Function to populate the drive first - will be removed."""
-    #     logger.info('populate share on Google Drive')
-    #     self._populate_helper('./resources/20170831-140610.json')
-    #     self._populate_helper('./resources/20170831-140630.json')
-    #     self._populate_helper('./resources/20170831-140730.json')
-
-    # def _populate_helper(self, filename):
-    #     with open(filename, 'rb') as json_file:
-    #         data = json_file.read()
-    #         bin_name = os.path.basename(filename).split('.')[0] + '.bin'
-    #         TTrackDecryptor.encrypt(data, bin_name)
-    #     tmpfile = self._drive.CreateFile({"parents": [{"kind": "drive#fileLink", "id": self._share_id}]})
-    #     tmpfile.SetContentFile(bin_name)
-    #     tmpfile.Upload()
 
     def get_last_address_data_file(self):
         """Get the last address data file from Google Drive (if available)."""

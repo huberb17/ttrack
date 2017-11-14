@@ -421,4 +421,45 @@ class DataStore:
             addresses.append(address)
         return addresses
 
+    def set_address(self, address):
+        try:
+            sql_string = """INSERT OR REPLACE INTO addresses
+	                            (id, street, street_number, door_number, zip_code, city, note, is_active)
+                            VALUES
+	                            ('{0}', '{1}', '{2}', '{3}', '{4}', '{5}', '{6}', '{7}')
+	                        """.format(address['id'].encode('utf-8'),
+                                       address['street'].encode('utf-8'),
+                                       address['streetNumber'].encode('utf-8'),
+                                       address['doorNumber'].encode('utf-8'),
+                                       address['zipCode'].encode('utf-8'),
+                                       address['city'].encode('utf-8'),
+                                       address['note'].encode('utf-8'),
+                                       address['isActive'])
+            c = self._conn.cursor()
+            c.execute(sql_string)
+            if (c.lastrowid != 0 and c.lastrowid != None) or (c.rowcount != 0 and c.rowcount != None):
+                self._conn.commit()
+                self._changed = True
+
+        except DataStoreError:
+            raise DataStoreError
+
+        except Exception as err:
+            raise DataStoreError(err.message)
+
+    def remove_address(self, addr_id):
+        try:
+            sql_string = """DELETE FROM addresses WHERE id = '{0}'""".format(addr_id)
+            c = self._conn.cursor()
+            c.execute(sql_string)
+            if (c.lastrowid != 0 and c.lastrowid != None) or (c.rowcount != 0 and c.rowcount != None):
+                self._conn.commit()
+                self._changed = True
+
+        except DataStoreError:
+            raise DataStoreError
+
+        except Exception as err:
+            raise DataStoreError(err.message)
+
 

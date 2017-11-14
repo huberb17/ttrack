@@ -10,13 +10,17 @@ Actions are one of:
 """
 
 import json
+from Tkinter import *
+
 import backend.ttrack.utils.custom_logger as cl
 from backend.ttrack.cloud.gdrive_connector import GdriveConnector
+from backend.ttrack.ui.main_window import MainApplication
+from backend.ttrack.ui.view_controller import ViewController
 from backend.ttrack.utils.config_reader import ConfigReader
 from backend.ttrack.utils.errors import ConfigReaderError, GdriveConnectorError, DataStoreError
 from backend.ttrack.export.excel_writer import ExcelWriter
 from backend.ttrack.persistence.data_store import DataStore
-from backend.ttrack.utils.ttrack_decryptor import TTrackDecryptor
+
 
 
 def process_actions(gd_conn, ds):
@@ -43,20 +47,8 @@ def process_workdays(gd_conn, ds):
         ds.try_add(workdays)
         file_id, data = gd_conn.get_next_workday()
 
-
-def upload_current_customers(data_store, google_drive):
-    """This function retrieves the customer data from the DB and uploads it with
-    the constant name 'customerFile.bin'."""
-    data = data_store.get_customers()
-    google_drive.encrypt_and_upload_data('customerFile.bin', json.dumps(data))
-
-
-def upload_current_addresses(data_store, google_drive):
-    """This function retrieves the address data from the DB and uploads it with
-    the constant name 'addressFile.bin'."""
-    data = data_store.get_addresses()
-    google_drive.encrypt_and_upload_data('addressFile.bin', json.dumps(data))
-
+def build_ui(main_window):
+    pass
 
 def main():
     """The main function for the ttrack module."""
@@ -76,25 +68,12 @@ def main():
         # connect to Google Drive and get the current list of files
         gd_conn.connect()
 
-        # this is optional: upload the current customers and addresses to the drive
-#        upload_current_customers(ds, gd_conn)
-#        upload_current_addresses(ds, gd_conn)
+        root = Tk()
+        root.title("TTrack Desktop")
+        controller = ViewController(gd_conn, ds, excel_writer)
+        MainApplication(root, controller, padding="3 3 12 12").pack(side="top", fill="both", expand=True)
 
-        # the following is some kind of admin functionality - is not done in every
-        # months usage - it wipes the DB and stores only the last addresses, customers and
-        # workdays
-#        file_id, data = gd_conn.get_last_address_data_file()
-#        ds.force_data_storage('address', data)
-#        file_id, data = gd_conn.get_last_customer_data_file()
-#        ds.force_data_storage('customer', data)
-
-        # update the DB state by replaying all actions done at the frontend (address and customer)
-#        process_actions(gd_conn, ds)
-        # update the DB state by adding all workdays created at the frontend
-        process_workdays(gd_conn, ds)
-
-        # re-create the excel reports
-        excel_writer.backup_and_create(ds)
+        root.mainloop()
 
     except (ConfigReaderError, GdriveConnectorError, DataStoreError) as err:
         logger.error(err.message)
@@ -107,6 +86,25 @@ def main():
         for handler in logger.handlers:
             handler.close()
             logger.removeFilter(handler)
+
+
+
+#         # the following is some kind of admin functionality - is not done in every
+#         # months usage - it wipes the DB and stores only the last addresses, customers and
+#         # workdays
+# #        file_id, data = gd_conn.get_last_address_data_file()
+# #        ds.force_data_storage('address', data)
+# #        file_id, data = gd_conn.get_last_customer_data_file()
+# #        ds.force_data_storage('customer', data)
+#
+#         # update the DB state by replaying all actions done at the frontend (address and customer)
+# #        process_actions(gd_conn, ds)
+#         # update the DB state by adding all workdays created at the frontend
+#         process_workdays(gd_conn, ds)
+#
+#         # re-create the excel reports
+#         excel_writer.backup_and_create(ds)
+#
 
 if __name__ == '__main__':
     main()
