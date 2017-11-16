@@ -93,6 +93,7 @@ export class CustomerService {
         if (customers) {
             if (customers.length > 0) {
                 this.customerList = customers;
+                console.log(this.customerList);
                 this.storeCustomers();
             }
         }

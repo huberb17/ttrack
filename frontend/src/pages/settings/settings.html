@@ -22,14 +22,14 @@
     <ion-list-header>Allgemeine Einstellungen</ion-list-header>
     <ion-item>
       <h2>Default Start-Adresse</h2>
-      <p>{{defaultStartAddress.toString()}}</p>
+      <p>{{getDefaultStartAddress()}}</p>
       <button ion-button item-right icon-only color="secondary" clear (click)="changeStartAddress()">
           <ion-icon name="create"></ion-icon>  
       </button>
     </ion-item>
     <ion-item>
         <h2>Default End-Adresse</h2>
-        <p>{{defaultEndAddress.toString()}}</p>
+        <p>{{getDefaultEndAddress()}}</p>
         <button ion-button item-right icon-only color="secondary" clear (click)="changeEndAddress()">
             <ion-icon name="create"></ion-icon>  
         </button>

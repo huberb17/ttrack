@@ -101,6 +101,10 @@ export class SettingsPage {
     modal.present();
   }
 
+  public getDefaultStartAddress(): string {
+    return TTrackAddress.toString(this.defaultStartAddress);
+  }
+
   public changeEndAddress(): void {
     let modal = this.modalCtrl.create(ChangeAddressModalPage, 
                   { addresses: this.addrService.getAddresses() });
@@ -110,6 +114,10 @@ export class SettingsPage {
       }
     });
     modal.present();
+  }
+
+  public getDefaultEndAddress(): string {
+    return TTrackAddress.toString(this.defaultEndAddress);
   }
   
   private addressSettingsCallback(defaultStartAddress: TTrackAddress,
