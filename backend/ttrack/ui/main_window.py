@@ -19,8 +19,10 @@ class MainApplication(Frame):
         menu_file = Menu(menubar)
         menu_file.add_command(label='Beenden', command=self.exit_app)
         menu_gdrive = Menu(menubar)
-        menu_gdrive.add_command(label='Adressen von Cloud laden', command=self.cloud_load_addresses)
+        menu_gdrive.add_command(label='Adressen von Cloud laden', command=self.cloud_download_addresses)
         menu_gdrive.add_command(label='Adressen in Cloud hochladen', command=self.cloud_upload_addresses)
+        menu_gdrive.add_command(label='Kunden von Cloud laden', command=self.cloud_download_customers)
+        menu_gdrive.add_command(label='Kunden in Cloud hochladen', command=self.cloud_upload_customers)
         menubar.add_cascade(menu=menu_file, label='Datei')
         menubar.add_cascade(menu=menu_gdrive, label='Google Drive')
         self.parent['menu'] = menubar
@@ -35,7 +37,7 @@ class MainApplication(Frame):
         self.notebook.rowconfigure(0, weight=1)
 
         self.workdays_frame = WorkdaysFrame(self.notebook, self._controller, padding="5 5 5 5")
-        self.customers_frame = CustomersFrame(self.notebook, padding="5 5 5 5")
+        self.customers_frame = CustomersFrame(self.notebook, self._controller, padding="5 5 5 5")
         self.addresses_frame = AddressesFrame(self.notebook, self._controller, padding="5 5 5 5")
 
         self.notebook.add(self.workdays_frame, text='Arbeitstage')
@@ -44,13 +46,18 @@ class MainApplication(Frame):
         self.notebook.pack()
 
     def exit_app(self):
-        print 'exit clicked'
         self.parent.quit()
 
-    def cloud_load_addresses(self):
-        print 'clicked download'
+    def cloud_download_addresses(self):
+        self._controller.download_latest_addresses()
 
     def cloud_upload_addresses(self):
         self._controller.upload_current_addresses()
+
+    def cloud_download_customers(self):
+        self._controller.download_latest_customers()
+
+    def cloud_upload_customers(self):
+        self._controller.upload_current_customers()
 
 

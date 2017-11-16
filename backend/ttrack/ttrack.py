@@ -87,24 +87,12 @@ def main():
             handler.close()
             logger.removeFilter(handler)
 
+    #         # update the DB state by replaying all actions done at the frontend (address and customer)
+    # #        process_actions(gd_conn, ds)
+    #         # update the DB state by adding all workdays created at the frontend
+    #         process_workdays(gd_conn, ds)
+    #
 
-
-#         # the following is some kind of admin functionality - is not done in every
-#         # months usage - it wipes the DB and stores only the last addresses, customers and
-#         # workdays
-# #        file_id, data = gd_conn.get_last_address_data_file()
-# #        ds.force_data_storage('address', data)
-# #        file_id, data = gd_conn.get_last_customer_data_file()
-# #        ds.force_data_storage('customer', data)
-#
-#         # update the DB state by replaying all actions done at the frontend (address and customer)
-# #        process_actions(gd_conn, ds)
-#         # update the DB state by adding all workdays created at the frontend
-#         process_workdays(gd_conn, ds)
-#
-#         # re-create the excel reports
-#         excel_writer.backup_and_create(ds)
-#
 
 if __name__ == '__main__':
     main()

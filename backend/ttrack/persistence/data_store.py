@@ -421,6 +421,23 @@ class DataStore:
             addresses.append(address)
         return addresses
 
+    def get_customers(self):
+        sql_string = "SELECT * FROM customers"
+        c = self._conn.cursor()
+        c.execute(sql_string)
+        data = c.fetchall()
+        customers = []
+        for item in data:
+            customer = {}
+            customer['id'] = item[0]
+            customer['title'] = item[1]
+            customer['firstName'] = item[2]
+            customer['lastName'] = item[3]
+            customer['address'] = item[4]
+            customer['isActive'] = item[5]
+            customers.append(customer)
+        return customers
+
     def set_address(self, address):
         try:
             sql_string = """INSERT OR REPLACE INTO addresses
@@ -435,6 +452,31 @@ class DataStore:
                                        address['city'].encode('utf-8'),
                                        address['note'].encode('utf-8'),
                                        address['isActive'])
+            c = self._conn.cursor()
+            c.execute(sql_string)
+            if (c.lastrowid != 0 and c.lastrowid != None) or (c.rowcount != 0 and c.rowcount != None):
+                self._conn.commit()
+                self._changed = True
+
+        except DataStoreError:
+            raise DataStoreError
+
+        except Exception as err:
+            raise DataStoreError(err.message)
+
+
+    def set_customer(self, customer):
+        try:
+            sql_string = """INSERT OR REPLACE INTO customers
+                                (id, title, first_name, last_name, address_id, is_active)
+                            VALUES
+                                ('{0}', '{1}', '{2}', '{3}', '{4}', '{5}')
+                            """.format(customer['id'].encode('utf-8'),
+                                       customer['title'].encode('utf-8'),
+                                       customer['firstName'].encode('utf-8'),
+                                       customer['lastName'].encode('utf-8'),
+                                       customer['address'].encode('utf-8'),
+                                       customer['isActive'])
             c = self._conn.cursor()
             c.execute(sql_string)
             if (c.lastrowid != 0 and c.lastrowid != None) or (c.rowcount != 0 and c.rowcount != None):
@@ -462,4 +504,18 @@ class DataStore:
         except Exception as err:
             raise DataStoreError(err.message)
 
+    def remove_customer(self, customer_id):
+        try:
+            sql_string = """DELETE FROM customers WHERE id = '{0}'""".format(customer_id)
+            c = self._conn.cursor()
+            c.execute(sql_string)
+            if (c.lastrowid != 0 and c.lastrowid != None) or (c.rowcount != 0 and c.rowcount != None):
+                self._conn.commit()
+                self._changed = True
+
+        except DataStoreError:
+            raise DataStoreError
+
+        except Exception as err:
+            raise DataStoreError(err.message)
 
