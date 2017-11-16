@@ -85,7 +85,7 @@ class DataStore:
         if type == 'customer':
             data = Customer(data).convert_to_db_object()
             sql_string = '''INSERT OR IGNORE INTO customers VALUES ('{0}', '{1}', '{2}', 
-                    '{3}', '{4}', {5}, '{6}', {7})'''.format(
+                    '{3}', '{4}', {5}, '{6}', '{7}')'''.format(
                 data['id'], data['title'], data['first_name'], data['last_name'], data['address_id'],
                 data['active'], data['report_text'], data['default_invoice']
             )
@@ -375,7 +375,7 @@ class DataStore:
             self.update(action)
 
 
-    def get_customers(self):
+    def get_customers_with_address(self):
         addresses = self.get_addresses()
         sql_string = "SELECT * FROM customers"
         c = self._conn.cursor()

@@ -50,6 +50,9 @@ class ViewController:
     def store_customer(self, customer):
         self._datastore.set_customer(customer)
 
+    def remove_address(self, addr_id):
+        self._datastore.remove_address(addr_id)
+
     def remove_customer(self, customer_id):
         self._datastore.remove_customer(customer_id)
 
@@ -57,13 +60,17 @@ class ViewController:
         """This function retrieves the address data from the DB and uploads it with
         the constant name 'addressFile.bin'."""
         data = self._datastore.get_addresses()
-        self._gdrive.encrypt_and_upload_data('addressFile.bin', json.dumps(data))
+        str_data = json.dumps(data)
+        str_data = str_data.replace('None', '')
+        self._gdrive.encrypt_and_upload_data('addressFile.bin', str_data)
 
     def upload_current_customers(self):
         """This function retrieves the customer data from the DB and uploads it with
         the constant name 'customerFile.bin'."""
-        data = self._datastore.get_customers()
-        self._gdrive.encrypt_and_upload_data('customerFile.bin', json.dumps(data))
+        data = self._datastore.get_customers_with_address()
+        str_data = json.dumps(data)
+        str_data = str_data.replace('None', '')
+        self._gdrive.encrypt_and_upload_data('customerFile.bin', str_data)
 
     def download_latest_addresses(self):
         """This function retrieves the latest address file from the cloud and overwrites the
