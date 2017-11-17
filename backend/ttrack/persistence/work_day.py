@@ -51,3 +51,11 @@ class WorkDay:
 
     def get_invoices(self):
         return self._invoices
+
+    def convert_to_db_object(self):
+        data = {
+            'id': self._data['id'],
+            'date': self._data['therapyDate'][:10],
+            'data': json.dumps(self._data)
+        }
+        return data

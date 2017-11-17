@@ -113,10 +113,15 @@ class DataStore:
             sql_string = '''INSERT OR IGNORE INTO incomes VALUES ('{0}', '{1}', '{2}', {3})'''.format(
                 data['id'], data['date'], data['text_for_report'], data['value']
             )
+        elif type == 'workday':
+            data = data.convert_to_db_object()
+            sql_string = '''INSERT OR IGNORE INTO workdays VALUES ('{0}', '{1}', '{2}')'''.format(
+                data['id'], data['date'], data['data']
+            )
         return sql_string
 
     def _check_action_type(self, type):
-        if type not in ['customer', 'address', 'driven_route', 'expense', 'income']:
+        if type not in ['customer', 'address', 'driven_route', 'expense', 'income', 'workday']:
             logger.info('unknown data type received: {0}'.format(type))
             msg = 'Unknown data type found in action: {0}'.format(type)
             raise DataStoreError(msg)
@@ -328,6 +333,11 @@ class DataStore:
     def try_add(self, workdays):
         for workday_obj in workdays:
             workday = WorkDay(workday_obj)
+            # store the workday data as it is in the DB
+            self.update({'type': 'workday',
+                         'command': 'create',
+                         'data': workday})
+
             driven_routes = workday.get_driven_routes()
             old_expense = None
             for route in driven_routes:
@@ -437,6 +447,18 @@ class DataStore:
             customer['isActive'] = item[5]
             customers.append(customer)
         return customers
+
+    def get_workdays(self):
+        sql_string = "SELECT data FROM workdays"
+        c = self._conn.cursor()
+        c.execute(sql_string)
+        data = c.fetchall()
+        workdays = []
+        for item in data:
+            workday = json.loads(item[0])
+            workdays.append(workday)
+        return workdays
+
 
     def set_address(self, address):
         try:

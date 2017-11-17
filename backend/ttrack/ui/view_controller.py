@@ -9,9 +9,10 @@ class ViewController:
         self._datastore = ds
         self._excel_writer = ew
         self.workday_list = { }
+        self.workday_list_db = { }
         self.address_list = [ ]
 
-    def load_workdays(self):
+    def load_workdays_cloud(self):
         file_id, data = self._gdrive.get_next_workday()
         self.workday_list = { }
         while file_id is not None:
@@ -21,6 +22,13 @@ class ViewController:
                     continue
                 self.workday_list[workday['id']] = workday
             file_id, data = self._gdrive.get_next_workday()
+
+    def show_workdays_db(self):
+        workdays = self._datastore.get_workdays()
+        self.workday_list_db = { }
+        for workday in workdays:
+            self.workday_list_db[workday['id']] = workday
+
 
     def store_workday(self, workday):
         self._datastore.backup_db_content()
