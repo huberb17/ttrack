@@ -17,7 +17,7 @@ import { CreateOrChangeAddressModalPage } from "../pages/customer-list/modals/cr
 import { AddressService } from "./services/address.service";
 import { GdriveService } from "./services/gdrive.service";
 import { WorkdayService } from "./services/workday.service";
-import { IonicStorageModule } from '@ionic/storage';
+//import { IonicStorageModule } from '@ionic/storage';
 
 @NgModule({
   declarations: [
@@ -35,8 +35,8 @@ import { IonicStorageModule } from '@ionic/storage';
     TabsPage
   ],
   imports: [
-    IonicModule.forRoot(MyApp),
-    IonicStorageModule.forRoot()
+    IonicModule.forRoot(MyApp)
+//    IonicStorageModule.forRoot()
   ],
   bootstrap: [IonicApp],
   entryComponents: [

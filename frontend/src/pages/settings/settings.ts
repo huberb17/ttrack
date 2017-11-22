@@ -145,6 +145,7 @@ export class SettingsPage {
   }
 
   private getAddressesFromGdriveCallback(addresses: TTrackAddress[]): void {
+    console.log('settings.ts - 148: ' + JSON.stringify(addresses));
     if (addresses) {
       if (addresses.length > 0) {
         this.addrService.overwriteAddresses(addresses);
@@ -159,6 +160,7 @@ export class SettingsPage {
   }
 
   private getCustomersFromGdriveCallback(customers: TTrackCustomer[]): void {
+    console.log('settings.ts - 163: ' + JSON.stringify(customers));
     if (customers) {
       if (customers.length > 0) {
         this.custService.overwriteCustomers(customers);

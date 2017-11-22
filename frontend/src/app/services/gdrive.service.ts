@@ -118,43 +118,57 @@ export class GdriveService {
         }
 
         gapi.load('client', { callback: function() {
-            GooglePlus.trySilentLogin({
-                'scopes': gdriveWrapper.SCOPES,
-                'webClientId': '894125857880-7bj3f8ttc59i021vmi9qnn0mhc4s34v4.apps.googleusercontent.com', //gdriveWrapper.CLIENT_ID',
-                'offline': true
-            })
-            .then(res => {
-                console.log('line 124' + JSON.stringify(res));
-                var auth_code = res['serverAuthCode'];
-          
-                gapi.client.request({
-                  'path': '/oauth2/v4/token',
-                  'method': 'POST',
-                  'params': {'code': auth_code, 
-                      'client_id': gdriveWrapper.CLIENT_ID,
-                      'client_secret': gdriveWrapper.SECRET,
-                      'redirect_uri': '',
-                      'grant_type': 'authorization_code'
-                  },
-                    'headers': { },
-                    'body': {}
+            gapi.client.init(
+                {
+                    apiKey: gdriveWrapper.API_KEY,
+                    clientId: gdriveWrapper.CLIENT_ID,
+                    discoveryDocs: gdriveWrapper.DISCOVERY_DOCS,
+                    scope: gdriveWrapper.SCOPES
                 })
-                .then( res => { 
-                    console.log('line 139' + JSON.stringify(res));
-                    gdriveWrapper.initOk = true; 
-                    gdriveWrapper.authToken = res['result']['accesss_token'];
+                .then(() => {
+                    console.log('line 127' + 'enter init function');
+                    //GooglePlus.trySilentLogin({
+                    GooglePlus.login({
+                        'scopes': gdriveWrapper.SCOPES,
+                        'webClientId': '894125857880-7bj3f8ttc59i021vmi9qnn0mhc4s34v4.apps.googleusercontent.com', //gdriveWrapper.CLIENT_ID',
+                        'offline': true
+                    })
+                    .then(res => {
+                        console.log('line 134' + JSON.stringify(res));
+                        var auth_code = res['serverAuthCode'];
+              
+                        gapi.client.request({
+                            'path': '/oauth2/v4/token',
+                            'method': 'POST',
+                            'params': {'code': auth_code, 
+                                'client_id': gdriveWrapper.CLIENT_ID,
+                                'client_secret': gdriveWrapper.SECRET,
+                                'redirect_uri': '',
+                                'grant_type': 'authorization_code'
+                            },
+                            'headers': { },
+                            'body': {}
+                        })
+                        .then( res => { 
+                            console.log('line 150' + JSON.stringify(res));
+                            gdriveWrapper.initOk = true; 
+                            gdriveWrapper.authToken = res['result']['accesss_token'];
+                        })
+                        .catch( err => {
+                            console.log('line 155' + JSON.stringify(err));
+                        });
+                    })
+                    .catch( err => {
+                        console.log('line 159' + JSON.stringify(err));
+                    });
                 })
-                .catch( err => {
-                    console.log('line 144' + JSON.stringify(err));
+                .catch ( err => {
+                    console.log('line 162' + JSON.stringify(err));
                 });
-            })
-            .catch( err => {
-                console.log('line 148' + JSON.stringify(err));
-            });
             },
             onerror: function () {
-                console.log('line 152' + 'failed to log google api library');
-            }
+                console.log('line 166' + 'failed to log google api library');
+            }                
         });
     }
     
@@ -369,8 +383,11 @@ export class GdriveService {
     }
 
     private  getContentOfFile(fileName: string, callback: any): void {
+        console.log('gdrive 372: ' + JSON.stringify(gdriveWrapper.initOk));
+        console.log('gdrive 373: ' + JSON.stringify(gdriveWrapper.authToken));
         if (gdriveWrapper.initOk) {
             if (gdriveWrapper.authToken) {
+                console.log('gdrive 376: '  + JSON.stringify(gapi.client));
                 gapi.client.setToken( { 'access_token': gdriveWrapper.authToken });
                 this.sendFileListRequest(fileName, callback);
             }
@@ -387,11 +404,13 @@ export class GdriveService {
     }
         
     private sendFileListRequest(fileName: string, callback: any): any {
+        console.log('gdrive 393: ' + JSON.stringify(gapi.client.drive));
         gapi.client.drive.files.list({
             'pageSize': 10,
             'fields': "nextPageToken, files(id, name)"
         }).then( response => {
             console.log('Files:');
+            console.log('gdrive 397: ' + JSON.stringify(response));
             var files = response.result.files;
             if (files && files.length > 0) {
                 for (var i = 0; i < files.length; i++) {
@@ -400,6 +419,7 @@ export class GdriveService {
                     if (file.name == fileName) {
                         console.log('found correct file');
                         this.getFileContent(file.id, callback);
+                        break;
                     }
                 }
             } else {
