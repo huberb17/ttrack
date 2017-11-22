@@ -1,6 +1,8 @@
 import json
 from  operator import itemgetter
 
+from backend.ttrack.export.excel_writer import ExcelWriter
+
 
 class ViewController:
 
@@ -92,8 +94,12 @@ class ViewController:
         file_id, data = self._gdrive.get_last_customer_data_file()
         self._datastore.force_data_storage('customer', data)
 
-    def create_excel_reports(self):
-        """This functions backups and re-creates the excel reports."""
-        self._excel_writer.backup_and_create(self._datastore)
+    def create_milage_report(self):
+        """This function backups and re-creates the milage excel report."""
+        self._excel_writer.backup_and_create(self._datastore, ExcelWriter.REPORT_MILAGE)
+
+    def create_income_report(self):
+        """This function backups and re-creates the income excel report."""
+        self._excel_writer.backup_and_create(self._datastore, ExcelWriter.REPORT_INCOME)
 
 

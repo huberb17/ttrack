@@ -17,6 +17,9 @@ from backend.ttrack.utils.errors import ExcelWriterError
 logger = logging.getLogger(__name__)
 
 class ExcelWriter:
+    REPORT_MILAGE = 'milage'
+    REPORT_INCOME = 'income'
+
     """Handle the data export to MS Excel."""
     def __init__(self, config):
         """The initializer of the class.
@@ -28,7 +31,7 @@ class ExcelWriter:
         self._income_filename = config.export_income
         self._export_path = config.export_path
 
-    def backup_and_create(self, data_store):
+    def backup_and_create(self, data_store, report_type):
         """Create a backup of the current reports and re-export the data.
         
         :type data_store: backend.ttrack.persistence.data_store.DataStore
@@ -37,7 +40,7 @@ class ExcelWriter:
         """
         try:
             self._backup_files()
-            self._create_export(data_store)
+            self._create_export(data_store, report_type)
         except IOError as io_err:
             logger.info('IO error received: {0}'.format(io_err.strerror))
             msg = 'Error during IO operation: {0}'.format(io_err.strerror)
@@ -66,15 +69,19 @@ class ExcelWriter:
             msg = 'Unable to backup file: {0}, {1}'.format(err.strerror, err.filename)
             raise ExcelWriterError(msg)
 
-    def _create_export(self, data_store):
+    def _create_export(self, data_store, report_type):
         """Export the current data of data_store into MS Excel reports.
 
                :type data_store: backend.ttrack.persistence.data_store.DataStore
                :param data_store: the data to be exported
                :return: None
        """
-        self._create_milage_export(data_store)
-        self._create_income_export(data_store)
+        if report_type == self.REPORT_MILAGE:
+            self._create_milage_export(data_store)
+        elif report_type == self.REPORT_INCOME:
+            self._create_income_export(data_store)
+        else:
+            logger.info('wrong report type used: {0}'.format(report_type))
 
     def _create_milage_export(self, data_store):
         """Create the milage report as MS Excel file.
