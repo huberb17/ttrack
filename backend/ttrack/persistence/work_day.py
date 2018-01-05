@@ -27,7 +27,10 @@ class WorkDay:
                 route_distance = float(route['lengthInKm'])
                 start_id = route['start']['id']
                 end_id = customer['address']['id']
-                comment = customer['firstName'] + ' ' + customer['lastName']
+                if 'firstName' in customer:
+                    comment = customer['firstName'] + ' ' + customer['lastName']
+                else:
+                    comment = customer['lastName']
                 dr_id = '{0}_dr_{1}'.format(workday_id, count)
                 self._driven_routes.append(DrivenRoute(dr_id, date, start_km, start_id, end_id, route_distance, comment))
                 start_km += float(route_distance)

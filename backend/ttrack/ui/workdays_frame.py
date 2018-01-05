@@ -103,7 +103,10 @@ class WorkdaysFrame(Frame):
         self.workdayDateVar.set(workday[1]['therapyDate'])
         self.workdayMilageVar.set(workday[1]['milage'])
         for customer in workday[1]['customersOfDay']:
-            customers += ( customer['firstName'] + " " + customer['lastName'], )
+            if 'firstName' in customer:
+                customers += ( customer['firstName'] + " " + customer['lastName'], )
+            else:
+                customers += (customer['lastName'],)
         self.workdayDetailVar.set(customers)
 
     def show_workday_db_details(self, *args):

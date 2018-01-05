@@ -6,7 +6,7 @@ class Expense:
         self._id = route._id.encode('utf-8')
         self._category = category.encode('utf-8')
         self._date = route._date.encode('utf-8')
-        self._text = route._comment.encode('utf-8')
+        self._text = route._comment
         self._value = float(route._route_distance) * km_factor
 
     def convert_to_db_object(self):
