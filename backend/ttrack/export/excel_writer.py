@@ -133,7 +133,7 @@ class ExcelWriter:
         return start_row
 
     def _create_milage_header(self, month_name, sheet):
-        sheet['E2'].value = month_name + ' ' + '2017'
+        sheet['E2'].value = month_name + ' ' + '2018'
 
     def _generate_milage_rows(self, wb, data_store):
         template_ws = wb.get_sheet_by_name('Vorlage')
@@ -142,7 +142,7 @@ class ExcelWriter:
                                       (6, u'Juni'), (7, u'Juli'), (8, u'August'), (9, u'September'),
                                       (10, u'Oktober'), (11, u'November'), (12, u'Dezember')]:
 
-            data = data_store.get_milage_data(month_num, '2017')
+            data = data_store.get_milage_data(month_num, '2018')
 
             # if sheet is not found, just copy the template and set the date
             if not month_name in wb.sheetnames:
@@ -214,7 +214,7 @@ class ExcelWriter:
                                       (6, u'Juni'), (7, u'Juli'), (8, u'August'), (9, u'September'),
                                       (10, u'Oktober'), (11, u'November'), (12, u'Dezember')]:
 
-            data = data_store.get_expense_data(month_num, '2017')
+            data = data_store.get_expense_data(month_num, '2018')
 
             # if sheet is not found, just copy the template and set the date
             if not month_name in wb.sheetnames:
@@ -279,7 +279,7 @@ class ExcelWriter:
         return wb
 
     def _create_income_expense_header(self, month_name, sheet):
-        sheet['D1'].value = month_name + ' ' + '2017'
+        sheet['D1'].value = month_name + ' ' + '2018'
         self._style_range(sheet, 'E3:F3', Border(top=Side(border_style='thin', color=colors.BLACK),
                                                      left=Side(border_style='thin', color=colors.BLACK),
                                                      bottom=Side(border_style='thin', color=colors.BLACK),
