@@ -1,8 +1,11 @@
 import json
 from  operator import itemgetter
 
+import logging
+
 from backend.ttrack.export.excel_writer import ExcelWriter
 
+logger = logging.getLogger(__name__)
 
 class ViewController:
 
@@ -96,10 +99,21 @@ class ViewController:
 
     def create_milage_report(self):
         """This function backups and re-creates the milage excel report."""
-        self._excel_writer.backup_and_create(self._datastore, ExcelWriter.REPORT_MILAGE)
+        try:
+            self._excel_writer.backup_and_create(self._datastore, ExcelWriter.REPORT_MILAGE)
+            return True
+        except Exception as err:
+            logger.error('failed to write milage report: {0}'.format(err.message))
+            return False
+
 
     def create_income_report(self):
         """This function backups and re-creates the income excel report."""
-        self._excel_writer.backup_and_create(self._datastore, ExcelWriter.REPORT_INCOME)
+        try:
+            self._excel_writer.backup_and_create(self._datastore, ExcelWriter.REPORT_INCOME)
+            return True
+        except Exception as err:
+            logger.error('failed to write income report: {0}'.format(err.message))
+            return False
 
 
