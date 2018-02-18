@@ -1,3 +1,4 @@
+# coding=utf-8
 import tkMessageBox
 from Tkinter import *
 from ttk import *
@@ -67,16 +68,20 @@ class MainApplication(Frame):
         self._controller.upload_current_customers()
 
     def create_milage_report(self):
+        self._controller.show_busy()
         success = self._controller.create_milage_report()
         if success:
             tkMessageBox.showinfo('Fahrtenbuch erzeugt', 'Das Fahrtenbuch wurde erfolgreich angelegt.')
         else:
             tkMessageBox.showinfo('Fahrtenbuch Fehler', 'Das Fahrtenbuch konnte nicht erfolgreich angelegt werden. Siehe Log-Files für mehr Information')
+        self._controller.show_not_busy()
 
     def create_income_report(self):
+        self._controller.show_busy()
         success = self._controller.create_income_report()
         if success:
             tkMessageBox.showinfo('Einnahmen/Ausgaben erzeugt', 'Der Einnahmen-/Ausgabenbericht wurde erfolgreich angelegt.')
         else:
             tkMessageBox.showinfo('Einnahmen/Ausgaben Fehler',
                                   'Der Einnahmen-/Ausgabenbericht konnte nicht erfolgreich angelegt werden. Siehe Log-Files für mehr Information')
+        self._controller.show_not_busy()

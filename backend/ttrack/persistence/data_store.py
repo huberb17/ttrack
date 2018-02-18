@@ -243,7 +243,7 @@ class DataStore:
                     converted_field = datetime.datetime.strptime(field.strip(), "%Y-%m-%d")
                     data_row = data_row + (converted_field,)
                 elif index == 2: # expense_note (index == 3 -> income_note)
-                    if row[index] is not None: # index in row is zero based, so this is the next field -> income_note
+                    if row[index] is not None and row[index] != '': # index in row is zero based, so this is the next field -> income_note
                         data_row = data_row + (row[index],)
                     else:
                         data_row = data_row + (field,)

@@ -117,3 +117,5 @@ class ViewController:
             return False
 
 
+    def show_busy(self):
+        """Sets the cursor of the main window to busy."""
