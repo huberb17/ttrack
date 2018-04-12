@@ -8,6 +8,7 @@ import operator
 class WorkdaysFrame(Frame):
     def __init__(self, parent, controller, *args, **kwargs):
         Frame.__init__(self, parent, *args, **kwargs)
+        self.root = self._root()
         self.parent = parent
         self._controller = controller
 
@@ -59,36 +60,48 @@ class WorkdaysFrame(Frame):
         dlf = LabelFrame(self, text='Arbeitstagdetails')
         dlf.grid(column=1, row=0, sticky=(N))
 
-        Label(dlf, text='Datum:').grid(column=0, row=0, sticky=(E))
+        Label(dlf, text='Datum:').grid(column=0, row=0, sticky=(W))
         self.workdayDateVar = StringVar()
-        self.date_entry = Entry(dlf, textvariable=self.workdayDateVar)
+        self.date_entry = Entry(dlf, textvariable=self.workdayDateVar, width=12)
         self.date_entry.state(['readonly'])
         self.date_entry.grid(column=1, row=0, sticky=(W))
 
-        Label(dlf, text='km-Stand:').grid(column=0, row=1, sticky=(E))
+        Label(dlf, text='km-Stand:').grid(column=0, row=1, sticky=(W))
         self.workdayMilageVar = IntVar()
-        self.milage_entry = Entry(dlf, textvariable=self.workdayMilageVar)
+        self.milage_entry = Entry(dlf, textvariable=self.workdayMilageVar, width=12)
         self.milage_entry.state(['readonly'])
         self.milage_entry.grid(column=1, row=1, sticky=(W))
 
         self.workdayDetailVar = StringVar()
-        self.workday_detail_list = Listbox(dlf, listvariable=self.workdayDetailVar, width=30)
+        self.workday_detail_list = Listbox(dlf, listvariable=self.workdayDetailVar, width=25)
         self.workday_detail_list.grid(column=0, row=2, columnspan=2, sticky=(W))
 
         self.workday_store_button = Button(dlf, text='Arbeitstag übernehmen', command=self.store_workday)
         self.workday_store_button.grid(column=0, row=3, columnspan=2, sticky=(W))
-
+        self.workday_store_button.state(['disabled'])
 
     def load_workdays_cloud(self):
+        self.root.config(cursor="wait")
+        self.root.update_idletasks()
+        self.root.after(500, self.do_load_cloud)
+
+    def do_load_cloud(self):
+        self.workday_store_button.state(['disabled'])
         self._controller.load_workdays_cloud()
         self.workday_dates = ()
         self.sorted_workdays = sorted(self._controller.workday_list.items(), key=lambda x: x[1]['therapyDate'])
         for item in self.sorted_workdays:
             self.workday_dates += ( item[1]['therapyDate'][:10], )
         self.workdayVar.set(self.workday_dates)
-        self.workday_store_button.state(['!disabled'])
+        self.workday_load_button_cloud.state(['disabled'])
+        self.root.config(cursor="")
 
     def show_workdays_db(self):
+        self.root.config(cursor="wait")
+        self.root.update_idletasks()
+        self.root.after(500, self.do_load_db)
+
+    def do_load_db(self):
         self.workday_store_button.state(['disabled'])
         self._controller.show_workdays_db()
         self.workday_db_dates = ()
@@ -96,29 +109,41 @@ class WorkdaysFrame(Frame):
         for item in self.sorted_db_workdays:
             self.workday_db_dates += (item[1]['therapyDate'][:10],)
         self.workdayDbVar.set(self.workday_db_dates)
+        self.root.config(cursor="")
 
     def show_workday_details(self, *args):
+        self.clear_workday_details()
+        self.workday_db_list.select_clear(0, END)
+        if (self.workday_list.curselection()):
+            workday = self.sorted_workdays[self.workday_list.curselection()[0]]
+            self.display_workday_details(workday)
+            self.workday_store_button.state(['!disabled'])
+
+    def show_workday_db_details(self, *args):
+        self.clear_workday_details()
+        self.workday_list.select_clear(0, END)
+        if (self.workday_db_list.curselection()):
+            self.workday_store_button.state(['disabled'])
+            workday = self.sorted_db_workdays[self.workday_db_list.curselection()[0]]
+            self.display_workday_details(workday)
+
+    def display_workday_details(self, workday):
         customers = ()
-        workday = self.sorted_workdays[self.workday_list.curselection()[0]]
-        self.workdayDateVar.set(workday[1]['therapyDate'])
+        self.workdayDateVar.set(workday[1]['therapyDate'][:10])
         self.workdayMilageVar.set(workday[1]['milage'])
         for customer in workday[1]['customersOfDay']:
             if 'firstName' in customer:
-                customers += ( customer['firstName'] + " " + customer['lastName'], )
+                customers += (customer['firstName'] + " " + customer['lastName'],)
             else:
                 customers += (customer['lastName'],)
-        self.workdayDetailVar.set(customers)
-
-    def show_workday_db_details(self, *args):
-        self.workday_store_button.state(['disabled'])
-        customers = ()
-        workday = self.sorted_db_workdays[self.workday_db_list.curselection()[0]]
-        self.workdayDateVar.set(workday[1]['therapyDate'])
-        self.workdayMilageVar.set(workday[1]['milage'])
-        for customer in workday[1]['customersOfDay']:
-            customers += ( customer['firstName'] + " " + customer['lastName'], )
         self.workdayDetailVar.set(customers)
 
     def store_workday(self):
         workday = self.sorted_workdays[self.workday_list.curselection()[0]][1]
         self._controller.store_workday(workday)
+
+    def clear_workday_details(self):
+        self.workdayDateVar.set('')
+        self.workdayMilageVar.set('')
+        self.workdayDetailVar.set( () )
+

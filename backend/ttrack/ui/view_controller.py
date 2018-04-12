@@ -115,7 +115,3 @@ class ViewController:
         except Exception as err:
             logger.error('failed to write income report: {0}'.format(err.message))
             return False
-
-
-    def show_busy(self):
-        """Sets the cursor of the main window to busy."""
