@@ -510,5 +510,6 @@ class ExcelWriter:
         for row in range(start_row, end_row + 1):
             for col_idx in range(start_col, end_col + 1):
                 col = get_column_letter(col_idx)
-                ws.cell('%s%s' % (col, row)).border = border
+                #ws.cell('%s%s' % (col, row)).border = border
+                ws['%s%s' % (col, row)].border = border
 

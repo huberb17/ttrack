@@ -1,9 +1,9 @@
 {
-  "dbName": "C:\\Users\\bernhard.huber\\PycharmProjects\\ttrack\\backend\\ttrack\\resources\\ttrack.db3",
-  "dbBackupPath": "C:\\Users\\bernhard.huber\\PycharmProjects\\ttrack\\backend\\ttrack\\resources\\db_dump",
-  "oauthSettingsFile": "C:\\Users\\bernhard.huber\\PycharmProjects\\ttrack\\backend\\ttrack\\resources\\settings.yaml",
+  "dbName": "C:\\Users\\u0109\\PycharmProjects\\ttrack\\backend\\ttrack\\resources\\ttrack.db3",
+  "dbBackupPath": "C:\\Users\\u0109\\PycharmProjects\\ttrack\\backend\\ttrack\\resources\\db_dump",
+  "oauthSettingsFile": "C:\\Users\\u0109\\PycharmProjects\\ttrack\\backend\\ttrack\\resources\\settings.yaml",
   "shareName": "frontend",
-  "exportMilage": "C:\\Users\\bernhard.huber\\PycharmProjects\\ttrack\\backend\\ttrack\\resources\\Fahrtenbuch.xlsx",
-  "exportIncome": "C:\\Users\\bernhard.huber\\PycharmProjects\\ttrack\\backend\\ttrack\\resources\\Einnahmen-Ausgaben.xlsx",
-  "exportBackup": "C:\\Users\\bernhard.huber\\PycharmProjects\\ttrack\\backend\\ttrack\\resources\\exportBackup"
+  "exportMilage": "C:\\Users\\u0109\\PycharmProjects\\ttrack\\backend\\ttrack\\resources\\Fahrtenbuch.xlsx",
+  "exportIncome": "C:\\Users\\u0109\\PycharmProjects\\ttrack\\backend\\ttrack\\resources\\Einnahmen-Ausgaben.xlsx",
+  "exportBackup": "C:\\Users\\u0109\\PycharmProjects\\ttrack\\backend\\ttrack\\resources\\exportBackup"
 }
