@@ -1,6 +1,7 @@
 <ion-header>
   <ion-navbar color=secondary>
-    <ion-title>Arbeitstag erfassen</ion-title>
+    <ion-title *ngIf="isEdit == false">Arbeitstag erfassen</ion-title>
+    <ion-title *ngIf="isEdit == true">Arbeitstag editieren</ion-title>
   </ion-navbar>
 </ion-header>
 
@@ -67,7 +68,7 @@
   </ion-list>
 </ion-content>
 
-<ion-footer *ngIf="isCreated == true">
+<ion-footer *ngIf="(isCreated == true && isEdit == false)">
   <ion-toolbar color=light>
     <ion-title>Arbeitstag</ion-title>
     <ion-buttons start>
@@ -79,6 +80,19 @@
     </button>
     <button ion-button (click)="deleteWorkday()">
       Löschen
+    </button>
+  </ion-buttons>
+  </ion-toolbar>
+</ion-footer>
+<ion-footer *ngIf="(isEdit == true)">
+  <ion-toolbar color=light>
+    <ion-title>Arbeitstag</ion-title>
+    <ion-buttons start>
+    <button ion-button (click)="submitWorkdayChange()">
+      Änderung übernehmen
+    </button>
+    <button ion-button (click)="cancelWorkdayChange()">
+      Abbrechen
     </button>
   </ion-buttons>
   </ion-toolbar>

@@ -2,6 +2,8 @@ import { Component } from '@angular/core';
 
 import { NavController } from 'ionic-angular';
 import { WorkdayService, Workday } from '../../app/services/workday.service'
+import { ModalController } from 'ionic-angular/components/modal/modal';
+import { WorkDayPage } from '../work-day/work-day';
 
 @Component({
   selector: 'page-history',
@@ -10,6 +12,7 @@ import { WorkdayService, Workday } from '../../app/services/workday.service'
 export class HistoryListPage {
   workdayHistory: Workday[];
   constructor(public navCtrl: NavController,
+              public modalCtrl: ModalController,
               private wdService: WorkdayService) {
 
     this.workdayHistory = [];
@@ -51,6 +54,26 @@ export class HistoryListPage {
       }
     }
     return archived;
+  }
+
+  public changeWorkday(workday: Workday, index: number): void {
+    var workdayToEdit: Workday = this.wdService.createWorkdayCopy(workday);
+    let modal = this.modalCtrl.create(WorkDayPage, { workday: workdayToEdit });
+    modal.onDidDismiss(data => {
+      if (data)
+      {
+        console.log("save edited workday");
+        this.workdayHistory[index] = data;
+        this.wdService.storeWorkdayHistory();
+      } else {
+        console.log("dismiss changes on workday");
+      }
+    });
+    modal.present();
+  }
+
+  public removeWorkday(index: number): void {
+    this.wdService.removeFromHistory(index);
   }
 
   public uploadWorkday(workday: Workday): void {

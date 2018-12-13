@@ -18,11 +18,17 @@
           Archivierte Arbeitstage entfernen         
         </button>
       </ion-item>
-    <ion-item *ngFor="let workday of workdayHistory">     
+    <ion-item *ngFor="let workday of workdayHistory; let i = index">     
       {{printDate(workday)}}
       <div text-wrap>
         <p>{{printCustomers(workday)}}</p>
       </div>
+      <button *ngIf="!workday.isUploaded" ion-button item-right icon-only color="danger" clear (click)="removeWorkday(i)">
+        <ion-icon name="trash"></ion-icon>  
+      </button>
+      <button *ngIf="!workday.isUploaded" ion-button item-right icon-only color="secondary" clear (click)="changeWorkday(workday, i)">
+        <ion-icon name="create"></ion-icon>  
+      </button>
       <button *ngIf="!workday.isUploaded" ion-button item-right clear icon-only (click)="uploadWorkday(workday)">
         <ion-icon name="cloud-upload"></ion-icon>  
       </button>

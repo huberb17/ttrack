@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Storage } from '@ionic/storage';
-import { TTrackCustomer, TTrackAddress } from '../domain-model/domain-model';
+import { TTrackCustomer, TTrackAddress, TTrackIncome } from '../domain-model/domain-model';
 import { AddressService } from "../../app/services/address.service";
 import { GdriveService } from "../../app/services/gdrive.service";
 
@@ -126,6 +126,26 @@ export class CustomerService {
             this.state.needsUpload = false;
             this.storeStateToStorage();
         }
+    }
+
+    createCustomerCopy(customer: TTrackCustomer): TTrackCustomer {
+        var newCustomer = new TTrackCustomer();
+        newCustomer.id = customer.id;
+        newCustomer.firstName = customer.firstName;
+        newCustomer.lastName = customer.lastName;
+        newCustomer.isActive = customer.isActive;
+        newCustomer.title = customer.title;
+        newCustomer.address = customer.address;           
+        newCustomer.invoiceConfiguration = new TTrackIncome();
+        if (customer.invoiceConfiguration === undefined) {
+            newCustomer.invoiceConfiguration.textForReport = newCustomer.firstName + " " + newCustomer.lastName;
+            newCustomer.invoiceConfiguration.value = 500;
+        }
+        else {
+            newCustomer.invoiceConfiguration.textForReport = customer.invoiceConfiguration.textForReport;
+            newCustomer.invoiceConfiguration.value = customer.invoiceConfiguration.value;
+        }
+        return newCustomer;
     }
 
     private storeCustomers() {

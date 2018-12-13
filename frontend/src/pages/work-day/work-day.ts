@@ -1,6 +1,6 @@
 import { Component, OnInit, NgZone, ViewChild } from '@angular/core';
 
-import { ModalController, NavController, ToastController, Content, AlertController } from 'ionic-angular';
+import { ModalController, NavController, ToastController, Content, AlertController, NavParams } from 'ionic-angular';
 
 import { TTrackCustomer, TTrackAddress, CustomerAtWorkday, TTrackRoute, TTrackIncome } from '../../app/domain-model/domain-model';
 import { CustomerService } from '../../app/services/customer.service';
@@ -11,6 +11,7 @@ import { DistanceService } from "../../app/services/distance.service";
 import { OveruleDistanceModalPage } from "./modals/overule-distance-modal";
 import { GdriveService } from "../../app/services/gdrive.service";
 import { WorkdayService, Workday } from "../../app/services/workday.service";
+import { ViewController } from 'ionic-angular/navigation/view-controller';
 
 @Component({
   selector: 'page-work-day',
@@ -22,6 +23,7 @@ export class WorkDayPage implements OnInit {
   public isCreated: boolean;
   public isDayEmpty: boolean;
   public isDaySaved: boolean;
+  public isEdit: boolean;
   public customersOfDay: CustomerAtWorkday[];
   public milage: number;
     
@@ -33,6 +35,8 @@ export class WorkDayPage implements OnInit {
   constructor(public navCtrl: NavController,
               public modalCtrl: ModalController,
               public toastCtrl: ToastController,
+              public params: NavParams,
+              public viewCtrl: ViewController,
               private alertCtrl: AlertController,
               private zone: NgZone,
               private customerService: CustomerService,
@@ -40,11 +44,7 @@ export class WorkDayPage implements OnInit {
               private distanceService: DistanceService,
               private workdayService: WorkdayService,
               private gdriveService: GdriveService) {
-    this.isCreated = false;
-    this.isDayEmpty = true;
-    this.isDaySaved = true;
-    this.customersOfDay = new Array<CustomerAtWorkday>();
-    
+
     this.addressList = [];
     this.customerList = [];
     this.observeAddressChange = this.observeAddressChange.bind(this);
@@ -58,9 +58,32 @@ export class WorkDayPage implements OnInit {
 
     this.observeWorkdayChange = this.observeWorkdayChange.bind(this);
     this.workdayService.registerWorkdayCallback(this.observeWorkdayChange);
-    this.workdayService.reloadWorkday();
 
     this.distanceCallback = this.distanceCallback.bind(this);
+
+    var workday = this.params.get('workday');
+    if (workday != undefined) {
+      this.isEdit = true;
+      this.customerService.reloadCustomers();
+      this.addressService.reloadAddresses();
+      this.therapyDate = workday.therapyDate;
+      this.milage = workday.milage;
+      this.customersOfDay = workday.customersOfDay;
+      this.startAddress = workday.startAddress;
+      this.endAddress = workday.endAddress;
+      this.lastRoute = workday.lastRoute;
+      this.isCreated = true;
+      this.isDayEmpty = false;
+      this.isDaySaved = true;
+    } else {
+      this.isEdit = false;
+      this.isCreated = false;
+      this.isDayEmpty = true;
+      this.isDaySaved = true;
+    
+      this.customersOfDay = new Array<CustomerAtWorkday>();
+      this.workdayService.reloadWorkday();  
+    }    
   }
 
   ngOnInit(): void {
@@ -342,6 +365,22 @@ export class WorkDayPage implements OnInit {
 
   setToUnsaved() {
     this.isDaySaved = false;
+  }
+
+  cancelWorkdayChange(): void {
+    this.viewCtrl.dismiss();
+  }
+
+  submitWorkdayChange(): void {
+    var workday = new Workday();
+    workday.therapyDate = this.therapyDate;
+    workday.milage = this.milage;
+    workday.customersOfDay = this.customersOfDay;
+    workday.startAddress = this.startAddress;
+    workday.endAddress = this.endAddress;
+    workday.lastRoute = this.lastRoute;
+    workday.isUploaded = false;
+    this.viewCtrl.dismiss(workday);
   }
 
   private observeAddressChange(addressList: TTrackAddress[]): void {

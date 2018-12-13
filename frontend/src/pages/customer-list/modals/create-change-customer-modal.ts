@@ -36,21 +36,7 @@ export class CreateOrChangeCustomerModalPage {
             this.customer.invoiceConfiguration.value = 450;
         }
         else {
-            this.customer = new TTrackCustomer();
-            this.customer.id = oldCust.id;
-            this.customer.firstName = oldCust.firstName;
-            this.customer.lastName = oldCust.lastName;
-            this.customer.isActive = oldCust.isActive;
-            this.customer.title = oldCust.title;
-            this.customer.address = oldCust.address;           
-            if (oldCust.invoiceConfiguration === undefined) {
-                this.customer.invoiceConfiguration = new TTrackIncome();
-                this.customer.invoiceConfiguration.textForReport = this.customer.firstName + " " + this.customer.lastName;
-                this.customer.invoiceConfiguration.value = 450;
-            }
-            else {
-                this.customer.invoiceConfiguration = oldCust.invoiceConfiguration;
-            }
+            this.customer = this.custCtrl.createCustomerCopy(oldCust);
             this.hasAddress = true;
         }
         console.log(this.customer);

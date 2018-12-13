@@ -103,7 +103,8 @@ export class WorkdayService {
         this.addWorkdayToHistory(workday);
         this.workday = new Workday();
         this.storeWorkday(this.workday);
-        this.uploadWorkday(workday);
+        // just store the workday and do not upload it
+        //this.uploadWorkday(workday);
     }
 
     uploadWorkday(workday: Workday) {
@@ -137,6 +138,19 @@ export class WorkdayService {
     private addWorkdayToHistory(workday: Workday): void {
         this.workdayHistory.push(workday);
         this.storeWorkdayHistory();
+    }
+
+    createWorkdayCopy(workday: Workday): Workday {
+        var copy = new Workday();
+        copy.id = workday.id;
+        copy.therapyDate = workday.therapyDate;
+        copy.milage = workday.milage;
+        copy.startAddress = Object.create(workday.startAddress);
+        copy.endAddress = Object.create(workday.endAddress);
+        copy.lastRoute = Object.create(workday.lastRoute);
+        copy.customersOfDay = Array.from(workday.customersOfDay);
+        copy.isUploaded = workday.isUploaded;
+        return copy;
     }
 
     private updateHistory(workday: Workday): void {
@@ -179,7 +193,7 @@ export class WorkdayService {
         }
     }
 
-    private storeWorkdayHistory() {
+    storeWorkdayHistory() {
         var serWorkdayHistory = [];
         for (var workday of this.workdayHistory) {
             var serWorkday = this.serializeWorkday(workday);
@@ -196,6 +210,11 @@ export class WorkdayService {
             this.state.needsUpload = true;
             this.storeStateToStorage();
         } 
+    }
+
+    removeFromHistory(index: number) {
+        this.workdayHistory.splice(index, 1);
+        this.storeWorkdayHistory();
     }
 
     private refreshWorkday() {
