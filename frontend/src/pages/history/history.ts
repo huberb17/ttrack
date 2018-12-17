@@ -63,11 +63,11 @@ export class HistoryListPage {
     modal.onDidDismiss(data => {
       if (data)
       {
-        console.log("save edited workday");
+        console.log("[INFO - history.ts - changeWorkday]: " + "save edited workday");
         this.workdayHistory[index] = data;
         this.wdService.storeWorkdayHistory();
       } else {
-        console.log("dismiss changes on workday");
+        console.log("[INFO - history.ts - changeWorkday]: " + "dismiss changes on workday");
       }
     });
     modal.present();

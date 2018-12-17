@@ -27,7 +27,7 @@ export class CreateOrChangeCustomerModalPage {
     { 
         this.isCreateNew = false;
         var oldCust = this.params.get('customer');
-        console.log(oldCust);
+        console.log("[INFO - create-change-customer-modal.ts - Constructor]: oldCustomer: " + JSON.stringify(oldCust));
         if (oldCust.address === undefined) {
             this.customer = oldCust;
             this.hasAddress = false;
@@ -39,7 +39,7 @@ export class CreateOrChangeCustomerModalPage {
             this.customer = this.custCtrl.createCustomerCopy(oldCust);
             this.hasAddress = true;
         }
-        console.log(this.customer);
+        console.log("[INFO - create-change-customer-modal.ts - Constructor]: customer: " + JSON.stringify(this.customer));
     }
 
     dismiss(): void {
@@ -47,8 +47,7 @@ export class CreateOrChangeCustomerModalPage {
     }
 
     saveCustomer(): void {
-        console.log('save customer')
-        console.log(this.customer);
+        console.log("[INFO - create-change-customer-modal.ts - saveCustomer]: customer: " + JSON.stringify(this.customer));
         let data = { 'customer': this.customer}
         this.viewCtrl.dismiss(data);
     }
@@ -61,10 +60,9 @@ export class CreateOrChangeCustomerModalPage {
         modal.onDidDismiss(data => {
             if (data)
             {
-                console.log('new adderss created');
-                console.log(data);
+                console.log("[INFO - create-change-customer-modal.ts - createAddress]: new adderss created" + JSON.stringify(data));
                 this.customer.address = data['address'];
-                console.log(this.customer);
+                console.log("[INFO - create-change-customer-modal.ts - createAddress]: customer: " + JSON.stringify(this.customer));
                 this.addrService.addAddress(data['address']);
                 this.hasAddress = true;
             }
@@ -77,11 +75,9 @@ export class CreateOrChangeCustomerModalPage {
         modal.onDidDismiss(data => {
             if (data)
             {
-                console.log('adderss chosen');
-                console.log(data);
-                console.log(data['address']);
+                console.log("[INFO - create-change-customer-modal.ts - chooseAddress]: address: " + JSON.stringify(data['address']));
                 this.customer.address = data['address'];
-                console.log(this.customer);
+                console.log("[INFO - create-change-customer-modal.ts - chooseAddress]: customer: " + JSON.stringify(this.customer));
                 this.hasAddress = true;
             }
         });

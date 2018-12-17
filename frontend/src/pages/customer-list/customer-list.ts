@@ -50,7 +50,7 @@ export class CustomerListPage {
   }
 
   reloadCustomerList(): void {
-    console.log('show inactive ' +  this.showInactive);
+    console.log("[INFO - customer-lists.ts - reloadCustomerList]: " + 'show inactive ' +  this.showInactive);
     this.custService.reloadCustomers();
   }
 
@@ -68,7 +68,7 @@ export class CustomerListPage {
         {
           text: 'Abbrechen',
           handler: () => {
-            console.log('Abbrechen clicked');
+            console.log("[INFO - customer-lists.ts - removeCustomer]: " + 'Abbrechen clicked');
           }
         }
       ]
@@ -145,7 +145,7 @@ export class CustomerListPage {
         {
           text: 'Abbrechen',
           handler: () => {
-            console.log('Abbrechen clicked');
+            console.log("[INFO - customer-lists.ts - removeAddress]: " + 'Abbrechen clicked');
           }
         }
       ]
@@ -171,7 +171,7 @@ export class CustomerListPage {
   }
 
   private observeChangeHistoryChange = (isHistoryEmpty: boolean) => {
-    console.log('observed gdrive change: %s', isHistoryEmpty);
+    console.log("[INFO - customer-lists.ts - observeChangeHistoryChange]: " + 'observed gdrive change: %s', isHistoryEmpty);
     this.isHistoryEmpty = isHistoryEmpty;
   }
 }

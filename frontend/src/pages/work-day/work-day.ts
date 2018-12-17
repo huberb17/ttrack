@@ -152,22 +152,22 @@ export class WorkDayPage implements OnInit {
     modal.onDidDismiss(data => {
       if (data)
       {
-        console.log(data);        
+        console.log("[INFO - work-day.ts - addCustomer]: ModalResponse: " + JSON.stringify(data));        
         let newCustomer = new CustomerAtWorkday(<TTrackCustomer> data);
-        console.log(newCustomer);
+        console.log("[INFO - work-day.ts - addCustomer]: customer: " + JSON.stringify(newCustomer));
         newCustomer.invoice = new TTrackIncome();
         newCustomer.routeToCustomer = new TTrackRoute();
         newCustomer.routeToCustomer.end = newCustomer.address;
         this.customersOfDay.push(newCustomer);
         if (this.customersOfDay.length == 1) { // this is the first customer
-          console.log(this.startAddress);
+          console.log("[INFO - work-day.ts - addCustomer]: RouteStart: " + JSON.stringify(this.startAddress));
           newCustomer.routeToCustomer.start = this.startAddress;
         }
         else {
-          console.log(this.customersOfDay[this.customersOfDay.length - 2].address);
+          console.log("[INFO - work-day.ts - addCustomer]: RouteStart: " + JSON.stringify(this.customersOfDay[this.customersOfDay.length - 2].address));
           newCustomer.routeToCustomer.start = this.customersOfDay[this.customersOfDay.length - 2].address;
         }
-        console.log(newCustomer);
+        console.log("[INFO - work-day.ts - addCustomer]: customer: " + JSON.stringify(newCustomer));
 
         this.distanceService.calculateRoute(newCustomer.routeToCustomer, this.distanceCallback, this.customersOfDay.length-1);
         this.lastRoute.start = newCustomer.address;
@@ -193,7 +193,7 @@ export class WorkDayPage implements OnInit {
       }
       else if (idx == this.customersOfDay.length) {
         this.lastRoute.start = this.customersOfDay[idx-1].address;
-        console.log(this.lastRoute);
+        console.log("[INFO - work-day.ts - removeCustomer]: LastRoute: " + JSON.stringify(this.lastRoute));
         this.distanceService.calculateRoute(this.lastRoute, this.distanceCallback, idx);
       }
       else {
@@ -348,14 +348,13 @@ export class WorkDayPage implements OnInit {
   }
 
   overuleDistance(idx: number): void {
-    console.log('clicked overuleDistance with id: ' + idx);
-    console.log(this.customersOfDay[idx].address);
+    console.log("[INFO - work-day.ts - overRuleDistance]: " + 'clicked overuleDistance with id: ' + idx);
+    console.log("[INFO - work-day.ts - overRuleDistance]: Address: " + JSON.stringify(this.customersOfDay[idx].address));
     let modal = this.modalCtrl.create(OveruleDistanceModalPage, 
                   { customer: this.customersOfDay[idx] });
     modal.onDidDismiss(data => {
       if (data)
       {
-        console.log(this.customersOfDay[idx].address);
         this.customersOfDay[idx].routeToCustomer.lengthInKm = data;
         this.isDaySaved = false;
       }
@@ -385,17 +384,17 @@ export class WorkDayPage implements OnInit {
 
   private observeAddressChange(addressList: TTrackAddress[]): void {
     this.addressList = addressList;
-    console.log('callback observeAddressChange called');
+    console.log("[INFO - work-day.ts - observeAddressChange]: " + 'callback observeAddressChange called');
   }
 
   private observeCustomerChange(customerList: TTrackCustomer[]): void {
     this.customerList = customerList;
-    console.log('callback observeCustomerChange called');
+    console.log("[INFO - work-day.ts - observeCustomerChange]: " + 'callback observeCustomerChange called');
   }
 
   private observeWorkdayChange(workday: Workday): void {
-    console.log(workday);
-    console.log(this.lastRoute);
+    console.log("[INFO - work-day.ts - observeWorkdayChange]: Workday: " + JSON.stringify(workday));
+    console.log("[INFO - work-day.ts - observeWorkdayChange]: Lastroute: " + JSON.stringify(this.lastRoute));
     if (workday.therapyDate === undefined) {
       this.therapyDate = new Date().toISOString();
       this.isCreated = false;

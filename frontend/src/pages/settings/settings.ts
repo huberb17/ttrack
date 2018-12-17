@@ -43,7 +43,7 @@ export class SettingsPage {
   }
 
   public doGoogleLogin(){
-    this.gdriveService.tryLogin( (res) => console.log(res) );
+    this.gdriveService.tryLogin( (res) => console.log("[INFO - settings.ts - doGoogleLogin]: " + JSON.stringify(res)));
   }
 
   public getCustomerData(): void {
@@ -60,7 +60,7 @@ export class SettingsPage {
         {
           text: 'Abbrechen',
           handler: () => {
-            console.log('get CustomerData canceled');
+            console.log("[INFO - settings.ts - getCustomerData]: " + 'canceled');
           }
         }
       ]
@@ -82,7 +82,7 @@ export class SettingsPage {
         {
           text: 'Abbrechen',
           handler: () => {
-            console.log('get CustomerData canceled');
+            console.log("[INFO - settings.ts - getAddressData]: " + 'canceled');
           }
         }
       ]
@@ -145,7 +145,7 @@ export class SettingsPage {
   }
 
   private getAddressesFromGdriveCallback(addresses: TTrackAddress[]): void {
-    console.log('settings.ts - 148: ' + JSON.stringify(addresses));
+    console.log("[INFO - settings.ts - getAddressesFromGdriveCallback]: " + JSON.stringify(addresses));
     if (addresses) {
       if (addresses.length > 0) {
         this.addrService.overwriteAddresses(addresses);
@@ -160,7 +160,7 @@ export class SettingsPage {
   }
 
   private getCustomersFromGdriveCallback(customers: TTrackCustomer[]): void {
-    console.log('settings.ts - 163: ' + JSON.stringify(customers));
+    console.log("[INFO - settings.ts - getCustomersFromGdriveCallback]: " + JSON.stringify(customers));
     if (customers) {
       if (customers.length > 0) {
         this.custService.overwriteCustomers(customers);

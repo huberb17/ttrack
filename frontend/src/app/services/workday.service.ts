@@ -161,7 +161,7 @@ export class WorkdayService {
                 return;
             }
         }
-        console.log('workday ' + workday.id + ' not found');
+        console.log("[INFO - workday.service.ts - updateHistory]: " + 'workday ' + workday.id + ' not found');
     }
 
     private updateHistoryWorkdays(workdays: Workday[]): void {
@@ -178,13 +178,13 @@ export class WorkdayService {
 
     private storeWorkday(workday: Workday) {
         this.workday = workday;
-        console.log(workday);
+        console.log("[INFO - workday.service.ts - storeWorkday]: Workday: " + JSON.stringify(workday));
         var serWorkday = this.serializeWorkday(workday);
-        console.log(serWorkday);
+        console.log("[INFO - workday.service.ts - storeWorkday]: Serialized: " + JSON.stringify(serWorkday));
         this.storage.set('workday', serWorkday).then((data) => {
             this.notifyWorkdayChange();
         }, (error) => {
-            console.log('customer storage failed: ' + error);
+            console.log("[ERROR - workday.service.ts - storeWorkday]: " + JSON.stringify(error));
         });
 
         if (!this.state.needsUpload) {
@@ -203,7 +203,7 @@ export class WorkdayService {
         this.storage.set('workdayHistory', serWorkdayHistory).then((data) => {
             this.notifyWorkdayHistoryChange();
         }, (error) => {
-            console.log('customer storage failed: ' + error);
+            console.log("[ERROR - workday.service.ts - storeWorkdayHistory]: " + JSON.stringify(error));
         });
 
         if (!this.state.needsUpload) {
@@ -226,7 +226,7 @@ export class WorkdayService {
             this.workday = workday;
             this.notifyWorkdayChange();
         }, (error) => {
-            console.log(error.err);
+            console.log("[ERROR - workday.service.ts - refreshWorkday]: " + JSON.stringify(error.err));
             this.workday = workday;
         });     
     }
@@ -237,14 +237,14 @@ export class WorkdayService {
             if (data) {
                 for (var serWorkday of data) {
                     var workday = this.deserializeWorkday(serWorkday);                   
-                    console.log(workday);
+                    console.log("[INFO - workday.service.ts - refreshWorkday]: " + JSON.stringify(workday));
                     workdayList.push(workday);
                 }
             }
             this.workdayHistory = workdayList;
             this.notifyWorkdayHistoryChange();
         }, (error) => {
-            console.log(error.err);
+            console.log("[ERROR - workday.service.ts - refreshWorkday]: " + JSON.stringify(error.err));
             this.workdayHistory = workdayList;
         });     
     }
@@ -257,7 +257,7 @@ export class WorkdayService {
                 state.needsUpload = data['needsUpload'];              
             }
         }, (error) => {
-            console.log(error.err);
+            console.log("[ERROR - workday.service.ts - getStateFromStorage]: " + JSON.stringify(error.err));
         })
         return state;
     }
@@ -266,7 +266,7 @@ export class WorkdayService {
         this.notifyStateObservers();
         this.storage.set('workdayServiceState', this.state).then((data) => {
         }, (error) => {
-            console.log('workdayServiceState storage failed: ' + error.err);
+            console.log("[ERROR - workday.service.ts - storeStateToStorage]: " + JSON.stringify(error.err));
         });
     }
 
@@ -291,7 +291,7 @@ export class WorkdayService {
     }
 
     private observeWorkdayUpload(workdayIds: string[]): void {
-        console.log(workdayIds);
+        console.log("[INFO - workday.service.ts - observeWorkdayUpload]: Ids: " + workdayIds);
         if (workdayIds) {
           for (let workday of this.workdayHistory) {
               for (let workdayId of workdayIds) {

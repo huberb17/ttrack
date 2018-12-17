@@ -40,7 +40,7 @@ class AddressServiceSettings {
                 this.notify();
             }
         }, (error) => {
-            console.log(error.err);
+            console.log("[ERROR - address.service.ts - reloadSettings]: " + JSON.stringify(error.err));
         });
     }
     
@@ -51,7 +51,7 @@ class AddressServiceSettings {
         this.storage.set('addressServiceSettings', serSettings).then((data) => {
             this.notify();
         }, (error) => {
-            console.log(error.err);
+            console.log("[ERROR - address.service.ts - storeSettings]: " + JSON.stringify(error.err));
         });
     }
 
@@ -194,7 +194,7 @@ export class AddressService {
         this.storage.set('addresses', serAddrList).then((data) => {
             this.refreshAddressList();
         }, (error) => {
-            console.log('address storage failed: ' + error);
+            console.log("[ERROR - address.service.ts - storeAddresses]: " + JSON.stringify(error));
         });
 
         if (!this.state.needsUpload) {
@@ -219,7 +219,7 @@ export class AddressService {
             this.addressList = addrList;
             this.notifyAddressChange();
         }, (error) => {
-            console.log(error.err);
+            console.log("[ERROR - address.service.ts - refreshAddressList]: " + JSON.stringify(error.err));
             this.addressList = addrList;
         });
     }
@@ -232,7 +232,7 @@ export class AddressService {
                 state.needsUpload = data['needsUpload'];
             }
         }, (error) => {
-            console.log(error.err);
+            console.log("[ERROR - address.service.ts - getStateFromStorage]: " + JSON.stringify(error.err));
         })
         return state;
     }
@@ -241,7 +241,7 @@ export class AddressService {
         this.notifyStateObservers();
         this.storage.set('addressServiceState', this.state).then((data) => {
         }, (error) => {
-            console.log('addressServiceState storage failed: ' + error.err);
+            console.log("[ERROR - address.service.ts - storeStateToStorage]: " + JSON.stringify(error.err));
         });
     }
 

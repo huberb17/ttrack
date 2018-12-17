@@ -93,7 +93,7 @@ export class CustomerService {
         if (customers) {
             if (customers.length > 0) {
                 this.customerList = customers;
-                console.log(this.customerList);
+                console.log("[INFO - customer.service.ts - overwriteCustomers]: CustomerList: " + JSON.stringify(this.customerList));
                 this.storeCustomers();
             }
         }
@@ -157,7 +157,7 @@ export class CustomerService {
         this.storage.set('customers', serCustList).then((data) => {
             this.refreshCustomerList();
         }, (error) => {
-            console.log('customer storage failed: ' + error);
+            console.log("[ERROR - customer.service.ts - storeCustomers]: " + JSON.stringify(error));
         });
 
         if (!this.state.needsUpload) {
@@ -191,7 +191,7 @@ export class CustomerService {
             this.customerList = custList;
             this.notifyCustomerChange();
         }, (error) => {
-            console.log(error.err);
+            console.log("[ERROR - customer.service.ts - refreshCustomerList]: " + JSON.stringify(error.err));
             this.customerList = custList;
         });     
     }
@@ -204,7 +204,7 @@ export class CustomerService {
                 state.needsUpload = data['needsUpload'];              
             }
         }, (error) => {
-            console.log(error.err);
+            console.log("[ERROR - customer.service.ts - getStateFromStorage]: " + JSON.stringify(error.err));
         })
         return state;
     }
@@ -213,7 +213,7 @@ export class CustomerService {
         this.notifyStateObservers();
         this.storage.set('customerServiceState', this.state).then((data) => {
         }, (error) => {
-            console.log('customerServiceState storage failed: ' + error.err);
+            console.log("[ERROR - customer.service.ts - storeStateToStorage]: " + JSON.stringify(error.err));
         });
     }
 

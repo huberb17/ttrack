@@ -15,8 +15,8 @@ export class DistanceService {
     public calculateRoute(route: TTrackRoute, callback: any, param: any): void {
         var startAddrString = TTrackAddress.toString(route.start);
         var endAddrString = TTrackAddress.toString(route.end);
-        console.log(startAddrString);
-        console.log(endAddrString);
+        console.log("[INFO - distance.service.ts - calculateRoute]: StartAddress: " + startAddrString);
+        console.log("[INFO - distance.service.ts - calculateRoute]: StartAddress: " + endAddrString);
         this.getDistance(startAddrString, endAddrString, callback, param);        
     }
 
@@ -34,10 +34,10 @@ export class DistanceService {
           if (status !== 'OK') {
             alert('Error was: ' + status);
           } else {
-              console.log(response);
+              console.log("[INFO - distance.service.ts - getDistance]: ResponseObject: " + JSON.stringify(response));
               var distance = response.rows[0].elements[0].distance;
               callback(param, distance['value']);
-              console.log(distance['value']);
+              console.log("[INFO - distance.service.ts - getDistance]: DistanceValue: " + distance['value']);
           }    
         });        
     }   
