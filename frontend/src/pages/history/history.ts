@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 
-import { NavController } from 'ionic-angular';
+import { NavController, AlertController } from 'ionic-angular';
 import { WorkdayService, Workday } from '../../app/services/workday.service'
 import { ModalController } from 'ionic-angular/components/modal/modal';
 import { WorkDayPage } from '../work-day/work-day';
@@ -13,6 +13,7 @@ export class HistoryListPage {
   workdayHistory: Workday[];
   constructor(public navCtrl: NavController,
               public modalCtrl: ModalController,
+              public alertCtrl: AlertController,
               private wdService: WorkdayService) {
 
     this.workdayHistory = [];
@@ -73,7 +74,25 @@ export class HistoryListPage {
   }
 
   public removeWorkday(index: number): void {
-    this.wdService.removeFromHistory(index);
+    let confirm = this.alertCtrl.create({
+      title: 'Arbeitstag wirklich löschen?',
+      message: 'Soll der Arbeitstag wirklich endgültig entfernt werden?',
+      buttons: [
+        {
+          text: 'Löschen',
+          handler: () => {
+            this.wdService.removeFromHistory(index);
+          }
+        },
+        {
+          text: 'Abbrechen',
+          handler: () => {
+            
+          }
+        }
+      ]
+    });
+    confirm.present();
   }
 
   public uploadWorkday(workday: Workday): void {
