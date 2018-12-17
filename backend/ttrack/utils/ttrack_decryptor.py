@@ -36,6 +36,6 @@ class TTrackDecryptor:
         cipher = AES.new(key, AES.MODE_CBC, iv)
         padding = 16 - (len(msg) % 16)
         msg += '{' * padding + '{' * 256 # add some additional padding to get correct encryption on the other side
-        ciphertext = iv + base64.b64encode(cipher.encrypt(msg))
+        ciphertext = iv.encode('hex') + base64.b64encode(cipher.encrypt(msg))
 
         return ciphertext
