@@ -628,10 +628,12 @@ export class GdriveService {
 
       private decryptString(cipherText: string): string {
         var key = CryptoJS.enc.Latin1.parse('1234567890123456');
-        var iv = CryptoJS.enc.Latin1.parse(cipherText.slice(0,16));
-        cipherText = cipherText.slice(16);
+        //var iv = CryptoJS.enc.Latin1.parse(cipherText.slice(0,32));
+        var iv  = CryptoJS.enc.Hex.parse(cipherText.slice(0,32));
+        cipherText = cipherText.slice(32);
         var decrypted = CryptoJS.AES.decrypt(cipherText, key, { iv: iv });
-        var tmpDecrypted = CryptoJS.enc.Latin1.stringify(decrypted);
+        //var tmpDecrypted = CryptoJS.enc.Latin1.stringify(decrypted);
+        var tmpDecrypted = CryptoJS.enc.Utf8.stringify(decrypted);
         var lastSquared = tmpDecrypted.lastIndexOf(']');
         var lastCurled = tmpDecrypted.lastIndexOf('}');
         if (lastSquared > lastCurled) {
