@@ -256,35 +256,26 @@ class DataStore:
                     else:
                         data_row = data_row + (None,)
                 elif index == 5: # expenses_category
-                    if field == 'rent':
-                        pre_empty_fields = 1
-                        post_empty_fields = 9
-                    elif field == 'consumable':
-                        pre_empty_fields = 2
-                        post_empty_fields = 8
-                    elif field == 'office_material':
-                        pre_empty_fields = 3
-                        post_empty_fields = 7
-                    elif field == 'training':
-                        pre_empty_fields = 4
+                    if field == 'consumable':
+                        pre_empty_fields = 0
                         post_empty_fields = 6
-                    elif field == 'km':
-                        pre_empty_fields = 5
+                    elif field == 'office_material':
+                        pre_empty_fields = 1
                         post_empty_fields = 5
-                    elif field == 'clothes':
-                        pre_empty_fields = 6
+                    elif field == 'training':
+                        pre_empty_fields = 2
                         post_empty_fields = 4
-                    elif field == 'phone':
-                        pre_empty_fields = 7
+                    elif field == 'km':
+                        pre_empty_fields = 3
                         post_empty_fields = 3
-                    elif field == 'social_insurance':
-                        pre_empty_fields = 8
+                    elif field == 'phone':
+                        pre_empty_fields = 4
                         post_empty_fields = 2
-                    elif field == 'property_insurance':
-                        pre_empty_fields = 9
+                    elif field == 'social_insurance':
+                        pre_empty_fields = 5
                         post_empty_fields = 1
                     elif field == 'purchase':
-                        pre_empty_fields = 10
+                        pre_empty_fields = 6
                         post_empty_fields = 0
                 elif index == 6: # expense_value
                     i = 0

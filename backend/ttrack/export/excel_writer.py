@@ -133,7 +133,7 @@ class ExcelWriter:
         return start_row
 
     def _create_milage_header(self, month_name, sheet):
-        sheet['E2'].value = month_name + ' ' + '2018'
+        sheet['E2'].value = month_name + ' ' + '2019'
 
     def _generate_milage_rows(self, wb, data_store):
         template_ws = wb.get_sheet_by_name('Vorlage')
@@ -142,7 +142,7 @@ class ExcelWriter:
                                       (6, u'Juni'), (7, u'Juli'), (8, u'August'), (9, u'September'),
                                       (10, u'Oktober'), (11, u'November'), (12, u'Dezember')]:
 
-            data = data_store.get_milage_data(month_num, '2018')
+            data = data_store.get_milage_data(month_num, '2019')
 
             # if sheet is not found, just copy the template and set the date
             if not month_name in wb.sheetnames:
@@ -156,6 +156,7 @@ class ExcelWriter:
             max_col = old_sheet.max_column
 
             new_sheet = wb.copy_worksheet(template_ws)
+            new_sheet.page_setup.orientation = new_sheet.ORIENTATION_LANDSCAPE
             self._create_milage_header(month_name, new_sheet)
 
             old_start_row = self._find_start_marker(max_row, old_sheet)
@@ -214,7 +215,7 @@ class ExcelWriter:
                                       (6, u'Juni'), (7, u'Juli'), (8, u'August'), (9, u'September'),
                                       (10, u'Oktober'), (11, u'November'), (12, u'Dezember')]:
 
-            data = data_store.get_expense_data(month_num, '2018')
+            data = data_store.get_expense_data(month_num, '2019')
 
             # if sheet is not found, just copy the template and set the date
             if not month_name in wb.sheetnames:
@@ -228,6 +229,8 @@ class ExcelWriter:
             max_col = old_sheet.max_column
 
             new_sheet = wb.copy_worksheet(template_ws)
+            # set landscape orientation
+            new_sheet.page_setup.orientation = new_sheet.ORIENTATION_LANDSCAPE
             self._create_income_expense_header(month_name, new_sheet)
 
             old_start_row = self._find_start_marker(max_row, old_sheet)
@@ -279,12 +282,12 @@ class ExcelWriter:
         return wb
 
     def _create_income_expense_header(self, month_name, sheet):
-        sheet['D1'].value = month_name + ' ' + '2018'
-        self._style_range(sheet, 'E3:F3', Border(top=Side(border_style='thin', color=colors.BLACK),
+        sheet['D1'].value = month_name + ' ' + '2019'
+        self._style_range(sheet, 'E3:E3', Border(top=Side(border_style='thin', color=colors.BLACK),
                                                      left=Side(border_style='thin', color=colors.BLACK),
                                                      bottom=Side(border_style='thin', color=colors.BLACK),
                                                      right=Side(border_style='thin', color=colors.BLACK)))
-        self._style_range(sheet, 'G3:P3', Border(top=Side(border_style='thin', color=colors.BLACK),
+        self._style_range(sheet, 'F3:L3', Border(top=Side(border_style='thin', color=colors.BLACK),
                                                  left=Side(border_style='thin', color=colors.BLACK),
                                                  bottom=Side(border_style='thin', color=colors.BLACK),
                                                  right=Side(border_style='thin', color=colors.BLACK)))
@@ -293,17 +296,16 @@ class ExcelWriter:
     def _create_income_expense_footer(self, sheet, month_name, first_row, last_row, last_month_win_loss_row):
 
         # create border after last row
-        self._style_range(sheet, 'B{0}:P{0}'.format(last_row + 1), Border(top=Side(border_style='thin',
+        self._style_range(sheet, 'B{0}:L{0}'.format(last_row + 1), Border(top=Side(border_style='thin',
                                                                                    color=colors.BLACK)))
         # create sum income row
         sheet['A{0}'.format(last_row + 1)].value = 'sum_income'
         range_string = 'B{0}:C{0}'.format(last_row + 1)
         sheet.merge_cells(range_string)
         sheet[range_string.split(":")[0]].value = 'Summe Einnahmen Monat'
-        sheet['D{0}'.format(last_row + 1)] = '=SUM(E{0}:F{1})'.format(last_row + 1, last_row + 1)
+        sheet['D{0}'.format(last_row + 1)] = '=SUM(E{0}:E{1})'.format(last_row + 1, last_row + 1)
         sheet['E{0}'.format(last_row + 1)] = '=SUM(E{0}:E{1})'.format(first_row, last_row)
-        sheet['F{0}'.format(last_row + 1)] = '=SUM(F{0}:F{1})'.format(first_row, last_row)
-        self._style_range(sheet, 'B{0}:F{0}'.format(last_row + 1), Border(top=Side(border_style='thin',
+        self._style_range(sheet, 'B{0}:E{0}'.format(last_row + 1), Border(top=Side(border_style='thin',
                                                                                    color=colors.BLACK),
                                                  left=Side(border_style='thin', color=colors.BLACK),
                                                  bottom=Side(border_style='thin', color=colors.BLACK),
@@ -314,17 +316,14 @@ class ExcelWriter:
         range_string = 'B{0}:C{0}'.format(last_row + 2)
         sheet.merge_cells(range_string)
         sheet[range_string.split(":")[0]].value = 'Summe Ausgaben Monat'
-        sheet['D{0}'.format(last_row + 2)] = '=SUM(G{0}:O{0})*-1'.format(last_row + 2)
+        sheet['D{0}'.format(last_row + 2)] = '=SUM(F{0}:L{0})*-1'.format(last_row + 2)
+        sheet['F{0}'.format(last_row + 2)] = '=SUM(F{0}:F{1})'.format(first_row, last_row)
         sheet['G{0}'.format(last_row + 2)] = '=SUM(G{0}:G{1})'.format(first_row, last_row)
         sheet['H{0}'.format(last_row + 2)] = '=SUM(H{0}:H{1})'.format(first_row, last_row)
         sheet['I{0}'.format(last_row + 2)] = '=SUM(I{0}:I{1})'.format(first_row, last_row)
         sheet['J{0}'.format(last_row + 2)] = '=SUM(J{0}:J{1})'.format(first_row, last_row)
         sheet['K{0}'.format(last_row + 2)] = '=SUM(K{0}:K{1})'.format(first_row, last_row)
         sheet['L{0}'.format(last_row + 2)] = '=SUM(L{0}:L{1})'.format(first_row, last_row)
-        sheet['M{0}'.format(last_row + 2)] = '=SUM(M{0}:M{1})'.format(first_row, last_row)
-        sheet['N{0}'.format(last_row + 2)] = '=SUM(N{0}:N{1})'.format(first_row, last_row)
-        sheet['O{0}'.format(last_row + 2)] = '=SUM(O{0}:O{1})'.format(first_row, last_row)
-        sheet['P{0}'.format(last_row + 2)] = '=SUM(P{0}:P{1})'.format(first_row, last_row)
         self._style_range(sheet, 'B{0}:D{0}'.format(last_row + 2), Border(top=Side(border_style='thin',
                                                                                    color=colors.BLACK),
                                                                           left=Side(border_style='thin',
@@ -333,7 +332,7 @@ class ExcelWriter:
                                                                                       color=colors.BLACK),
                                                                           right=Side(border_style='thin',
                                                                                      color=colors.BLACK)))
-        self._style_range(sheet, 'G{0}:P{0}'.format(last_row + 2), Border(top=Side(border_style='thin',
+        self._style_range(sheet, 'F{0}:L{0}'.format(last_row + 2), Border(top=Side(border_style='thin',
                                                                                    color=colors.BLACK),
                                                                           left=Side(border_style='thin',
                                                                                     color=colors.BLACK),
@@ -412,14 +411,11 @@ class ExcelWriter:
             range_string = 'B{0}:C{0}'.format(ic_row)
             sheet.merge_cells(range_string)
             sheet[range_string.split(":")[0]].value = 'Summe Einnahmen kumuliert'
-            sheet['D{0}'.format(ic_row)] = '=SUM(E{0}:F{0})'.format(ic_row)
+            sheet['D{0}'.format(ic_row)] = '=SUM(E{0}:E{0})'.format(ic_row)
             formula = '=E{0} + {1}!E{2}'.format(last_row + 1, last_month_name.encode('utf-8'),
                                                                        ic_row_last)
             sheet['E{0}'.format(ic_row)] = formula
-            formula = '=F{0} + {1}!F{2}'.format(last_row + 1, last_month_name.encode('utf-8'),
-                                                                       ic_row_last)
-            sheet['F{0}'.format(ic_row)] = formula
-            self._style_range(sheet, 'D{0}:F{0}'.format(ic_row), Border(top=Side(border_style='thin',
+            self._style_range(sheet, 'D{0}:E{0}'.format(ic_row), Border(top=Side(border_style='thin',
                                                                                  color=colors.BLACK),
                                                                         left=Side(border_style='thin',
                                                                                   color=colors.BLACK),
@@ -431,7 +427,9 @@ class ExcelWriter:
             range_string = 'B{0}:C{0}'.format(ec_row)
             sheet.merge_cells(range_string)
             sheet[range_string.split(":")[0]].value = 'Summe Ausgaben kumuliert'
-            sheet['D{0}'.format(ec_row)] = '=SUM(G{0}:O{0})*-1'.format(ec_row)
+            sheet['D{0}'.format(ec_row)] = '=SUM(F{0}:L{0})*-1'.format(ec_row)
+            formula = '=F{0} + {1}!F{2}'.format(last_row + 2, last_month_name.encode('utf-8'), ec_row_last)
+            sheet['F{0}'.format(ec_row)] = formula
             formula = '=G{0} + {1}!G{2}'.format(last_row + 2, last_month_name.encode('utf-8'), ec_row_last)
             sheet['G{0}'.format(ec_row)] = formula
             formula = '=H{0} + {1}!H{2}'.format(last_row + 2, last_month_name.encode('utf-8'), ec_row_last)
@@ -444,14 +442,6 @@ class ExcelWriter:
             sheet['K{0}'.format(ec_row)] = formula
             formula = '=L{0} + {1}!L{2}'.format(last_row + 2, last_month_name.encode('utf-8'), ec_row_last)
             sheet['L{0}'.format(ec_row)] = formula
-            formula = '=M{0} + {1}!M{2}'.format(last_row + 2, last_month_name.encode('utf-8'), ec_row_last)
-            sheet['M{0}'.format(ec_row)] = formula
-            formula = '=N{0} + {1}!N{2}'.format(last_row + 2, last_month_name.encode('utf-8'), ec_row_last)
-            sheet['N{0}'.format(ec_row)] = formula
-            formula = '=O{0} + {1}!O{2}'.format(last_row + 2, last_month_name.encode('utf-8'), ec_row_last)
-            sheet['O{0}'.format(ec_row)] = formula
-            formula = '=P{0} + {1}!P{2}'.format(last_row + 2, last_month_name.encode('utf-8'), ec_row_last)
-            sheet['P{0}'.format(ec_row)] = formula
             self._style_range(sheet, 'B{0}:D{0}'.format(ec_row), Border(top=Side(border_style='thin',
                                                                                  color=colors.BLACK),
                                                                         left=Side(border_style='thin',
@@ -460,7 +450,7 @@ class ExcelWriter:
                                                                                     color=colors.BLACK),
                                                                         right=Side(border_style='thin',
                                                                                    color=colors.BLACK)))
-            self._style_range(sheet, 'G{0}:P{0}'.format(ec_row), Border(top=Side(border_style='thin',
+            self._style_range(sheet, 'F{0}:L{0}'.format(ec_row), Border(top=Side(border_style='thin',
                                                                                  color=colors.BLACK),
                                                                         left=Side(border_style='thin',
                                                                                   color=colors.BLACK),
