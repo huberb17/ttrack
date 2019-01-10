@@ -40,7 +40,7 @@ export class CustomerListPage {
     this.custService.registerCustomerCallback(this.observeCustomerChange);
     this.custService.reloadCustomers();
 
-    //this.observeChangeHistoryChange = this.observeChangeHistoryChange.bind(this);
+    this.observeChangeHistoryChange = this.observeChangeHistoryChange.bind(this);
     this.gdriveService.registerUploadCallback(this.observeChangeHistoryChange);    
     this.gdriveService.reloadChangeHistory();
   }
@@ -162,7 +162,8 @@ export class CustomerListPage {
     this.visibleCustomers = [];
     for (var cust of this.customers) {
       if (this.showInactive) {
-        this.visibleCustomers.push(cust);
+        if (!cust.isActive) this.visibleCustomers.push(cust);
+        //this.visibleCustomers.push(cust);
       }
       else {
         if (cust.isActive) this.visibleCustomers.push(cust);

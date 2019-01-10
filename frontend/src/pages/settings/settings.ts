@@ -10,6 +10,8 @@ import { WorkdayService } from '../../app/services/workday.service';
 
 declare var gapi;
 
+export const AppVersion = require('../../../package.json').version;
+
 @Component({
   selector: 'page-settings',
   templateUrl: 'settings.html'
@@ -17,6 +19,7 @@ declare var gapi;
 export class SettingsPage {
   public defaultStartAddress: TTrackAddress;
   public defaultEndAddress: TTrackAddress;
+  public version : String = AppVersion;
   
   constructor(public navCtrl: NavController,
       public modalCtrl: ModalController,
