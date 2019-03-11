@@ -226,7 +226,7 @@ class ExcelWriter:
             # copy all manually entered values and remove the rest
             old_sheet = wb.get_sheet_by_name(month_name)
             max_row = old_sheet.max_row
-            max_col = old_sheet.max_column
+            max_col = template_ws.max_column
 
             new_sheet = wb.copy_worksheet(template_ws)
             # set landscape orientation
