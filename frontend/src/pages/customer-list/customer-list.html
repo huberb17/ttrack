@@ -6,7 +6,7 @@
     <ion-buttons end>
       <ion-item color=secondary clear>
         <ion-label>Inaktive Kunden anzeigen</ion-label>
-        <ion-toggle item-right [(ngModel)]="showInactive" (click)="reloadCustomerList()"></ion-toggle>
+        <ion-toggle item-right [(ngModel)]="showInactive" (ionChange)="reloadCustomerList()"></ion-toggle>
       </ion-item>
       </ion-buttons>
   </ion-navbar>
