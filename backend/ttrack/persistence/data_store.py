@@ -25,6 +25,7 @@ class DataStore:
             self._dbname = config.dbname
             self._backup_path = config.db_backup_path
             self._conn = sqlite3.connect(self._dbname)
+            self._id_mappings = config.id_mappings
         except Exception as e:
             logger.info('received sqlite exception: {0}'.format(e.message))
             msg = 'Error connecting to database: {0}'.format(e.message)
@@ -143,7 +144,7 @@ class DataStore:
                 data['note'], data['is_active']
             )
         elif type == 'driven_route':
-            data = DrivenRoute(data).convert_to_db_object()
+            data = DrivenRoute(data, self._id_mappings).convert_to_db_object()
             sql_string = '''UPDATE driven_routes SET id='{0}', date='{1}', start_km={2}, 
                                 start_address_id='{3}', end_address_id='{4}', route_km={5}, 
                                 invoice_ref='{6}'  WHERE id = '{0}'  '''.format(
@@ -323,7 +324,7 @@ class DataStore:
 
     def try_add(self, workdays):
         for workday_obj in workdays:
-            workday = WorkDay(workday_obj)
+            workday = WorkDay(workday_obj, self._id_mappings)
             # store the workday data as it is in the DB
             self.update({'type': 'workday',
                          'command': 'create',

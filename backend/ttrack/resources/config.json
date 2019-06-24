@@ -5,5 +5,11 @@
   "shareName": "frontend",
   "exportMilage": "C:\\Users\\u0109\\PycharmProjects\\ttrack\\backend\\ttrack\\resources\\Fahrtenbuch.xlsx",
   "exportIncome": "C:\\Users\\u0109\\PycharmProjects\\ttrack\\backend\\ttrack\\resources\\Einnahmen-Ausgaben.xlsx",
-  "exportBackup": "C:\\Users\\u0109\\PycharmProjects\\ttrack\\backend\\ttrack\\resources\\exportBackup"
+  "exportBackup": "C:\\Users\\u0109\\PycharmProjects\\ttrack\\backend\\ttrack\\resources\\exportBackup",
+  "idMappings" : [
+    {
+      "original": "1",
+      "new": "5fdcadb6-9c51-42fa-ae8b-fc8e81a7f65a"
+    }
+  ]
 }

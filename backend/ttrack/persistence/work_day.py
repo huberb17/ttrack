@@ -8,9 +8,10 @@ from backend.ttrack.utils.errors import DataStoreError
 
 class WorkDay:
     """Implements the WorkDay object."""
-    def __init__(self, json_data):
+    def __init__(self, json_data, id_mappings):
         """The initializer method of the class."""
         self._data = json_data
+        self._id_mappings = id_mappings
         self._driven_routes = []
         self._invoices = []
 
@@ -32,7 +33,7 @@ class WorkDay:
                 else:
                     comment = customer['lastName']
                 dr_id = '{0}_dr_{1}'.format(workday_id, count)
-                self._driven_routes.append(DrivenRoute(dr_id, date, start_km, start_id, end_id, route_distance, comment))
+                self._driven_routes.append(DrivenRoute(dr_id, date, start_km, start_id, end_id, route_distance, comment, self._id_mappings))
                 start_km += float(route_distance)
                 last_id = end_id
                 if 'invoice' in customer:
@@ -46,7 +47,7 @@ class WorkDay:
             route_distance = last_route['lengthInKm']
             comment = u'Rückfahrt'
             dr_id = '{0}_dr_{1}'.format(workday_id, count)
-            self._driven_routes.append(DrivenRoute(dr_id, date, start_km, last_id, end_id, route_distance, comment))
+            self._driven_routes.append(DrivenRoute(dr_id, date, start_km, last_id, end_id, route_distance, comment, self._id_mappings))
         except (ValueError, KeyError) as err:
             raise DataStoreError('Error decoding WorkDay object: {}'.format(err.message))
 

@@ -24,6 +24,9 @@ class ConfigReader:
             self.export_milage = config['exportMilage']
             self.export_income = config['exportIncome']
             self.export_path = config['exportBackup']
+            self.id_mappings = dict()
+            for id_mapping in config['idMappings']:
+                self.id_mappings[id_mapping['original']] = id_mapping['new']
             logger.info('successfully read config file')
         except IOError as io_err:
             logger.info('received IO exception: {0}'.format(io_err.strerror))
