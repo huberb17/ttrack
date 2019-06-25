@@ -141,6 +141,7 @@ class WorkdaysFrame(Frame):
     def store_workday(self):
         workday = self.sorted_workdays[self.workday_list.curselection()[0]][1]
         self._controller.store_workday(workday)
+        self.workday_store_button.state(['disabled'])
 
     def clear_workday_details(self):
         self.workdayDateVar.set('')
