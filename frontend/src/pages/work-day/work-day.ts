@@ -349,17 +349,35 @@ export class WorkDayPage implements OnInit {
 
   overuleDistance(idx: number): void {
     console.log("[INFO - work-day.ts - overRuleDistance]: " + 'clicked overuleDistance with id: ' + idx);
-    console.log("[INFO - work-day.ts - overRuleDistance]: Address: " + JSON.stringify(this.customersOfDay[idx].address));
-    let modal = this.modalCtrl.create(OveruleDistanceModalPage, 
-                  { customer: this.customersOfDay[idx] });
-    modal.onDidDismiss(data => {
-      if (data)
-      {
-        this.customersOfDay[idx].routeToCustomer.lengthInKm = data;
-        this.isDaySaved = false;
-      }
-    })
-    modal.present();
+    if (idx) {
+      console.log("[INFO - work-day.ts - overRuleDistance]: Address: " + JSON.stringify(this.customersOfDay[idx].address));
+      let modal = this.modalCtrl.create(OveruleDistanceModalPage, 
+                    { customer: this.customersOfDay[idx] });
+      modal.onDidDismiss(data => {
+        if (data)
+        {
+          this.customersOfDay[idx].routeToCustomer.lengthInKm = data;
+          this.isDaySaved = false;
+        }
+      })
+      modal.present();
+    } else {
+      console.log("[INFO - work-day.ts - overRuleDistance]: Address: " + JSON.stringify(this.lastRoute.end));
+      var dummyCustomer = new TTrackCustomer();
+      dummyCustomer.address = this.lastRoute.end
+      var dummyCustOfWd = new CustomerAtWorkday(dummyCustomer);
+      var dummyRoute = new TTrackRoute();
+      dummyCustOfWd.routeToCustomer = this.lastRoute
+      let modal = this.modalCtrl.create(OveruleDistanceModalPage, { customer: dummyCustOfWd });
+      modal.onDidDismiss(data => {
+        if (data)
+        {
+          this.lastRoute.lengthInKm = data;
+          this.isDaySaved = false;
+        }
+      })
+      modal.present();
+    }
   }
 
   setToUnsaved() {
