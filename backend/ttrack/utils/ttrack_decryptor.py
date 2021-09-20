@@ -1,5 +1,6 @@
 import base64
 import logging
+import binascii
 from Crypto import Random
 from Crypto.Cipher import AES
 
@@ -13,9 +14,9 @@ class TTrackDecryptor:
         file_in = open(filename, "rb")
         iv, ciphertext = [file_in.read(x) for x in (32, -1)]
         file_in.close()
-        iv = iv.decode('hex')
+        iv = binascii.unhexlify(iv)
         # let's assume that the key is somehow available again
-        key = '1234567890123456'
+        key = b'1234567890123456'
         cipher = AES.new(key, AES.MODE_CBC, iv)
         data = cipher.decrypt(base64.b64decode(ciphertext))
         # remove trailing invalid data
@@ -31,8 +32,8 @@ class TTrackDecryptor:
 
     @staticmethod
     def encrypt(msg):
-        key = '1234567890123456'
-        iv = '1234567890123456'
+        key = b'1234567890123456'
+        iv = b'1234567890123456'
         cipher = AES.new(key, AES.MODE_CBC, iv)
         padding = 16 - (len(msg) % 16)
         msg += '{' * padding + '{' * 256 # add some additional padding to get correct encryption on the other side
