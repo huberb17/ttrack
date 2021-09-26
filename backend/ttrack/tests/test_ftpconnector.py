@@ -42,6 +42,13 @@ class FtpConnectorTest(unittest.TestCase):
         self.assertIsNotNone(id)
         self.assertIsNotNone(wd)
 
+    def testGetCustomer(self):
+        ftp_conn = FtpConnector(TestUtils.get_config())
+        ftp_conn.connect()
+        id, cust = ftp_conn.get_last_customer_data_file()
+        self.assertIsNotNone(id)
+        self.assertIsNotNone(cust)
+
 class TestUtils:
     @staticmethod
     def get_bad_config():

@@ -122,7 +122,7 @@ class FtpConnector:
             file_id, data = self._get_last_data_file(self._address_data_files)
             return file_id, data
         except Exception as e:
-            logger.error(f'Error on getting last address data file: {e.message}')
+            logger.error(f'Error on getting last address data file: {str(e)}')
             return None, None
 
     def get_last_customer_data_file(self):
@@ -131,7 +131,7 @@ class FtpConnector:
             file_id, data = self._get_last_data_file(self._customer_data_files)
             return file_id, data
         except Exception as e:
-            logger.error(f'Error on getting last customer data file: {e.message}')
+            logger.error(f'Error on getting last customer data file: {str(e)}')
             return None, None
 
     def _get_last_data_file(self, file_list):
