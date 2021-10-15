@@ -1,9 +1,9 @@
 # coding=utf-8
 import json
 
-from backend.ttrack.persistence.driven_route import DrivenRoute
-from backend.ttrack.persistence.income import Income
-from backend.ttrack.utils.errors import DataStoreError
+from persistence.driven_route import DrivenRoute
+from persistence.income import Income
+from utils.errors import DataStoreError
 
 
 class WorkDay:

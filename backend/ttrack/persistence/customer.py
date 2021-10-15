@@ -1,6 +1,6 @@
 import json
 
-from backend.ttrack.utils.errors import DataStoreError
+from utils.errors import DataStoreError
 
 
 class Customer:

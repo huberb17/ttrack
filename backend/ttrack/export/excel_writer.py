@@ -10,9 +10,9 @@ import datetime
 from openpyxl import load_workbook
 from openpyxl.formatting.rule import CellIsRule
 from openpyxl.styles import Border, Side, colors, Font
-from openpyxl.utils import coordinate_from_string, column_index_from_string, get_column_letter
+from openpyxl.utils.cell import coordinate_from_string, column_index_from_string, get_column_letter
 
-from backend.ttrack.utils.errors import ExcelWriterError
+from utils.errors import ExcelWriterError
 
 logger = logging.getLogger(__name__)
 

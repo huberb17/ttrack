@@ -1,7 +1,7 @@
 # coding=utf-8
 import uuid
-from Tkinter import *
-from ttk import *
+from tkinter import *
+from tkinter.ttk import *
 
 class CustomersFrame(Frame):
     def __init__(self, parent, controller, *args, **kwargs):
@@ -144,8 +144,7 @@ class CustomersFrame(Frame):
         customer['lastName'] = self.lastname_var.get()
         customer['address'] = self.addr_id_lookup(self.address_var.get())
         customer['isActive'] = self.active_var.get()
-        print customer
-
+        
         self.customerList.selection_clear(ACTIVE)
         self._controller.store_customer(customer)
         self.load_customers()

@@ -3,7 +3,7 @@ from  operator import itemgetter
 
 import logging
 
-from backend.ttrack.export.excel_writer import ExcelWriter
+from export.excel_writer import ExcelWriter
 
 logger = logging.getLogger(__name__)
 

@@ -1,4 +1,4 @@
-from backend.ttrack.utils.id_mapper import IdMapper
+from utils.id_mapper import IdMapper
 
 class DrivenRoute:
     """Implements the DrivenRoute object."""

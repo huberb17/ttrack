@@ -10,16 +10,16 @@ Actions are one of:
 """
 
 import json
-from Tkinter import *
+from tkinter import *
 
-import backend.ttrack.utils.custom_logger as cl
-from backend.ttrack.cloud.gdrive_connector import GdriveConnector
-from backend.ttrack.ui.main_window import MainApplication
-from backend.ttrack.ui.view_controller import ViewController
-from backend.ttrack.utils.config_reader import ConfigReader
-from backend.ttrack.utils.errors import ConfigReaderError, GdriveConnectorError, DataStoreError
-from backend.ttrack.export.excel_writer import ExcelWriter
-from backend.ttrack.persistence.data_store import DataStore
+import utils.custom_logger as cl
+#from cloud.gdrive_connector import GdriveConnector
+from ui.main_window import MainApplication
+from ui.view_controller import ViewController
+from utils.config_reader import ConfigReader
+from utils.errors import ConfigReaderError, GdriveConnectorError, DataStoreError
+from export.excel_writer import ExcelWriter
+from persistence.data_store import DataStore
 
 
 

@@ -1,7 +1,7 @@
 # coding=utf-8
 import uuid
-from Tkinter import *
-from ttk import *
+from tkinter import *
+from tkinter.ttk import *
 
 class AddressesFrame(Frame):
     def __init__(self, parent, controller, *args, **kwargs):
@@ -136,8 +136,7 @@ class AddressesFrame(Frame):
         address['city'] = self.city_var.get()
         address['note'] = self.note_var.get()
         address['isActive'] = self.active_var.get()
-        print address
-
+        
         self.addressList.selection_clear(ACTIVE)
         self._controller.store_address(address)
         self.load_addresses()

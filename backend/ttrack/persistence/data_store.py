@@ -6,12 +6,12 @@ import sqlite3
 import logging
 import datetime
 
-from backend.ttrack.persistence.address import Address
-from backend.ttrack.persistence.customer import Customer
-from backend.ttrack.persistence.driven_route import DrivenRoute
-from backend.ttrack.persistence.expense import Expense
-from backend.ttrack.persistence.work_day import WorkDay
-from backend.ttrack.utils.errors import DataStoreError
+from persistence.address import Address
+from persistence.customer import Customer
+from persistence.driven_route import DrivenRoute
+from persistence.expense import Expense
+from persistence.work_day import WorkDay
+from utils.errors import DataStoreError
 
 logger = logging.getLogger(__name__)
 

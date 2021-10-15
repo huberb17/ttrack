@@ -1,11 +1,11 @@
 # coding=utf-8
-import tkMessageBox
-from Tkinter import *
-from ttk import *
+import tkinter.messagebox as TkMessageBox
+from tkinter import *
+from tkinter.ttk import *
 
-from backend.ttrack.ui.addresses_frame import AddressesFrame
-from backend.ttrack.ui.customers_frame import CustomersFrame
-from backend.ttrack.ui.workdays_frame import WorkdaysFrame
+from ui.addresses_frame import AddressesFrame
+from ui.customers_frame import CustomersFrame
+from ui.workdays_frame import WorkdaysFrame
 
 class MainApplication(Frame):
     def __init__(self, parent, controller, *args, **kwargs):
