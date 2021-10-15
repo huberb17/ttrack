@@ -1,6 +1,7 @@
+from datetime import datetime
 from backend.ttrack.utils.errors import FtpConnectorError
 import unittest
-import mock
+from unittest import mock
 from backend.ttrack.cloud.ftp_connector import FtpConnector
 
 class FtpConnectorTest(unittest.TestCase):
@@ -49,6 +50,25 @@ class FtpConnectorTest(unittest.TestCase):
         self.assertIsNotNone(id)
         self.assertIsNotNone(cust)
 
+    def testGetAddress(self):
+        ftp_conn = FtpConnector(TestUtils.get_config())
+        ftp_conn.connect()
+        id, addr = ftp_conn.get_last_address_data_file()
+        self.assertIsNotNone(id)
+        self.assertIsNotNone(addr)
+
+    def testGetAction(self):
+        ftp_conn = FtpConnector(TestUtils.get_config())
+        ftp_conn.connect()
+        id, action = ftp_conn.get_next_action()
+        self.assertIsNone(id)
+        self.assertIsNone(action)
+
+    def testEncryptAndUploadData(self):
+        ftp_conn = FtpConnector(TestUtils.get_config())
+        ftp_conn.connect()
+        ftp_conn.encrypt_and_upload_data('my_test_file' + datetime.now().strftime("%Y%m%d_%H%M%S"), b'{ "msg": "my test data" }')
+
 class TestUtils:
     @staticmethod
     def get_bad_config():
@@ -64,6 +84,8 @@ class TestUtils:
         config = mock.Mock()
         config.share = 'ttrack'
         config.user = 'ttrack'
+        import os
+        sepp = os.path.dirname(os.path.realpath('__file__'))
         config.passwd = open('pass.txt', 'r').readline()
         config.host = '192.168.0.47'
         return config
