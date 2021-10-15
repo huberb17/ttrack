@@ -20,15 +20,16 @@ class TTrackDecryptor:
         cipher = AES.new(key, AES.MODE_CBC, iv)
         data = cipher.decrypt(base64.b64decode(ciphertext))
         # remove trailing invalid data
-        last_curled = str(data).rfind('}')
-        last_square = str(data).rfind(']')
+        message = data.decode('utf-8')
+        last_curled = message.rfind('}')
+        last_square = message.rfind(']')
         last_index = -1
         if last_curled >= last_square:
             last_index = last_curled + 1
         else:
             last_index = last_square + 1
-        data = data[:last_index]
-        return data
+        message = message[:last_index]
+        return message.encode('utf-8')
 
     @staticmethod
     def encrypt(msg):
@@ -36,7 +37,7 @@ class TTrackDecryptor:
         iv = b'1234567890123456'
         cipher = AES.new(key, AES.MODE_CBC, iv)
         padding = 16 - (len(msg) % 16)
-        msg += '{' * padding + '{' * 256 # add some additional padding to get correct encryption on the other side
-        ciphertext = iv.encode('hex') + base64.b64encode(cipher.encrypt(msg))
+        msg += b'{' * padding + b'{' * 256 # add some additional padding to get correct encryption on the other side
+        ciphertext = iv.hex().encode('utf-8') + base64.b64encode(cipher.encrypt(msg))
 
         return ciphertext
