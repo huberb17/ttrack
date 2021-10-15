@@ -17,7 +17,6 @@ class FtpConnector:
         """
         self._ftp = None
         self._file_list = None
-        self._action_files = None
         self._customer_data_files = None
         self._address_data_files = None
         self._workday_data_files = None
@@ -35,9 +34,8 @@ class FtpConnector:
             self._ftp.cwd(self._share)
             logger.info(f'connection to FTP host {self._host} and share {self._share} established')
             self._file_list = self._ftp.nlst()
-            self._action_files = filter(lambda x: x.rfind('actions') > 0, self._file_list)
-            self._customer_data_files = filter(lambda x: x.rfind('customers') > 0, self._file_list)
-            self._address_data_files = filter(lambda x: x.rfind('addresses') > 0, self._file_list)
+            self._customer_data_files = list(filter(lambda x: x.rfind('customers') > 0, self._file_list))
+            self._address_data_files = list(filter(lambda x: x.rfind('addresses') > 0, self._file_list))
             self._workday_data_files = list(filter(lambda x: x.rfind('workdays') > 0, self._file_list))
             # logger.info('found files in share "{0}": {1}'.format(self._share, title_list))
         except IOError as io_err:
@@ -50,13 +48,8 @@ class FtpConnector:
             raise FtpConnectorError(msg)
 
     def get_next_action(self):
-        """Get the next action from FTP share (if available)."""
-        try:
-            file_id, action = self._get_next_action()
-            return  file_id, action
-        except Exception as e:
-            logger.error(f'Error on getting next action: {str(e)}')
-            return None, None
+        """Method not required anymore. Returns always (None, None)."""
+        return None, None
 
     def get_next_workday(self):
         """Get the next workday file from FTP share (if available)."""
@@ -68,37 +61,9 @@ class FtpConnector:
             return None, None
 
     def delete_action(self, file_id):
-        """Delete the specified action from FTP share.
-        
-        :param file_id: the id of the file to be deleted.
+        """Method not required anymore.
         """
-        try:
-            for f in self._action_files:
-                if f == file_id:
-                    self._action_files.remove(f)
-                    logger.info(f'removed file "{f}" from list.')
-                    self._ftp.delete(f)
-                    logger.info(f'removed file "{f}".')
-                    return file_id
-            logger.info(f'file "{file_id} not found.')
-            return None
-        except:
-            logger.error(f'Failed to remove file "{file_id}.')
-            return None
-
-    def _get_next_action(self):
-        """Internal method that retrieves and decrypts the next action from FTP."""
-        if len(self._action_files) == 0:
-            logger.info('file list is empty')
-            self._update_file_list()
-            if len(self._action_files) == 0:
-                return None, None
-        next_file = self._action_files[0]
-        file_id = next_file
-        logger.info(f'got file "{file_id} from list.')
-        self._ftp.retrbinary("RETR " + file_id, open('tmpfile', 'wb').write)
-        action = TTrackDecryptor.decrypt('tmpfile')
-        return file_id, action
+        return None
 
     def _get_next_workday(self):
         """Internal method that retrieves and decrypts the next workday file from FTP."""
@@ -113,8 +78,7 @@ class FtpConnector:
 
     def _update_file_list(self):
         logger.info('retrieve file list from FTP')
-        self._file_list = self._ftp.nlst()
-        self._action_files = filter(lambda x: x.rfind('actions') > 0, self._file_list)
+        self._file_list = self._ftp.nlst()     
 
     def get_last_address_data_file(self):
         """Get the last address data file from FTP (if available)."""
@@ -152,7 +116,9 @@ class FtpConnector:
         """Method to enrypt the given data and store it on Google Drive with the given name."""
         try:
             encrypted = TTrackDecryptor.encrypt(data)
-            self._ftp.storbinary('STOR ' + filename, encrypted)
+            with open('tmpfile', 'wb') as f:
+                f.write(encrypted)
+            self._ftp.storbinary('STOR ' + filename, open('tmpfile', 'rb'))           
         except Exception as e:
-            logger.error(f'Error uploading file: {e.message}')
-            raise FtpConnectorError(e.message)
+            logger.error(f'Error uploading file: {str(e)}')
+            raise FtpConnectorError(str(e))
