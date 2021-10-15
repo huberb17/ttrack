@@ -27,8 +27,8 @@ class DataStore:
             self._conn = sqlite3.connect(self._dbname)
             self._id_mappings = config.id_mappings
         except Exception as e:
-            logger.info('received sqlite exception: {0}'.format(e.message))
-            msg = 'Error connecting to database: {0}'.format(e.message)
+            logger.info(f'received sqlite exception: {str(e)}')
+            msg = f'Error connecting to database: {str(e)}'
             raise DataStoreError(msg)
 
     def disconnect(self):

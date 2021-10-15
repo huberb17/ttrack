@@ -61,7 +61,7 @@ def main():
         # read the configuration file
         config = ConfigReader('./resources/config.json')
         # initialize the helper classes
-        gd_conn = GdriveConnector(config)
+        #gd_conn = GdriveConnector(config)
         ds = DataStore(config)
         excel_writer = ExcelWriter(config)
 
@@ -76,9 +76,9 @@ def main():
         root.mainloop()
 
     except (ConfigReaderError, GdriveConnectorError, DataStoreError) as err:
-        logger.error(err.message)
-    except Exception as e:
-        logger.error(e.message)
+        logger.error(str(err.message))
+    except BaseException as e:
+        logger.error(str(e))
     finally:
         if ds is not None:
             ds.disconnect()
