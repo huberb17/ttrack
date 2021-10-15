@@ -59,7 +59,7 @@ class DataStore:
         try:
             self.backup_db_content()
             if type == 'address':
-                self._fore_address_data_storage(data)
+                self._force_address_data_storage(data)
             elif type == 'customer':
                 self._force_customer_data_storage(data)
             else:
@@ -304,7 +304,7 @@ class DataStore:
             for line in self._conn.iterdump():
                 f.write('{0}\n'.format(line.encode('utf-8')))
 
-    def _fore_address_data_storage(self, data):
+    def _force_address_data_storage(self, data):
         addresses = json.loads(data)
         self._drop_table_content('addresses')
         for address_obj in addresses:
@@ -405,51 +405,64 @@ class DataStore:
         return customers
 
     def get_addresses(self):
-        sql_string = "SELECT * FROM addresses"
-        c = self._conn.cursor()
-        c.execute(sql_string)
-        data = c.fetchall()
-        addresses = []
-        for item in data:
-            address = {}
-            address['id'] = item[0]
-            address['street'] = item[1]
-            address['streetNumber'] = item[2]
-            address['doorNumber'] = item[3]
-            address['zipCode'] = item[4]
-            address['city'] = item[5]
-            address['note'] = item[6]
-            address['isActive'] = item[7]
-            addresses.append(address)
-        return addresses
+        try:
+            sql_string = "SELECT * FROM addresses"
+            c = self._conn.cursor()
+            c.execute(sql_string)
+            data = c.fetchall()
+            addresses = []
+            for item in data:
+                address = {}
+                address['id'] = item[0]
+                address['street'] = item[1]
+                address['streetNumber'] = item[2]
+                address['doorNumber'] = item[3]
+                address['zipCode'] = item[4]
+                address['city'] = item[5]
+                address['note'] = item[6]
+                address['isActive'] = item[7]
+                addresses.append(address)
+            return addresses
+        except BaseException as e:
+            logger.error(f'received sqlite exception: {str(e)}')
+            return []
 
     def get_customers(self):
-        sql_string = "SELECT * FROM customers"
-        c = self._conn.cursor()
-        c.execute(sql_string)
-        data = c.fetchall()
-        customers = []
-        for item in data:
-            customer = {}
-            customer['id'] = item[0]
-            customer['title'] = item[1]
-            customer['firstName'] = item[2]
-            customer['lastName'] = item[3]
-            customer['address'] = item[4]
-            customer['isActive'] = item[5]
-            customers.append(customer)
-        return customers
+        try:
+            sql_string = "SELECT * FROM customers"
+            c = self._conn.cursor()
+            c.execute(sql_string)
+            data = c.fetchall()
+            customers = []
+            for item in data:
+                customer = {}
+                customer['id'] = item[0]
+                customer['title'] = item[1]
+                customer['firstName'] = item[2]
+                customer['lastName'] = item[3]
+                customer['address'] = item[4]
+                customer['isActive'] = item[5]
+                customers.append(customer)
+            return customers
+        except BaseException as e:
+            logger.error(f'received sqlite exception: {str(e)}')
+            return []
+            
 
     def get_workdays(self):
-        sql_string = "SELECT data FROM workdays"
-        c = self._conn.cursor()
-        c.execute(sql_string)
-        data = c.fetchall()
-        workdays = []
-        for item in data:
-            workday = json.loads(item[0])
-            workdays.append(workday)
-        return workdays
+        try:
+            sql_string = "SELECT data FROM workdays"
+            c = self._conn.cursor()
+            c.execute(sql_string)
+            data = c.fetchall()
+            workdays = []
+            for item in data:
+                workday = json.loads(item[0])
+                workdays.append(workday)
+            return workdays
+        except BaseException as e:
+            logger.error(f'received sqlite exception: {str(e)}')
+            return []
 
 
     def set_address(self, address):

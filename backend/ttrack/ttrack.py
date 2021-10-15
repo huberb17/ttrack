@@ -13,14 +13,13 @@ import json
 from tkinter import *
 
 import utils.custom_logger as cl
-#from cloud.gdrive_connector import GdriveConnector
+from cloud.ftp_connector import FtpConnector
 from ui.main_window import MainApplication
 from ui.view_controller import ViewController
 from utils.config_reader import ConfigReader
-from utils.errors import ConfigReaderError, GdriveConnectorError, DataStoreError
+from utils.errors import ConfigReaderError, FtpConnectorError, DataStoreError
 from export.excel_writer import ExcelWriter
 from persistence.data_store import DataStore
-
 
 
 def process_actions(gd_conn, ds):
@@ -61,21 +60,21 @@ def main():
         # read the configuration file
         config = ConfigReader('./resources/config.json')
         # initialize the helper classes
-        #gd_conn = GdriveConnector(config)
+        ftp_conn = FtpConnector(config)
         ds = DataStore(config)
         excel_writer = ExcelWriter(config)
 
-        # connect to Google Drive and get the current list of files
-        gd_conn.connect()
+        # connect to FTP server and get the current list of files
+        ftp_conn.connect()
 
         root = Tk()
         root.title("TTrack Desktop")
-        controller = ViewController(gd_conn, ds, excel_writer)
-        MainApplication(root, controller, padding="3 3 12 12").pack(side="top", fill="both", expand=True)
+        controller = ViewController(ftp_conn, ds, excel_writer)
+        MainApplication(root, controller, padding="3 3 12 12").grid(row=0, column=0)
 
         root.mainloop()
 
-    except (ConfigReaderError, GdriveConnectorError, DataStoreError) as err:
+    except (ConfigReaderError, FtpConnectorError, DataStoreError) as err:
         logger.error(str(err.message))
     except BaseException as e:
         logger.error(str(e))

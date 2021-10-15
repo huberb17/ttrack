@@ -24,6 +24,9 @@ class ConfigReader:
             self.export_milage = config['exportMilage']
             self.export_income = config['exportIncome']
             self.export_path = config['exportBackup']
+            self.user = config['userName']
+            self.passwd = config['passwd']
+            self.host = config['host']
             self.id_mappings = dict()
             for id_mapping in config['idMappings']:
                 self.id_mappings[id_mapping['original']] = id_mapping['new']

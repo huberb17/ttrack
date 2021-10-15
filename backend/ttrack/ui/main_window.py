@@ -50,7 +50,6 @@ class MainApplication(Frame):
         self.notebook.add(self.workdays_frame, text='Arbeitstage')
         self.notebook.add(self.customers_frame, text='Kundendaten')
         self.notebook.add(self.addresses_frame, text='Adressdaten')
-        self.notebook.pack()
 
     def exit_app(self):
         self.parent.quit()
