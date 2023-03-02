@@ -1,57 +1,48 @@
-import json
-
-from utils.errors import DataStoreError
-
-
+from __future__ import annotations
 class Customer:
     """Implements the Customer object."""
-    def __init__(self, json_data):
-        """The initializer method of the class."""
-        self._data = json_data
+
+    _data = ''
+    _id = 'None'
+    _title = ''
+    _first_name = 'None'
+    _last_name = 'None'
+    _address = 'None'
+    _active = 0
+    _report_text = ''
+    _default_invoice = 0
+
+    @staticmethod
+    def build_from_json(json_data) -> Customer:
+        """Build object from json data."""
+        customer = Customer()
+        customer._data = json_data
         if 'id' in json_data:
-            self._id = json_data['id'].encode('utf-8')
-        else:
-            self._id = 'None'
+            customer._id = json_data['id']
         if 'title' in json_data:
-            self._title = json_data['title'].encode('utf-8')
-        else:
-            self._title = ''
+            customer._title = json_data['title']
         if 'firstName' in json_data:
-            self._first_name = json_data['firstName'].encode('utf-8')
-        else:
-            self._first_name = 'None'
+            customer._first_name = json_data['firstName']
         if 'lastName' in json_data:
-            self._last_name = json_data['lastName'].encode('utf-8')
-        else:
-            self._last_name = 'None'
+            customer._last_name = json_data['lastName']
         if 'address' in json_data:
             address = json_data['address']
             if type(address) is dict:
-                self._address = json_data['address']['id'].encode('utf-8')
+                customer._address = json_data['address']['id']
             else:
-                self._address = json_data['address'].encode('utf-8')
-        else:
-            self._address = 'None'
+                customer._address = json_data['address']
         if 'isActive' in json_data:
             if json_data['isActive'] == 'true' or json_data['isActive'] == 'True' or json_data['isActive'] == True:
-                self._active = 1
+                customer._active = 1
             else:
-                self._active = 0
-        else:
-            self._active = 0
+                customer._active = 0
         if 'invoiceConfiguration' in json_data:
             invConf = json_data['invoiceConfiguration']
             if 'textForReport' in invConf:
-                self._report_text = invConf['textForReport']
-            else:
-                self._report_text = ''
+                customer._report_text = invConf['textForReport']
             if 'value' in invConf:
-                self._default_invoice = invConf['value']
-            else:
-                self._default_invoice = 0
-        else:
-            self._report_text = ''
-            self._default_invoice = 0
+                customer._default_invoice = invConf['value']
+        return customer
 
     def convert_to_db_object(self):
         data = {
