@@ -2,8 +2,12 @@ import ftplib
 import logging
 from ftplib import FTP
 
-from utils.ttrack_decryptor import TTrackDecryptor
-from utils.errors import FtpConnectorError
+try:
+    from utils.ttrack_decryptor import TTrackDecryptor
+    from utils.errors import FtpConnectorError
+except:
+    from backend.ttrack.utils.ttrack_decryptor import TTrackDecryptor
+    from backend.ttrack.utils.errors import FtpConnectorError
 
 logger = logging.getLogger(__name__)
 
