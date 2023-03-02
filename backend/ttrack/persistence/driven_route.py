@@ -1,18 +1,47 @@
-from utils.id_mapper import IdMapper
+from __future__ import annotations
+try:
+    from utils.id_mapper import IdMapper
+except:
+    from backend.ttrack.utils.id_mapper import IdMapper
 
 class DrivenRoute:
     """Implements the DrivenRoute object."""
 
-    def __init__(self, id, date, start_km, start_id, end_id, route_distance, comment, id_mappings):
-        """The initializer method of the class."""
-        self._id = id.encode('utf-8')
-        self._date = date.encode('utf-8')
-        self._start_km = start_km
+    _id = ''
+    _date = ''
+    _start_km = 0
+    _start_id = ''
+    _end_id = ''
+    _route_distance = 0
+    _comment = ''
+
+    @staticmethod
+    def build_from_values(id, date, start_km, start_id, end_id, route_distance, comment, id_mappings) -> DrivenRoute:
+        """Build object from distinct values."""
+        dr = DrivenRoute()
+        dr._id = id
+        dr._date = date
+        dr._start_km = start_km
         idMapper = IdMapper(id_mappings)
-        self._start_id = idMapper.map(start_id).encode('utf-8')
-        self._end_id = idMapper.map(end_id).encode('utf-8')
-        self._route_distance = route_distance
-        self._comment = comment.encode('utf-8')
+        dr._start_id = idMapper.map(start_id)
+        dr._end_id = idMapper.map(end_id)
+        dr._route_distance = route_distance
+        dr._comment = comment
+        return dr
+
+    @staticmethod
+    def build_from_json(json_data, id_mappings) -> DrivenRoute:
+        """Build object from json data."""
+        dr = DrivenRoute()
+        dr._id = json_data['id']
+        dr._date = json_data['date']
+        dr._start_km = json_data['start_km']
+        idMapper = IdMapper(id_mappings)
+        dr._start_id = idMapper.map(json_data['start_address'])
+        dr._end_id = idMapper.map(json_data['end_address'])
+        dr._route_distance = json_data['route_distance']
+        dr._comment = json_data['comment']
+        return dr
 
     def convert_to_db_object(self):
         data = {
@@ -26,6 +55,3 @@ class DrivenRoute:
             'comment': self._comment
         }
         return data
-
-
-
