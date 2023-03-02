@@ -1,17 +1,28 @@
-# coding=utf-8
 import json
 import os
 import sqlite3
+from pathlib import Path
 
 import logging
 import datetime
 
-from persistence.address import Address
-from persistence.customer import Customer
-from persistence.driven_route import DrivenRoute
-from persistence.expense import Expense
-from persistence.work_day import WorkDay
-from utils.errors import DataStoreError
+try:
+    from persistence.address import Address
+    from persistence.customer import Customer
+    from persistence.driven_route import DrivenRoute
+    from persistence.expense import Expense
+    from persistence.income import Income
+    from persistence.work_day import WorkDay
+    from utils.errors import DataStoreError
+except:
+    from backend.ttrack.persistence.address import Address
+    from backend.ttrack.persistence.customer import Customer
+    from backend.ttrack.persistence.driven_route import DrivenRoute
+    from backend.ttrack.persistence.expense import Expense
+    from backend.ttrack.persistence.income import Income
+    from backend.ttrack.persistence.work_day import WorkDay
+    from backend.ttrack.utils.errors import DataStoreError
+
 
 logger = logging.getLogger(__name__)
 
@@ -29,6 +40,20 @@ class DataStore:
         except Exception as e:
             logger.info(f'received sqlite exception: {str(e)}')
             msg = f'Error connecting to database: {str(e)}'
+            raise DataStoreError(msg)
+
+    def raw_execute(self, sqlstring):
+        """This method has to be used with care, since it executes the string without check.
+
+        Args:
+            sqlstring (str): The sqlstring to be executed.
+        """
+        try:
+            c = self._conn.cursor()
+            c.execute(sqlstring)
+        except Exception as e:
+            logger.info(f'Received sqlite exception: {str(e)}')
+            msg = f'Error executing sqlstring {sqlstring}: {str(e)}'
             raise DataStoreError(msg)
 
     def disconnect(self):
@@ -52,7 +77,7 @@ class DataStore:
         except DataStoreError:
             raise DataStoreError
         except Exception as err:
-            raise DataStoreError(err.message)
+            raise DataStoreError(str(err))
 
     def force_data_storage(self, type, data):
         """Backups the current DB content and then replaces the content of table 'type' with data."""
@@ -67,7 +92,7 @@ class DataStore:
         except DataStoreError:
             raise DataStoreError
         except Exception as err:
-            raise DataStoreError(err.message)
+            raise DataStoreError(str(err))
 
     def _create_sql_string(self, command, data, type):
         if command == 'create':
@@ -84,33 +109,41 @@ class DataStore:
 
     def _sql_create_command(self, data, type):
         if type == 'customer':
-            data = Customer(data).convert_to_db_object()
+            data = Customer().build_from_json(data).convert_to_db_object()
             sql_string = '''INSERT OR IGNORE INTO customers VALUES ('{0}', '{1}', '{2}', 
                     '{3}', '{4}', {5}, '{6}', '{7}')'''.format(
                 data['id'], data['title'], data['first_name'], data['last_name'], data['address_id'],
                 data['active'], data['report_text'], data['default_invoice']
             )
         elif type == 'address':
-            data = Address(data).convert_to_db_object()
-            sql_string = '''INSERT OR IGNORE INTO addresses VALUES ('{0}', '{1}', '{2}', 
-                    '{3}', '{4}', '{5}', '{6}', {7})'''.format(
-                data['id'], data['street'], data['street_number'], data['door_number'], data['zip_code'], data['city'],
-                data['note'], data['is_active']
-            )
+            data = Address().build_from_json(data).convert_to_db_object()
+            sql_string = ''.join(("INSERT OR IGNORE INTO addresses VALUES ",
+                            f"('{data['id']}', '{data['street']}', '{data['street_number']}', ",
+                            f"'{data['door_number']}', '{data['zip_code']}', '{data['city']}', ",
+                            f"'{data['note']}', {data['is_active']})"))
         elif type == 'driven_route':
-            data = data.convert_to_db_object()
+            if isinstance(data, DrivenRoute):
+                data = data.convert_to_db_object()
+            else:
+                data = DrivenRoute(data, self._id_mappings).convert_to_db_object()
             sql_string = '''INSERT OR IGNORE INTO driven_routes VALUES ('{0}', '{1}', {2}, 
                                 '{3}', '{4}', {5}, '{6}', '{7}')'''.format(
                 data['id'], data['date'], data['start_km'], data['start_address_id'], data['end_address_id'],
                 data['route_km'], data['invoice_ref'], data['comment']
             )
         elif type == 'expense':
-            data = data.convert_to_db_object()
+            if isinstance(data, Expense):
+                data = data.convert_to_db_object()
+            else:
+                data = Expense().build_from_json(data).convert_to_db_object()
             sql_string = '''INSERT OR IGNORE INTO expenses VALUES ('{0}', '{1}', '{2}', {3}, '{4}')'''.format(
                 data['id'], data['date'], data['text_for_report'], data['value'], data['category']
             )
         elif type == 'income':
-            data = data.convert_to_db_object()
+            if isinstance(data, Income):
+                data = data.convert_to_db_object()
+            else:
+                data = Income().build_from_json(data).convert_to_db_object()
             sql_string = '''INSERT OR IGNORE INTO incomes VALUES ('{0}', '{1}', '{2}', {3})'''.format(
                 data['id'], data['date'], data['text_for_report'], data['value']
             )
@@ -129,14 +162,14 @@ class DataStore:
 
     def _sql_update_command(self, data, type):
         if type == 'customer':
-            data = Customer(data).convert_to_db_object()
+            data = Customer().build_from_json(data).convert_to_db_object()
             sql_string = '''UPDATE customers SET id='{0}', title='{1}', first_name='{2}', 
                     last_name='{3}', address_id='{4}', is_active={5}, report_text='{6}', default_invoice={7} 
                     WHERE id = '{0}' '''.format(data['id'], data['title'], data['first_name'], data['last_name'],
                                                 data['address_id'], data['active'], data['report_text'],
                                                 data['default_invoice'])
         elif type == 'address':
-            data = Address(data).convert_to_db_object()
+            data = Address().build_from_json(data).convert_to_db_object()
             sql_string = '''UPDATE addresses SET id='{0}', street='{1}', street_number='{2}', 
                     door_number='{3}', zip_code='{4}', city='{5}', note='{6}', 
                     is_active={7} WHERE id = '{0}' '''.format(
@@ -147,18 +180,19 @@ class DataStore:
             data = DrivenRoute(data, self._id_mappings).convert_to_db_object()
             sql_string = '''UPDATE driven_routes SET id='{0}', date='{1}', start_km={2}, 
                                 start_address_id='{3}', end_address_id='{4}', route_km={5}, 
-                                invoice_ref='{6}'  WHERE id = '{0}'  '''.format(
+                                invoice_ref='{6}', comment='{7}' WHERE id = '{0}'  '''.format(
                 data['id'], data['date'], data['start_km'], data['start_address_id'], data['end_address_id'],
-                data['route_km'], data['invoice_ref']
+                data['route_km'], data['invoice_ref'], data['comment']
             )
         elif type == 'expense':
-            data = data.convert_to_db_object()
+            data = Expense().build_from_json(data).convert_to_db_object()
             sql_string = '''UPDATE expenses SET id='{0}', date='{1}', text_for_report='{2}', value={3}, 
             category='{4}'  WHERE id = '{0}' '''.format(
                 data['id'], data['date'], data['text_for_report'], data['value'], data['category']
             )
         elif type == 'income':
-            sql_string = '''UPDATE incomes SET id='{0}', date='{1}', text_for_report={2}, 
+            data = Income().build_from_json(data).convert_to_db_object()
+            sql_string = '''UPDATE incomes SET id='{0}', date='{1}', text_for_report='{2}', 
             value={3}  WHERE id = '{0}' '''.format(
                 data['id'], data['date'], data['text_for_report'], data['value']
             )
@@ -174,7 +208,7 @@ class DataStore:
         elif type == 'address':
             sql_string = '''DELETE FROM addresses WHERE id = '{0}' '''.format(id)
         elif type == 'driven_route':
-            sql_string = '''DELETE FROM driven_routes VALUES WHERE id = '{0}'  '''.format(id)
+            sql_string = '''DELETE FROM driven_routes WHERE id = '{0}'  '''.format(id)
         elif type == 'expense':
             sql_string = '''DELETE FROM expenses WHERE id = '{0}' '''.format(id)
         elif type == 'income':
@@ -299,10 +333,11 @@ class DataStore:
     def backup_db_content(self):
         current_time = datetime.datetime.now()
         name = current_time.strftime("%Y-%m-%d_%H%M%S") + str(current_time.microsecond) + '.sql'
+        Path(self._backup_path).mkdir(parents=True, exist_ok=True)
         filename = os.path.join(self._backup_path, name)
         with open(filename, 'w') as f:
             for line in self._conn.iterdump():
-                f.write('{0}\n'.format(line.encode('utf-8')))
+                f.write(line + '\n')
 
     def _force_address_data_storage(self, data):
         addresses = json.loads(data)
@@ -344,7 +379,7 @@ class DataStore:
                         'data': old_expense
                     })
                 else:
-                    expense = Expense('km', 0.42, route)
+                    expense = Expense().build_from_values('km', 0.42, route)
                     self.update( {
                         'type': 'expense',
                         'command': 'create',
@@ -370,7 +405,7 @@ class DataStore:
         except DataStoreError:
             raise DataStoreError
         except Exception as err:
-            raise DataStoreError(err.message)
+            raise DataStoreError(str(err))
 
     def process(self, actions):
         for action in actions:
@@ -442,6 +477,8 @@ class DataStore:
                 customer['lastName'] = item[3]
                 customer['address'] = item[4]
                 customer['isActive'] = item[5]
+                customer['textForReport'] = item[6]
+                customer['invoiceConfiguration'] = item[7]
                 customers.append(customer)
             return customers
         except BaseException as e:
@@ -471,14 +508,9 @@ class DataStore:
 	                            (id, street, street_number, door_number, zip_code, city, note, is_active)
                             VALUES
 	                            ('{0}', '{1}', '{2}', '{3}', '{4}', '{5}', '{6}', '{7}')
-	                        """.format(address['id'].encode('utf-8'),
-                                       address['street'].encode('utf-8'),
-                                       address['streetNumber'].encode('utf-8'),
-                                       address['doorNumber'].encode('utf-8'),
-                                       address['zipCode'].encode('utf-8'),
-                                       address['city'].encode('utf-8'),
-                                       address['note'].encode('utf-8'),
-                                       address['isActive'])
+	                        """.format(address['id'], address['street'], address['streetNumber'],
+                                       address['doorNumber'], address['zipCode'], address['city'],
+                                       address['note'], address['isActive'])
             c = self._conn.cursor()
             c.execute(sql_string)
             if (c.lastrowid != 0 and c.lastrowid != None) or (c.rowcount != 0 and c.rowcount != None):
@@ -489,21 +521,18 @@ class DataStore:
             raise DataStoreError
 
         except Exception as err:
-            raise DataStoreError(err.message)
+            raise DataStoreError(str(err))
 
 
     def set_customer(self, customer):
         try:
             sql_string = """INSERT OR REPLACE INTO customers
-                                (id, title, first_name, last_name, address_id, is_active)
+                                (id, title, first_name, last_name, address_id, is_active, report_text, default_invoice)
                             VALUES
-                                ('{0}', '{1}', '{2}', '{3}', '{4}', '{5}')
-                            """.format(customer['id'].encode('utf-8'),
-                                       customer['title'].encode('utf-8'),
-                                       customer['firstName'].encode('utf-8'),
-                                       customer['lastName'].encode('utf-8'),
-                                       customer['address'].encode('utf-8'),
-                                       customer['isActive'])
+                                ('{0}', '{1}', '{2}', '{3}', '{4}', '{5}', '{6}', '{7}')
+                            """.format(customer['id'], customer['title'], customer['firstName'],
+                                    customer['lastName'], customer['addressId'], customer['isActive'],
+                                    customer['reportText'], customer['defaultInvoice'])
             c = self._conn.cursor()
             c.execute(sql_string)
             if (c.lastrowid != 0 and c.lastrowid != None) or (c.rowcount != 0 and c.rowcount != None):
@@ -514,7 +543,7 @@ class DataStore:
             raise DataStoreError
 
         except Exception as err:
-            raise DataStoreError(err.message)
+            raise DataStoreError(str(err))
 
     def remove_address(self, addr_id):
         try:
@@ -529,7 +558,7 @@ class DataStore:
             raise DataStoreError
 
         except Exception as err:
-            raise DataStoreError(err.message)
+            raise DataStoreError(str(message))
 
     def remove_customer(self, customer_id):
         try:
@@ -544,5 +573,5 @@ class DataStore:
             raise DataStoreError
 
         except Exception as err:
-            raise DataStoreError(err.message)
+            raise DataStoreError(str(err))
 
