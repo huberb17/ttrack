@@ -1,7 +1,10 @@
 import json
 import logging
 
-from utils.errors import ConfigReaderError
+try:
+    from utils.errors import ConfigReaderError
+except:
+    from backend.ttrack.utils.errors import ConfigReaderError
 
 logger = logging.getLogger(__name__)
 
