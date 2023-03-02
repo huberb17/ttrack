@@ -1,9 +1,14 @@
 # coding=utf-8
 import json
 
-from persistence.driven_route import DrivenRoute
-from persistence.income import Income
-from utils.errors import DataStoreError
+try:
+    from persistence.driven_route import DrivenRoute
+    from persistence.income import Income
+    from utils.errors import DataStoreError
+except:
+    from backend.ttrack.persistence.driven_route import DrivenRoute
+    from backend.ttrack.persistence.income import Income
+    from backend.ttrack.utils.errors import DataStoreError
 
 
 class WorkDay:
@@ -33,23 +38,23 @@ class WorkDay:
                 else:
                     comment = customer['lastName']
                 dr_id = '{0}_dr_{1}'.format(workday_id, count)
-                self._driven_routes.append(DrivenRoute(dr_id, date, start_km, start_id, end_id, route_distance, comment, self._id_mappings))
+                self._driven_routes.append(DrivenRoute().build_from_values(dr_id, date, start_km, start_id, end_id, route_distance, comment, self._id_mappings))
                 start_km += float(route_distance)
                 last_id = end_id
                 if 'invoice' in customer:
                     if 'value' in customer['invoice']:
                         invoice_value = float(customer['invoice']['value'])
                         invoice_text = customer['invoice']['textForReport']
-                        self._invoices.append(Income(dr_id, date, invoice_text, invoice_value))
+                        self._invoices.append(Income().build_from_values(dr_id, date, invoice_text, invoice_value))
                 count = count + 1
             last_route = workday['lastRoute']
             end_id = last_route['end']['id']
             route_distance = last_route['lengthInKm']
             comment = u'Rückfahrt'
             dr_id = '{0}_dr_{1}'.format(workday_id, count)
-            self._driven_routes.append(DrivenRoute(dr_id, date, start_km, last_id, end_id, route_distance, comment, self._id_mappings))
+            self._driven_routes.append(DrivenRoute().build_from_values(dr_id, date, start_km, last_id, end_id, route_distance, comment, self._id_mappings))
         except (ValueError, KeyError) as err:
-            raise DataStoreError('Error decoding WorkDay object: {}'.format(err.message))
+            raise DataStoreError('Error decoding WorkDay object: {}'.format(str(err)))
 
         return self._driven_routes
 
